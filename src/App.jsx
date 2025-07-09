@@ -17,6 +17,9 @@ const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage'));
 const AdminProductsPage = lazy(() => import('@/pages/admin/ProductsPage'));
 const AdminOrdersPage = lazy(() => import('@/pages/admin/OrdersPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const AboutPage = lazy(() => import('@/pages/AboutPage'));
+const ContactPage = lazy(() => import('@/pages/ContactPage'));
 
 function App() {
   const location = useLocation();
@@ -24,7 +27,7 @@ function App() {
 
   return (
     <>
-      <div className="flex flex-col min-h-screen bg-gradient-to-br from-black via-neutral-900 to-black text-foreground">
+      <div className="flex flex-col min-h-screen bg-gradient-to-br from-black via-gray-800 to-black text-foreground">
         {!isAdminRoute && <Header />}
         <main className="flex-grow">
           <Suspense fallback={<PageLoader />}>
@@ -37,7 +40,10 @@ function App() {
                 <Route path="/checkout" element={<CheckoutPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
-                
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+
                 <Route path="/admin" element={<AdminLayout />}>
                   <Route index element={<DashboardPage />} />
                   <Route path="products" element={<AdminProductsPage />} />

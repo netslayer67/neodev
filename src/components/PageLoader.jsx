@@ -16,7 +16,7 @@ export const PageLoader = () => {
         }}
         className="font-heading text-4xl text-white tracking-widest"
       >
-        RR
+        ND
       </motion.div>
     </div>
   );

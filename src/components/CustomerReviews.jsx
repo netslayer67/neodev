@@ -1,108 +1,137 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
+import { Star, Quote } from 'lucide-react';
 
+// Data ulasan (bisa dari API)
 const reviews = [
   {
     name: 'Alex Johnson',
-    review: "The FEARLESS HOODIE is next level. Quality is insane and the fit is perfect. Worth every penny.",
+    avatar: 'https://i.pravatar.cc/48?u=alex',
+    review: "Kualitas FEARLESS HOODIE ini benar-benar gila. Pas di badan dan sangat sepadan dengan harganya. Kualitasnya level berikutnya.",
     rating: 5,
-    product: "FEARLESS HOODIE"
+    product: 'FEARLESS HOODIE',
   },
   {
     name: 'Samantha Bee',
-    review: "Finally, a brand that gets it. Minimalist design with a powerful message. The ETERNAL TEE is my new daily driver.",
+    avatar: 'https://i.pravatar.cc/48?u=samantha',
+    review: "Akhirnya, sebuah brand yang mengerti. Desain minimalis dengan pesan yang kuat. ETERNAL TEE jadi andalan saya setiap hari.",
     rating: 5,
-    product: "ETERNAL TEE"
+    product: 'ETERNAL TEE',
   },
   {
     name: 'Mike P.',
-    review: "The quality of the fabric is top-notch. You can feel the difference immediately. Will be buying more.",
+    avatar: 'https://i.pravatar.cc/48?u=mike',
+    review: "Kualitas bahannya premium. Anda bisa langsung merasakan perbedaannya. Pasti akan membeli lagi dari sini.",
     rating: 5,
-    product: "REVENANT CARGO"
+    product: 'REVENANT CARGO',
   },
   {
     name: 'Jessica Wu',
-    review: "Obsessed with the aesthetic. It's bold, clean, and exactly my style. Shipping was fast too.",
+    avatar: 'https://i.pravatar.cc/48?u=jessica',
+    review: "Terobsesi dengan estetikanya. Berani, bersih, dan sesuai dengan gaya saya. Pengirimannya juga cepat.",
     rating: 4,
-    product: "VOID CAP"
+    product: 'VOID CAP',
   },
   {
     name: 'David Chen',
-    review: "IN GOD WE FEAR. This resonates so much. The apparel is just a bonus. Keep up the great work.",
+    avatar: 'https://i.pravatar.cc/48?u=david',
+    review: "'IN GOD WE FEAR.' Kalimat ini sangat berkesan bagi saya. Pakaiannya hanyalah bonus. Teruslah berkarya.",
     rating: 5,
-    product: "FEARLESS HOODIE"
+    product: 'FEARLESS HOODIE',
   },
   {
     name: 'Emily Rose',
-    review: "My APEX JACKET is perfect for the city. Lightweight but protects from the wind. Looks fire.",
+    avatar: 'https://i.pravatar.cc/48?u=emily',
+    review: "Jaket APEX saya sempurna untuk di kota. Ringan tapi tetap melindungi dari angin. Kelihatan keren banget.",
     rating: 5,
-    product: "APEX JACKET"
+    product: 'APEX JACKET',
   },
 ];
 
-const MarqueeItem = ({ review }) => (
-  <div className="glass-card flex-shrink-0 w-[350px] p-6 mx-4 rounded-xl flex flex-col justify-between">
-    <div>
+// --- Sub-Komponen untuk Clean Code: ReviewCard ---
+const ReviewCard = ({ review, variants }) => (
+  <motion.div
+    variants={variants}
+    whileHover={{ y: -6, scale: 1.02 }}
+    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+    className="relative p-px overflow-hidden rounded-2xl bg-transparent h-full"
+  >
+    {/* Gradient Border */}
+    <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-white/5 to-transparent rounded-2xl" />
+    <div className="relative flex flex-col h-full p-6 bg-gradient-to-b from-gray-900/70 to-gray-950/80 backdrop-blur-xl rounded-[15px] shadow-2xl">
+      <Quote className="absolute top-4 right-4 h-12 w-12 text-white/10" />
       <div className="flex items-center mb-4">
-        <div className="flex">
-          {[...Array(review.rating)].map((_, i) => (
-            <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-          ))}
-          {[...Array(5 - review.rating)].map((_, i) => (
-            <Star key={i} className="h-5 w-5 text-neutral-600" />
-          ))}
+        {[...Array(5)].map((_, i) => (
+          <Star key={i} className={`h-5 w-5 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}`} />
+        ))}
+      </div>
+      <p className="text-neutral-200 italic mb-6 text-base flex-grow">"{review.review}"</p>
+      <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/10">
+        <img src={review.avatar} alt={review.name} className="h-10 w-10 rounded-full border-2 border-white/20" />
+        <div>
+          <p className="font-semibold text-white">{review.name}</p>
+          <p className="text-sm text-neutral-400">Purchased: {review.product}</p>
         </div>
       </div>
-      <p className="text-neutral-200 mb-4 text-md">"{review.review}"</p>
     </div>
-    <div>
-      <p className="font-bold text-white">{review.name}</p>
-      <p className="text-sm text-neutral-400">Purchased: {review.product}</p>
-    </div>
-  </div>
+  </motion.div>
 );
 
+// --- Komponen Utama CustomerReviews ---
 const CustomerReviews = () => {
-  const duplicatedReviews = [...reviews, ...reviews];
-
-  const marqueeVariants = {
-    animate: {
-      x: [0, -2292],
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
       transition: {
-        x: {
-          repeat: Infinity,
-          repeatType: "loop",
-          duration: 50,
-          ease: "linear",
-        },
+        staggerChildren: 0.1,
       },
     },
   };
 
+  const itemVariants = {
+    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: { type: 'spring', stiffness: 100, damping: 12 },
+    },
+  };
+
   return (
-    <section className="py-24 overflow-hidden">
-      <div className="container mx-auto px-6 text-center">
+    <section className="py-24 sm:py-32 overflow-hidden bg-black relative">
+      {/* Background Gradient Aurora */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-gradient-radial from-indigo-800/40 via-purple-800/20 to-transparent blur-3xl rounded-full" />
+
+      <div className="container mx-auto px-6 relative z-10">
         <motion.div
-          initial={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8 }}
-          className="mb-16"
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="text-center mb-16 max-w-2xl mx-auto"
         >
-          <h2 className="text-4xl font-heading tracking-wider text-white">VOICES OF THE FEARLESS</h2>
-          <p className="text-neutral-400 mt-2">Hear what our community has to say.</p>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
+            VOICES OF THE FEARLESS
+          </h2>
+          <p className="text-neutral-400 mt-4 text-lg">
+            Dengar apa yang komunitas kami katakan tentang esensi dan kualitas.
+          </p>
+        </motion.div>
+
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.1 }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
+          {reviews.map((review, index) => (
+            <ReviewCard key={index} review={review} variants={itemVariants} />
+          ))}
         </motion.div>
       </div>
-      <motion.div
-        className="flex"
-        variants={marqueeVariants}
-        animate="animate"
-      >
-        {duplicatedReviews.map((review, index) => (
-          <MarqueeItem key={index} review={review} />
-        ))}
-      </motion.div>
     </section>
   );
 };
