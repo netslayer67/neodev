@@ -26,10 +26,10 @@ import OrderDetailModal from './OrderDetailModal';
 // Komponen StatusBadge
 const StatusBadge = ({ status }) => {
   const styles = {
-    Fulfilled: 'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/20',
-    Processing: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
+    'Telah Sampai': 'bg-green-500/10 text-green-400 ring-1 ring-inset ring-green-500/20',
+    Diproses: 'bg-amber-500/10 text-amber-400 ring-1 ring-inset ring-amber-500/20',
     Cancelled: 'bg-red-500/10 text-red-400 ring-1 ring-inset ring-red-500/20',
-    Shipped: 'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/20',
+    Dikirim: 'bg-blue-500/10 text-blue-400 ring-1 ring-inset ring-blue-500/20',
     'Pending Payment': 'bg-gray-500/10 text-gray-400 ring-1 ring-inset ring-gray-500/20',
   };
   return <span className={`inline-flex items-center px-2 py-1 rounded-md text-xs font-medium ${styles[status] || styles['Pending Payment']}`}>{status}</span>;
@@ -110,7 +110,7 @@ const AdminOrdersPage = () => {
                 <Input placeholder="Search by Order ID or Customer..." className="w-full pl-10 bg-white/5 border-white/10 rounded-lg focus:ring-2 focus:ring-indigo-500" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
               <div className='flex gap-2 w-full md:w-auto'>
-                {['All', 'Fulfilled', 'Processing', 'Cancelled', 'Shipped', 'Pending Payment'].map(status => (
+                {['All', 'Fulfilled', 'Diproses', 'Cancelled', 'Dikirim', 'Pending Payment'].map(status => (
                   <Button key={status} variant={statusFilter === status ? 'secondary' : 'ghost'} onClick={() => setStatusFilter(status)} className="flex-grow md:flex-grow-0">
                     {status}
                   </Button>
@@ -150,8 +150,8 @@ const AdminOrdersPage = () => {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="bg-gray-900/80 border-white/20 text-white backdrop-blur-lg">
                             {order.status === 'Pending Payment' && <DropdownMenuItem onClick={() => handleUpdateOrderStatus(order._id, confirmOrderPayment)}>Confirm Payment</DropdownMenuItem>}
-                            {order.status === 'Processing' && <DropdownMenuItem onClick={() => handleUpdateOrderStatus(order._id, shipOrder)}>Mark as Shipped</DropdownMenuItem>}
-                            {order.status === 'Shipped' && <DropdownMenuItem onClick={() => handleUpdateOrderStatus(order._id, fulfillOrder)}>Mark as Fulfilled</DropdownMenuItem>}
+                            {order.status === 'Diproses' && <DropdownMenuItem onClick={() => handleUpdateOrderStatus(order._id, shipOrder)}>Mark as Shipped</DropdownMenuItem>}
+                            {order.status === 'Dikirim' && <DropdownMenuItem onClick={() => handleUpdateOrderStatus(order._id, fulfillOrder)}>Mark as Fulfilled</DropdownMenuItem>}
                             <DropdownMenuItem onClick={() => handleViewDetails(order._id)}>View Details</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
