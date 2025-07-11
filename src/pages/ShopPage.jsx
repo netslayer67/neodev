@@ -1,74 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-import { products } from '@/data/products'; // Pastikan path ini benar
-import ProductCard from '@/components/ProductCard'; // Pastikan path ini benar
-import { pageTransition } from '@/lib/motion'; // Pastikan path ini benar
+import { useDispatch, useSelector } from 'react-redux';
 
-// Konfigurasi animasi untuk Framer Motion
+// 1. Import action dari productSlice
+import { fetchProducts } from '../store/slices/productSlice';
+
+import ProductCard from '@/components/ProductCard';
+import { pageTransition } from '@/lib/motion';
+import { PageLoader } from '@/components/PageLoader';
+
+// Konfigurasi animasi (tetap sama)
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.05 },
-  },
+  visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
 };
 
 const itemVariants = {
   hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: 'easeOut' },
-  },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
 };
 
 const ShopPage = () => {
-  const categories = ['All', 'Hoodies', 'T-Shirts', 'Pants', 'Jackets', 'Accessories'];
+  const dispatch = useDispatch();
+
+  // 2. State lokal hanya untuk filter UI dan nomor halaman
   const [activeCategory, setActiveCategory] = useState('All');
-  const [visibleCount, setVisibleCount] = useState(8);
-  const [isLoading, setIsLoading] = useState(false);
-  const loadMoreRef = useRef(null);
+  const [page, setPage] = useState(1);
 
-  const filteredProducts = activeCategory === 'All'
-    ? products
-    : products.filter((p) => p.category === activeCategory);
+  // 3. Ambil data dari Redux store
+  const { items: products, pagination, status } = useSelector((state) => state.products);
 
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProducts.length;
+  const categories = ['All', 'Hoodies', 'T-Shirts', 'Pants', 'Jackets', 'Accessories'];
 
-  // Infinite Scroll dengan Intersection Observer
+  // 4. Logika untuk memuat produk
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        if (entry.isIntersecting && !isLoading && hasMore) {
-          setIsLoading(true);
-          setTimeout(() => {
-            setVisibleCount((prev) => prev + 4);
-            setIsLoading(false);
-          }, 500); // Simulasi waktu loading
-        }
-      },
-      { threshold: 1.0 }
-    );
+    // Dispatch action untuk mengambil produk saat kategori atau halaman berubah
+    dispatch(fetchProducts({ page, limit: 8, category: activeCategory === 'All' ? '' : activeCategory }));
+  }, [dispatch, page, activeCategory]);
 
-    const currentRef = loadMoreRef.current;
-    if (currentRef) {
-      observer.observe(currentRef);
-    }
+  // 5. Infinite Scroll dengan Intersection Observer
+  const observer = useRef();
+  const lastProductElementRef = useCallback(node => {
+    if (status === 'loading') return;
+    if (observer.current) observer.current.disconnect();
 
-    return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef);
+    observer.current = new IntersectionObserver(entries => {
+      // Jika elemen terakhir terlihat dan masih ada halaman berikutnya
+      if (entries[0].isIntersecting && pagination.currentPage < pagination.totalPages) {
+        setPage(prevPage => prevPage + 1);
       }
-    };
-  }, [isLoading, hasMore]);
+    });
 
-  // Reset scroll dan produk saat kategori berubah
+    if (node) observer.current.observe(node);
+  }, [status, pagination]);
+
+  // Handler untuk mengubah kategori
   const handleCategoryChange = (category) => {
     setActiveCategory(category);
-    setVisibleCount(8); // Reset ke jumlah produk awal
+    setPage(1); // Reset ke halaman pertama saat ganti kategori
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -85,7 +75,7 @@ const ShopPage = () => {
         <meta name="description" content="Explore the curated collection of modern, minimal, and luxury fashion by Neo Dervish." />
       </Helmet>
 
-      {/* Kontrol Header & Filter */}
+      {/* Kontrol Header & Filter (Tampilan Tetap Sama) */}
       <header className="container mx-auto mb-16 md:mb-20">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease: 'easeOut' }}>
@@ -97,8 +87,7 @@ const ShopPage = () => {
               <button
                 key={category}
                 onClick={() => handleCategoryChange(category)}
-                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 focus:outline-none ${activeCategory === category ? 'text-white' : 'text-neutral-400 hover:text-white'
-                  }`}
+                className={`relative px-4 py-2 rounded-full text-sm font-medium transition-colors duration-300 focus:outline-none ${activeCategory === category ? 'text-white' : 'text-neutral-400 hover:text-white'}`}
               >
                 {activeCategory === category && (
                   <motion.span
@@ -114,7 +103,7 @@ const ShopPage = () => {
         </div>
       </header>
 
-      {/* Grid Produk */}
+      {/* 6. Grid Produk Dinamis dari Redux */}
       <motion.div
         layout
         variants={containerVariants}
@@ -122,29 +111,30 @@ const ShopPage = () => {
         animate="visible"
         className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12"
       >
-        <AnimatePresence>
-          {visibleProducts.map((product) => (
-            <motion.div key={product.id} layout variants={itemVariants} initial="hidden" animate="visible" exit="hidden">
+        {products.map((product, index) => {
+          // Tambahkan ref ke elemen terakhir untuk trigger infinite scroll
+          if (products.length === index + 1) {
+            return (
+              <motion.div ref={lastProductElementRef} key={product._id} layout variants={itemVariants}>
+                <ProductCard product={product} />
+              </motion.div>
+            );
+          }
+          return (
+            <motion.div key={product._id} layout variants={itemVariants}>
               <ProductCard product={product} />
             </motion.div>
-          ))}
-        </AnimatePresence>
+          );
+        })}
       </motion.div>
 
-      {/* Trigger & Indikator Loading */}
-      <div ref={loadMoreRef} className="h-1 w-full mt-16" />
-      {isLoading && (
-        <div className="flex justify-center items-center mt-8">
-          <div className="w-6 h-6 border-2 border-neutral-600 border-t-white rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {!isLoading && !hasMore && (
+      {/* 7. Indikator Loading dan Pesan Akhir */}
+      {status === 'loading' && <PageLoader />}
+      {status === 'succeeded' && pagination.currentPage >= pagination.totalPages && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center mt-16 text-neutral-500 text-sm">
           <p>You've reached the end of the collection.</p>
         </motion.div>
       )}
-
     </motion.div>
   );
 };

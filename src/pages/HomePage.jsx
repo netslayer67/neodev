@@ -1,17 +1,20 @@
 // HomePage.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { products } from '@/data/products';
+import { fetchProducts } from '../store/slices/productSlice';
 import ProductCard from '@/components/ProductCard';
+import { PageLoader } from '@/components/PageLoader'
 import { Helmet } from 'react-helmet';
 import { useToast } from '@/components/ui/use-toast';
 import CustomerReviews from '@/components/CustomerReviews';
 import LookbookSection from '@/components/LookbookSection';
 import ManifestoSection from '@/components/ManifestoSection';
 import Vid from '../assets/vid.mp4';
+import { useSelector, useDispatch } from 'react-redux';
 
 // Helper component for animated text characters
 const AnimatedText = ({ text, el: Wrapper = 'p', className, variants }) => (
@@ -34,7 +37,23 @@ const AnimatedText = ({ text, el: Wrapper = 'p', className, variants }) => (
 );
 
 const HomePage = () => {
-  const featuredProducts = products.filter(p => p.isFeatured);
+
+  const dispatch = useDispatch();
+
+  // 2. Ambil data produk dan status dari Redux store
+  const { items: products, status: productStatus } = useSelector((state) => state.products);
+
+  // 3. Panggil action untuk mengambil data produk saat komponen pertama kali dimuat
+  useEffect(() => {
+    // Hanya fetch jika produk belum ada di store untuk efisiensi
+    if (products.length === 0) {
+      dispatch(fetchProducts());
+    }
+  }, [dispatch, products.length]);
+
+  // 4. Pilih beberapa produk untuk ditampilkan sebagai "featured"
+  // Misalnya, kita ambil 3 produk pertama sebagai "Latest Drops"
+  const featuredProducts = products.slice(0, 3);
   const { toast } = useToast();
 
   // Hooks for parallax scroll effect
@@ -137,10 +156,16 @@ const HomePage = () => {
             <h2 className="text-4xl md:text-5xl font-heading tracking-widest mb-3">Latest Drops</h2>
             <p className="text-neutral-400 text-lg">Exclusive pieces from our new collection.</p>
           </motion.div>
+
+          {/* 5. Tampilkan produk secara dinamis */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
-            {featuredProducts.map((product, index) => (
+            {/* Tampilkan loader jika sedang fetching */}
+            {productStatus === 'loading' && <PageLoader />}
+
+            {/* Tampilkan produk jika fetch berhasil */}
+            {productStatus === 'succeeded' && featuredProducts.map((product, index) => (
               <motion.div
-                key={product.id}
+                key={product._id} // Gunakan _id dari MongoDB
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
