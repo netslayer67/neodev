@@ -5,7 +5,7 @@ import { store } from '../store/store'; // Import store
 // --- PERBAIKAN DI SINI ---
 // Ubah 'v1' menjadi 'V1' agar sesuai dengan endpoint backend
 const instance = axios.create({
-    baseURL: 'http://localhost:5000/api/V1',
+    baseURL: 'https://be-neo.vercel.app/api/v1',
     headers: {
         'Content-Type': 'application/json',
     },
