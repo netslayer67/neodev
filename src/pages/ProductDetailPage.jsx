@@ -1,48 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
-
-// Import actions dari slice
+import { motion, AnimatePresence } from 'framer-motion';
 import { fetchProductBySlug, clearSelectedProduct } from '../store/slices/productSlice';
 import { addToCart } from '../store/slices/cartSlice';
-
-// Import komponen UI
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Plus, Minus, ShoppingBag, ArrowLeft, X, ChevronDown } from 'lucide-react';
+import { Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { pageTransition } from '@/lib/motion';
 import { PageLoader } from '@/components/PageLoader';
 
-// Komponen Accordion (tetap sama)
 const AccordionItem = ({ title, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   return (
     <div className="border-b border-white/10">
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center py-5 text-left"
-      >
-        <span className="text-lg font-medium text-white">{title}</span>
-        {isOpen ? <Minus size={20} /> : <Plus size={20} />}
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center py-4">
+        <span className="text-lg font-semibold text-white">{title}</span>
+        {isOpen ? <Minus size={18} /> : <Plus size={18} />}
       </button>
-      <AnimatePresence initial={false}>
+      <AnimatePresence>
         {isOpen && (
           <motion.div
-            key="content"
-            initial="collapsed"
-            animate="open"
-            exit="collapsed"
-            variants={{
-              open: { opacity: 1, height: 'auto', y: 0 },
-              collapsed: { opacity: 0, height: 0, y: -10 },
-            }}
-            transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
-            className="overflow-hidden"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4 }}
+            className="overflow-hidden text-sm text-white/80 pb-4"
           >
-            <div className="pb-6 text-neutral-300 space-y-4 leading-relaxed">{children}</div>
+            {children}
           </motion.div>
         )}
       </AnimatePresence>
@@ -50,141 +37,119 @@ const AccordionItem = ({ title, children, defaultOpen = false }) => {
   );
 };
 
-
 const ProductDetailPage = () => {
-  // Menggunakan `slug` dari URL, sesuai dengan pembaruan rute
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { toast } = useToast();
-
-  // State lokal untuk kuantitas dan gambar
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(null);
 
-  // Mengambil data dari Redux store
-  const { selectedProduct: product, status, items: allProducts } = useSelector((state) => state.products);
+  const { selectedProduct: product, status, items: allProducts } = useSelector(state => state.products);
 
-  // Mengambil data produk saat komponen dimuat
   useEffect(() => {
-    if (slug) {
-      dispatch(fetchProductBySlug(slug));
-    }
-    // Cleanup: Membersihkan state saat komponen dilepas
-    return () => {
-      dispatch(clearSelectedProduct());
-    };
+    if (slug) dispatch(fetchProductBySlug(slug));
+    return () => dispatch(clearSelectedProduct());
   }, [slug, dispatch]);
 
-  // Mengatur gambar utama saat data produk berubah
   useEffect(() => {
-    if (product && product.images) {
-      setSelectedImage(product.images[0]);
-    }
+    if (product?.images) setSelectedImage(product.images[0]);
   }, [product]);
 
-  // Fungsi untuk menambahkan item ke keranjang
   const handleAddToCart = () => {
-    dispatch(addToCart({ product, quantity: Number(quantity) }));
+    dispatch(addToCart({ product, quantity }));
     toast({
-      title: '🛒 Added to Cart!',
-      description: `${quantity} x ${product.name} has been added to your cart.`,
-      className: 'bg-black border-neutral-700 text-white',
+      title: '🛒 Added to Cart',
+      description: `${quantity} x ${product.name} added.`,
+      className: 'bg-black border border-white/10 text-white'
     });
   };
 
-  // Menampilkan state loading
-  if (status === 'loading') {
-    return <PageLoader />;
-  }
-
-  // Menampilkan pesan jika produk tidak ditemukan atau gagal dimuat
+  if (status === 'loading') return <PageLoader />;
   if (status === 'failed' || !product) {
     return (
-      <div className="min-h-screen flex flex-col justify-center items-center text-white bg-black">
-        <h1 className="text-4xl font-bold mb-4">Product Not Found</h1>
-        <Link to="/shop" className="underline text-sky-400">Back to Shop</Link>
+      <div className="min-h-screen bg-black flex items-center justify-center text-white">
+        <div className="text-center space-y-4">
+          <h1 className="text-3xl font-bold">Product Not Found</h1>
+          <Link to="/shop" className="text-sky-400 underline">Back to Shop</Link>
+        </div>
       </div>
     );
   }
 
-  // Filter produk terkait (menghindari produk yang sedang ditampilkan)
   const relatedProducts = allProducts.filter(p => p.category === product.category && p._id !== product._id).slice(0, 4);
 
   return (
     <motion.div
       initial="initial" animate="animate" exit="exit" variants={pageTransition}
-      className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white pt-32 pb-24"
+      className="bg-gradient-to-br from-black via-gray-800 to-black text-white min-h-screen pt-24 pb-32"
     >
       <Helmet>
-        <title>{`${product.name} - Neo Dervish`}</title>
-        <meta name="description" content={product.description} />
+        <title>{product.name} - Neo Dervish</title>
       </Helmet>
+
       <div className="container mx-auto px-4">
-        <Link to="/shop" className="inline-flex items-center mb-8 text-sm text-neutral-400 hover:text-white transition-colors">
-          <ArrowLeft className="mr-2" size={16} />
-          Back to The Collection
+        <Link to="/shop" className="flex items-center mb-6 text-sm text-white/50 hover:text-white transition">
+          <ArrowLeft className="mr-2" size={16} /> Back to Collection
         </Link>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16">
-          <div className="grid grid-cols-[80px_1fr] gap-4">
-            <div className="space-y-3">
+        <div className="grid lg:grid-cols-2 gap-12">
+          <div className="space-y-6">
+            <div className="flex gap-3 overflow-x-auto scrollbar-hide">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`block rounded-lg overflow-hidden border-2 transition-all duration-300 ${selectedImage === img ? 'border-white' : 'border-transparent hover:border-white/40'}`}
+                  className={`rounded-xl border-2 transition ${selectedImage === img ? 'border-white' : 'border-white/20 hover:border-white/40'}`}
                 >
-                  <img src={img} alt={`thumb-${idx}`} className="w-full h-20 object-cover" loading="lazy" />
+                  <img src={img} alt={`thumb-${idx}`} className="w-20 h-20 object-cover rounded-lg" loading="lazy" />
                 </button>
               ))}
             </div>
-            <div className="overflow-hidden rounded-xl border border-white/10">
+            <div className="relative rounded-xl overflow-hidden border border-white/10">
               <AnimatePresence mode="wait">
                 <motion.img
                   key={selectedImage}
                   src={selectedImage}
                   alt={product.name}
-                  initial={{ opacity: 0.5 }}
+                  initial={{ opacity: 0.4 }}
                   animate={{ opacity: 1 }}
-                  exit={{ opacity: 0.5 }}
-                  transition={{ duration: 0.3, ease: 'easeInOut' }}
-                  className="w-full h-full object-cover"
+                  exit={{ opacity: 0.4 }}
+                  transition={{ duration: 0.4 }}
+                  className="w-full object-cover rounded-xl"
                 />
               </AnimatePresence>
             </div>
           </div>
 
-          <div className="flex flex-col space-y-8">
+          <div className="flex flex-col gap-6">
             <div>
-              <p className="uppercase text-sm text-sky-400 tracking-wider font-semibold">{product.category}</p>
-              <h1 className="text-4xl lg:text-5xl font-bold text-white mt-2">{product.name}</h1>
-              <p className="text-3xl font-medium text-white/90 mt-4">
-                Rp {product.price.toLocaleString('id-ID')}
-              </p>
+              <p className="uppercase text-xs text-sky-400 tracking-wide font-medium">{product.category}</p>
+              <h1 className="text-4xl lg:text-5xl font-bold mt-2 mb-3">{product.name}</h1>
+              <p className="text-2xl font-semibold">Rp {product.price.toLocaleString('id-ID')}</p>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-xl p-6 space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-white">Quantity:</span>
-                <div className="flex items-center border border-white/20 rounded-full">
+            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 flex flex-col gap-5">
+              <div className="flex justify-between items-center">
+                <span className="text-white font-medium">Quantity</span>
+                <div className="flex items-center gap-3 border border-white/20 rounded-full px-3 py-1">
                   <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}><Minus size={16} /></Button>
-                  <span className="px-5 text-white text-base font-semibold">{quantity}</span>
+                  <span className="text-white font-semibold w-6 text-center">{quantity}</span>
                   <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)}><Plus size={16} /></Button>
                 </div>
               </div>
-              <motion.div whileTap={{ scale: 0.98 }}>
-                <Button onClick={handleAddToCart} className="w-full bg-white text-black hover:bg-neutral-200 py-3 rounded-full text-base font-bold shadow-lg shadow-white/10 transition-all">
-                  <ShoppingBag className="mr-2" size={20} /> Add to Cart
+              <motion.div whileTap={{ scale: 0.97 }}>
+                <Button onClick={handleAddToCart} className="w-full bg-white text-black py-3 font-bold rounded-full shadow-xl hover:bg-neutral-200">
+                  <ShoppingBag size={20} className="mr-2" /> Add to Cart
                 </Button>
               </motion.div>
             </div>
 
-            <div className="space-y-2">
-              <AccordionItem title="Description" defaultOpen={true}>
+            <div className="divide-y divide-white/10">
+              <AccordionItem title="Description" defaultOpen>
                 <p>{product.description}</p>
               </AccordionItem>
               <AccordionItem title="Details & Fit">
-                <ul className="list-disc list-inside space-y-2">
+                <ul className="list-disc list-inside">
                   <li>Material: {product.details?.material || 'Premium Cotton Blend'}</li>
                   <li>Fit: {product.details?.fit || 'Regular Fit'}</li>
                   <li>Origin: {product.details?.origin || 'Designed in-house'}</li>
@@ -198,15 +163,16 @@ const ProductDetailPage = () => {
         </div>
 
         {relatedProducts.length > 0 && (
-          <div className="mt-24 lg:mt-32">
-            <h2 className="text-2xl font-medium text-center mb-10 tracking-wide">You Might Also Like</h2>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-10">
-              {relatedProducts.map((p) => <ProductCard key={p._id} product={p} />)}
+          <div className="mt-24">
+            <h2 className="text-2xl font-semibold text-center mb-10">You Might Also Like</h2>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {relatedProducts.map(p => (
+                <ProductCard key={p._id} product={p} />
+              ))}
             </div>
           </div>
         )}
       </div>
-      {/* Modal pengiriman dihilangkan untuk fokus pada integrasi utama */}
     </motion.div>
   );
 };

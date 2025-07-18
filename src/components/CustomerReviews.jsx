@@ -1,8 +1,8 @@
-import React from 'react';
+// CustomerReviews.jsx (Refactored for Luxury-Grade Design)
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
 
-// Data ulasan (bisa dari API)
 const reviews = [
   {
     name: 'Alex Johnson',
@@ -48,36 +48,32 @@ const reviews = [
   },
 ];
 
-// --- Sub-Komponen untuk Clean Code: ReviewCard ---
 const ReviewCard = ({ review, variants }) => (
   <motion.div
     variants={variants}
-    whileHover={{ y: -6, scale: 1.02 }}
-    transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-    className="relative p-px overflow-hidden rounded-2xl bg-transparent h-full"
+    whileHover={{ scale: 1.025 }}
+    transition={{ type: 'spring', stiffness: 180, damping: 14 }}
+    className="group relative p-[1px] rounded-3xl glass-card shadow-xl will-change-transform"
   >
-    {/* Gradient Border */}
-    <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-white/5 to-transparent rounded-2xl" />
-    <div className="relative flex flex-col h-full p-6 bg-gradient-to-b from-gray-900/70 to-gray-950/80 backdrop-blur-xl rounded-[15px] shadow-2xl">
-      <Quote className="absolute top-4 right-4 h-12 w-12 text-white/10" />
-      <div className="flex items-center mb-4">
+    <div className="relative p-6 flex flex-col h-full bg-gradient-to-br from-gray-900/80 to-gray-950/90 backdrop-blur-xl rounded-3xl overflow-hidden">
+      <Quote className="absolute top-5 right-5 h-10 w-10 text-white/10 group-hover:rotate-3 transition-transform duration-500" />
+      <div className="flex items-center mb-4 gap-1">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} className={`h-5 w-5 ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}`} />
+          <Star key={i} className={`h-5 w-5 transition-colors ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}`} />
         ))}
       </div>
-      <p className="text-neutral-200 italic mb-6 text-base flex-grow">"{review.review}"</p>
-      <div className="flex items-center gap-3 mt-auto pt-4 border-t border-white/10">
-        <img src={review.avatar} alt={review.name} className="h-10 w-10 rounded-full border-2 border-white/20" />
+      <p className="text-white/90 italic text-base leading-relaxed flex-grow mb-6">"{review.review}"</p>
+      <div className="flex items-center gap-4 mt-auto pt-4 border-t border-white/10">
+        <img src={review.avatar} alt={review.name} className="h-11 w-11 rounded-full border-2 border-white/10" />
         <div>
-          <p className="font-semibold text-white">{review.name}</p>
-          <p className="text-sm text-neutral-400">Purchased: {review.product}</p>
+          <p className="font-semibold text-white text-sm">{review.name}</p>
+          <p className="text-sm text-white/50">Purchased: {review.product}</p>
         </div>
       </div>
     </div>
   </motion.div>
 );
 
-// --- Komponen Utama CustomerReviews ---
 const CustomerReviews = () => {
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -90,34 +86,49 @@ const CustomerReviews = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.9 },
+    hidden: { opacity: 0, y: 50, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: 'spring', stiffness: 100, damping: 12 },
+      transition: { type: 'spring', stiffness: 120, damping: 12 },
     },
   };
 
-  return (
-    <section className="py-24 sm:py-32 overflow-hidden bg-black relative">
-      {/* Background Gradient Aurora */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-gradient-radial from-indigo-800/40 via-purple-800/20 to-transparent blur-3xl rounded-full" />
+  useEffect(() => {
+    const tiltCards = document.querySelectorAll('.glass-card');
+    const isTouch = window.matchMedia('(hover: none)').matches;
 
-      <div className="container mx-auto px-6 relative z-10">
+    if (!isTouch) {
+      tiltCards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+          const rect = card.getBoundingClientRect();
+          const x = (e.clientX - rect.left) / rect.width - 0.5;
+          const y = (e.clientY - rect.top) / rect.height - 0.5;
+          card.style.transform = `rotateX(${y * -8}deg) rotateY(${x * 8}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        });
+      });
+    }
+  }, []);
+
+  return (
+    <section className="relative py-24 sm:py-32 bg-black overflow-hidden">
+      {/* Luxury Gradient Background */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-emerald-900/20 via-black to-indigo-900/20 blur-2xl" />
+
+      <div className="relative z-10 container mx-auto px-6">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
-          transition={{ duration: 0.8, ease: 'easeOut' }}
-          className="text-center mb-16 max-w-2xl mx-auto"
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 1 }}
+          className="text-center max-w-2xl mx-auto mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-white">
-            VOICES OF THE FEARLESS
-          </h2>
-          <p className="text-neutral-400 mt-4 text-lg">
-            Dengar apa yang komunitas kami katakan tentang esensi dan kualitas.
-          </p>
+          <h2 className="text-4xl md:text-5xl font-heading tracking-tight text-white">VOICES OF THE FEARLESS</h2>
+          <p className="text-neutral-400 mt-4 text-lg">Kisah nyata dari komunitas kami yang hidup dalam gerakan dan makna.</p>
         </motion.div>
 
         <motion.div
@@ -125,7 +136,7 @@ const CustomerReviews = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10"
         >
           {reviews.map((review, index) => (
             <ReviewCard key={index} review={review} variants={itemVariants} />

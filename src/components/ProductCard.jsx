@@ -1,75 +1,104 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowUpRight, ShoppingBag } from 'lucide-react';
-import { Button } from './ui/button';
-import { useToast } from './ui/use-toast';
-import { useDispatch } from 'react-redux'; // 1. Import useDispatch
-import { addToCart } from '../store/slices/cartSlice'; // 2. Import action addToCart
+import React, { useRef } from 'react'
+import { ShoppingBag, Heart, Eye } from 'lucide-react'
+import { useDispatch } from 'react-redux'
+import { addToCart } from '../store/slices/cartSlice'
+import { useToast } from './ui/use-toast'
+import { Link } from 'react-router-dom'
 
 const ProductCard = ({ product }) => {
-  const { toast } = useToast();
-  const dispatch = useDispatch(); // 3. Inisialisasi dispatch
+  const dispatch = useDispatch()
+  const { toast } = useToast()
+  const cardRef = useRef(null)
 
-  // Fungsi untuk menambahkan produk ke keranjang
   const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    // 4. Dispatch action dengan mengirim data produk
-    dispatch(addToCart({ product }));
-
+    e.preventDefault()
+    e.stopPropagation()
+    dispatch(addToCart({ product }))
     toast({
       title: 'Added to Cart',
       description: `${product.name} has been successfully added.`,
       className: 'bg-black border-neutral-700 text-white',
-    });
-  };
+    })
+  }
+
+  // 3D Hover Tilt
+  const handleMouseMove = (e) => {
+    const card = cardRef.current
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    const rotateX = ((y - centerY) / centerY) * 8
+    const rotateY = ((x - centerX) / centerX) * -8
+    card.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+  }
+
+  const handleMouseLeave = () => {
+    const card = cardRef.current
+    card.style.transform = 'rotateX(0deg) rotateY(0deg)'
+  }
 
   return (
-    <motion.div className="group relative rounded-xl overflow-hidden border border-neutral-800/80 bg-neutral-900 shadow-lg transition-all duration-300 hover:border-neutral-700 hover:shadow-white/5">
-      {/* 5. Perbarui link untuk menggunakan slug */}
-      <Link to={`/product/${product.slug}`} className="block">
-        <div className="relative h-96 overflow-hidden">
-          <motion.img
+    <div
+      ref={cardRef}
+      className="group relative w-full max-w-sm mx-auto perspective-1000 transition-transform duration-300"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <Link
+        to={`/product/${product.slug}`}
+        className="block rounded-3xl border border-neutral-700/30 backdrop-blur-md bg-gradient-to-br from-white/5 via-white/3 to-white/5 shadow-[0_8px_24px_rgba(255,255,255,0.05)] overflow-hidden transition-all hover:shadow-lg hover:scale-[1.015] will-change-transform"
+      >
+        {/* Product Image */}
+        <div className="relative aspect-[4/5] overflow-hidden">
+          <img
             src={product.images?.[0] || 'https://images.unsplash.com/photo-1698476803391-cef4134df5c2'}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
-            decoding="async"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-            <div className="flex justify-between items-end">
-              <div>
-                <h3 className="text-lg font-medium drop-shadow-md truncate">{product.name}</h3>
-                <p className="text-sm text-neutral-400 drop-shadow-sm">{product.category}</p>
-              </div>
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <ArrowUpRight size={20} className="text-neutral-300" />
-              </div>
-            </div>
+
+          {/* Floating Badge */}
+          <span className="absolute top-4 left-4 bg-white/10 text-white text-xs font-medium px-3 py-1 rounded-full backdrop-blur-lg border border-white/20 shadow-md animate-pulse">
+            New Arrival
+          </span>
+
+          {/* Floating Icons */}
+          <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+            <button className="bg-white/10 p-2 rounded-full border border-white/20 backdrop-blur-md text-white hover:bg-white/20 transition">
+              <Heart size={16} />
+            </button>
+            <button className="bg-white/10 p-2 rounded-full border border-white/20 backdrop-blur-md text-white hover:bg-white/20 transition">
+              <Eye size={16} />
+            </button>
+          </div>
+
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent z-10" />
+        </div>
+
+        {/* Product Info */}
+        <div className="relative z-20 p-5">
+          <h3 className="text-xl font-serif font-semibold text-white truncate">{product.name}</h3>
+          <p className="text-sm text-neutral-300 mb-4">{product.category}</p>
+
+          <div className="flex justify-between items-center">
+            <span className="text-lg font-bold text-gold-400 tracking-tight">
+              Rp {product.price.toLocaleString('id-ID')}
+            </span>
+            <button
+              onClick={handleAddToCart}
+              className="rounded-full p-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 text-white transition"
+              aria-label={`Add ${product.name} to cart`}
+            >
+              <ShoppingBag size={18} />
+            </button>
           </div>
         </div>
       </Link>
-      <div className="p-5 bg-neutral-900/30">
-        <div className="flex justify-between items-center">
-          <p className="text-xl font-semibold text-white">
-            Rp {product.price.toLocaleString('id-ID')}
-          </p>
-          <Button
-            size="icon"
-            variant="outline"
-            className="bg-transparent border-neutral-700 text-neutral-300 rounded-full h-10 w-10 hover:bg-white hover:text-black hover:border-white transition-all duration-300 opacity-70 group-hover:opacity-100"
-            onClick={handleAddToCart}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            <ShoppingBag size={20} />
-          </Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-};
+    </div>
+  )
+}
 
-export default ProductCard;
+export default ProductCard
