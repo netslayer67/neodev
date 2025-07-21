@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { Button } from '@/components/ui/button';
@@ -39,7 +39,7 @@ const CheckoutPage = () => {
     const { toast } = useToast();
     const { user } = useSelector((state) => state.auth);
     const { cartItems } = useSelector((state) => state.cart);
-    const { status: orderStatus } = useSelector((state) => state.orders);
+    const { status: orderStatus, midtransSnapToken } = useSelector((state) => state.orders);
 
     const [activeSection, setActiveSection] = useState('shipping');
     const [paymentMethod, setPaymentMethod] = useState('online');
@@ -51,15 +51,11 @@ const CheckoutPage = () => {
         phone: '',
     });
 
-    const subtotal = cartItems.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const shippingFee = cartItems.length > 0 ? 15000 : 0;
     const adminFee = 2500;
     const onlineDiscount = 3000;
-    const total =
-        subtotal + shippingFee + (paymentMethod === 'offline' ? adminFee : -onlineDiscount);
+    const total = subtotal + shippingFee + (paymentMethod === 'offline' ? adminFee : -onlineDiscount);
 
     const paymentOptions = [
         {
@@ -77,21 +73,45 @@ const CheckoutPage = () => {
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
         const orderData = {
-            items: cartItems.map((item) => ({
-                product: item._id,
-                quantity: item.quantity,
-            })),
+            items: cartItems.map((item) => ({ product: item._id, quantity: item.quantity })),
             shippingAddress: { ...shippingAddress, fullName: user.name },
             paymentMethod,
             itemsPrice: subtotal,
             shippingPrice: shippingFee,
             totalPrice: total,
         };
+
         try {
             const result = await dispatch(createOrder(orderData)).unwrap();
-            if (paymentMethod === 'online' && result.paymentUrl) {
-                window.location.href = result.paymentUrl;
-            } else {
+
+            if (paymentMethod === 'online' && result.midtransSnapToken) {
+                window.snap.pay(result.midtransSnapToken, {
+                    onSuccess: () => {
+                        dispatch(clearCart());
+                        dispatch(clearOrderState());
+                        navigate('/profile', { state: { activeView: 'orders' } });
+                    },
+                    onPending: () => {
+                        dispatch(clearCart());
+                        dispatch(clearOrderState());
+                        navigate('/profile', { state: { activeView: 'orders' } });
+                    },
+                    onError: () => {
+                        toast({
+                            variant: 'destructive',
+                            title: 'Payment Failed',
+                            description: 'Please try again or use another method.',
+                        });
+                    },
+                    onClose: () => {
+                        toast({
+                            title: 'Payment Cancelled',
+                            description: 'You closed the payment popup.',
+                        });
+                    },
+                });
+            }
+            else {
                 toast({
                     title: 'Order Placed',
                     description: `#${result.order.orderId} created successfully.`,
@@ -109,10 +129,11 @@ const CheckoutPage = () => {
         }
     };
 
-    if (cartItems.length === 0) {
-        navigate('/profile', { state: { activeView: 'orders' } });
-        return null;
-    }
+    useEffect(() => {
+        if (cartItems.length === 0) {
+            navigate('/profile', { state: { activeView: 'orders' } });
+        }
+    }, [cartItems]);
 
     return (
         <motion.div
@@ -124,7 +145,15 @@ const CheckoutPage = () => {
         >
             <Helmet>
                 <title>Checkout - Neo Dervish</title>
+                {paymentMethod === 'online' && (
+                    <script
+                        type="text/javascript"
+                        src="https://app.sandbox.midtrans.com/snap/snap.js"
+                        data-client-key={import.meta.env.VITE_MIDTRANS_CLIENT_KEY}
+                    />
+                )}
             </Helmet>
+
 
             <motion.div
                 variants={staggerContainer}
