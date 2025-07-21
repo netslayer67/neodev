@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { fetchProducts } from '@/store/slices/productSlice';
 import { ShoppingCart, Sun, Moon } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
-import { PageLoader } from '@/components/PageLoader';
+import PageLoader from '@/components/PageLoader';
 
 const categories = ['All', 'Hoodies', 'T-Shirts', 'Pants', 'Jackets', 'Accessories'];
 
@@ -53,16 +53,6 @@ export default function ShopPage() {
           <div>
             <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">The Luxe Collection</h1>
             <p className="text-neutral-400 mt-2">Modern fashion crafted for timeless presence.</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Toggle Dark Mode"
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full border border-neutral-700 bg-white/10 backdrop-blur-md hover:bg-white/20 transition"
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <ShoppingCart className="text-gold-500" />
           </div>
         </div>
 

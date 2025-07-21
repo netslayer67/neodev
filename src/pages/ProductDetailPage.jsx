@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import { pageTransition } from '@/lib/motion';
-import { PageLoader } from '@/components/PageLoader';
+import PageLoader from '@/components/PageLoader';
 
 const AccordionItem = ({ title, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
@@ -81,7 +81,7 @@ const ProductDetailPage = () => {
   return (
     <motion.div
       initial="initial" animate="animate" exit="exit" variants={pageTransition}
-      className="bg-gradient-to-br from-black via-gray-800 to-black text-white min-h-screen pt-24 pb-32"
+      className="bg-gradient-to-br from-black via-gray-900 to-black text-white min-h-screen pt-24 pb-32 font-sans"
     >
       <Helmet>
         <title>{product.name} - Neo Dervish</title>
@@ -93,52 +93,69 @@ const ProductDetailPage = () => {
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-12">
+          {/* Left: Gallery */}
           <div className="space-y-6">
             <div className="flex gap-3 overflow-x-auto scrollbar-hide">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`rounded-xl border-2 transition ${selectedImage === img ? 'border-white' : 'border-white/20 hover:border-white/40'}`}
+                  className={`rounded-xl border-2 transition ${selectedImage === img ? 'border-white' : 'border-white/20 hover:border-white/40'
+                    }`}
                 >
-                  <img src={img} alt={`thumb-${idx}`} className="w-20 h-20 object-cover rounded-lg" loading="lazy" />
+                  <img
+                    src={img.url}
+                    alt={img.alt || `thumb-${idx}`}
+                    className="w-20 h-20 object-cover rounded-lg"
+                    loading="lazy"
+                  />
                 </button>
               ))}
             </div>
-            <div className="relative rounded-xl overflow-hidden border border-white/10">
+            <div className="relative rounded-3xl overflow-hidden border border-white/10 backdrop-blur-2xl bg-white/5 shadow-2xl">
               <AnimatePresence mode="wait">
                 <motion.img
-                  key={selectedImage}
-                  src={selectedImage}
-                  alt={product.name}
-                  initial={{ opacity: 0.4 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0.4 }}
-                  transition={{ duration: 0.4 }}
-                  className="w-full object-cover rounded-xl"
+                  key={selectedImage?.url}
+                  src={selectedImage?.url}
+                  alt={selectedImage?.alt || product.name}
+                  initial={{ opacity: 0.4, scale: 1.02 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0.4, scale: 1.01 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-full object-cover rounded-3xl"
                 />
               </AnimatePresence>
             </div>
           </div>
 
+          {/* Right: Info Panel */}
           <div className="flex flex-col gap-6">
             <div>
-              <p className="uppercase text-xs text-sky-400 tracking-wide font-medium">{product.category}</p>
-              <h1 className="text-4xl lg:text-5xl font-bold mt-2 mb-3">{product.name}</h1>
-              <p className="text-2xl font-semibold">Rp {product.price.toLocaleString('id-ID')}</p>
+              <p className="uppercase text-xs text-gold-400 tracking-widest font-medium mb-1">{product.category}</p>
+              <h1 className="text-4xl lg:text-5xl font-serif font-bold mt-1 mb-4 leading-tight tracking-tight">
+                {product.name}
+              </h1>
+              <p className="text-2xl font-semibold text-white">Rp {product.price.toLocaleString('id-ID')}</p>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl p-6 flex flex-col gap-5">
+            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-2xl p-6 flex flex-col gap-5 shadow-inner">
               <div className="flex justify-between items-center">
                 <span className="text-white font-medium">Quantity</span>
-                <div className="flex items-center gap-3 border border-white/20 rounded-full px-3 py-1">
-                  <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}><Minus size={16} /></Button>
+                <div className="flex items-center gap-3 border border-white/20 rounded-full px-3 py-1 bg-black/20">
+                  <Button variant="ghost" size="icon" onClick={() => setQuantity(q => Math.max(1, q - 1))}>
+                    <Minus size={16} />
+                  </Button>
                   <span className="text-white font-semibold w-6 text-center">{quantity}</span>
-                  <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)}><Plus size={16} /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => setQuantity(q => q + 1)}>
+                    <Plus size={16} />
+                  </Button>
                 </div>
               </div>
               <motion.div whileTap={{ scale: 0.97 }}>
-                <Button onClick={handleAddToCart} className="w-full bg-white text-black py-3 font-bold rounded-full shadow-xl hover:bg-neutral-200">
+                <Button
+                  onClick={handleAddToCart}
+                  className="w-full bg-white text-black py-3 font-bold rounded-full shadow-xl hover:bg-neutral-200 transition-all"
+                >
                   <ShoppingBag size={20} className="mr-2" /> Add to Cart
                 </Button>
               </motion.div>
@@ -146,25 +163,26 @@ const ProductDetailPage = () => {
 
             <div className="divide-y divide-white/10">
               <AccordionItem title="Description" defaultOpen>
-                <p>{product.description}</p>
+                <p className="text-white/80">{product.description}</p>
               </AccordionItem>
               <AccordionItem title="Details & Fit">
-                <ul className="list-disc list-inside">
+                <ul className="list-disc list-inside text-white/80">
                   <li>Material: {product.details?.material || 'Premium Cotton Blend'}</li>
                   <li>Fit: {product.details?.fit || 'Regular Fit'}</li>
                   <li>Origin: {product.details?.origin || 'Designed in-house'}</li>
                 </ul>
               </AccordionItem>
               <AccordionItem title="Shipping & Returns">
-                <p>Informasi pengiriman dan pengembalian akan ditampilkan di sini.</p>
+                <p className="text-white/80">Informasi pengiriman dan pengembalian akan ditampilkan di sini.</p>
               </AccordionItem>
             </div>
           </div>
         </div>
 
+        {/* Related */}
         {relatedProducts.length > 0 && (
           <div className="mt-24">
-            <h2 className="text-2xl font-semibold text-center mb-10">You Might Also Like</h2>
+            <h2 className="text-2xl font-serif font-semibold text-center mb-10">You Might Also Like</h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map(p => (
                 <ProductCard key={p._id} product={p} />

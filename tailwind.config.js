@@ -17,6 +17,9 @@ module.exports = {
     },
     extend: {
       colors: {
+        gold: {
+          400: '#D4AF37',
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -57,8 +60,9 @@ module.exports = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['"Inter"', 'sans-serif'],
-        heading: ['"Bebas Neue"', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
+        sans: ['Montserrat', 'sans-serif'],
+        heading: ['Cormorant Garamond', 'serif'],
       },
       keyframes: {
         "accordion-down": {

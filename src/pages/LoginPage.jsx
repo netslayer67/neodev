@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-// 1. Import action loginUser
 import { loginUser } from '../store/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,23 +23,17 @@ const LoginPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 1. Dispatch action dan simpan hasilnya
       const resultAction = await dispatch(loginUser(formData)).unwrap();
-
-      // 2. Lakukan pengecekan role dari payload yang dikembalikan
       if (resultAction.user.role === 'admin') {
-        // Jika role adalah admin, arahkan ke dashboard admin
         navigate('/admin');
       } else {
-        // Jika bukan admin, arahkan ke halaman profil pengguna biasa
         navigate('/profile');
       }
-
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Login Failed",
-        description: error.message || "Invalid email or password.",
+        variant: 'destructive',
+        title: 'Login Failed',
+        description: error.message || 'Invalid email or password.',
       });
     }
   };
@@ -51,36 +44,78 @@ const LoginPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-800 to-black px-6 py-20"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black px-6 py-20 font-sans"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="w-full max-w-md rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl p-10"
+        className="w-full max-w-md rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_8px_30px_rgba(255,255,255,0.05)] p-10 relative"
       >
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-heading text-white tracking-wider">Welcome Back</h1>
-          <p className="text-neutral-400 text-sm mt-2">Login to continue your journey</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input id="email" type="email" value={formData.email} onChange={handleChange} required className="bg-neutral-800/80 border border-white/10 placeholder-neutral-500 text-white" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input id="password" type="password" value={formData.password} onChange={handleChange} required className="bg-neutral-800/80 border border-white/10 placeholder-neutral-500 text-white" />
-          </div>
-          <Button type="submit" size="lg" className="w-full mt-4 bg-white text-black hover:bg-neutral-300 rounded-full font-bold transition-colors" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Signing In...' : 'Sign In'}
-          </Button>
-        </form>
-        <div className="text-center mt-6">
-          <p className="text-sm text-neutral-400">
-            Don't have an account?{' '}
-            <Link to="/register" className="text-white font-semibold hover:underline transition-colors">Sign Up</Link>
+        {/* Glow circle for ambient luxury effect */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.2 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="absolute -top-20 -left-20 w-72 h-72 bg-indigo-500/30 rounded-full blur-3xl z-0"
+        />
+
+        <div className="relative z-10 text-center mb-10">
+          <h1 className="text-4xl font-display text-white tracking-wide leading-tight">
+            Step into Your Exclusive Space
+          </h1>
+          <p className="text-sm text-white/50 mt-2">
+            Luxury meets simplicity — welcome back.
           </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white text-sm">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="bg-white/5 border border-white/10 placeholder-white/40 text-white focus:ring-2 focus:ring-indigo-400/30 focus:outline-none transition-all rounded-xl"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-white text-sm">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="bg-white/5 border border-white/10 placeholder-white/40 text-white focus:ring-2 focus:ring-indigo-400/30 focus:outline-none transition-all rounded-xl"
+            />
+          </div>
+
+          <motion.div whileTap={{ scale: 0.97 }} className="pt-2">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-white text-black font-bold tracking-wide rounded-full py-3 hover:bg-neutral-200 transition-all disabled:opacity-70"
+              disabled={status === 'loading'}
+            >
+              {status === 'loading' ? 'Authenticating...' : 'Enter'}
+            </Button>
+          </motion.div>
+        </form>
+
+        <div className="text-center mt-6 text-sm text-white/60 relative z-10">
+          New here?{' '}
+          <Link
+            to="/register"
+            className="text-white font-medium underline hover:text-indigo-300 transition-colors"
+          >
+            Create Account
+          </Link>
         </div>
       </motion.div>
     </motion.div>

@@ -1,15 +1,13 @@
-// Revamped ProfilePage.jsx with premium UI, 3D tilt, glassmorphism, and TailwindCSS best practices
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { User, ShoppingBag, Star, LogOut, X, Search } from 'lucide-react';
+import { User, ShoppingBag, Star, LogOut, X, Search, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { logout } from '../store/slices/authSlice';
 import { fetchMyOrders, cancelOrder } from '../store/slices/orderSlice';
-import { PageLoader } from '@/components/PageLoader';
+import PageLoader from '@/components/PageLoader';
 import { useToast } from '@/components/ui/use-toast';
 
 const ProfilePage = () => {
@@ -22,28 +20,47 @@ const ProfilePage = () => {
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
-
+    const [showCancelSuccess, setShowCancelSuccess] = useState(false);
     const { user, status: authStatus } = useSelector((state) => state.auth);
     const { myOrders, status: orderStatus } = useSelector((state) => state.orders);
+    const [editMode, setEditMode] = useState(false);
+    const [profileData, setProfileData] = useState({ name: '', email: '' });
+
+    useEffect(() => {
+        if (user) {
+            setProfileData({ name: user.name, email: user.email });
+        }
+    }, [user]);
 
     useEffect(() => {
         if (user) dispatch(fetchMyOrders());
     }, [user, dispatch]);
+
+    useEffect(() => {
+        if (selectedOrder) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    }, [selectedOrder]);
 
     const handleLogout = () => {
         dispatch(logout());
         navigate('/');
     };
 
-    const handleCancelOrder = async (orderId) => {
+    const handleCancelOrder = async () => {
         try {
-            await dispatch(cancelOrder(orderId)).unwrap();
-            toast({ title: 'Order Cancelled', description: `Order #${orderId} has been cancelled.` });
+            await dispatch(cancelOrder(selectedOrder.orderId)).unwrap();
+            toast({ title: 'Order Cancelled', description: `Order #${selectedOrder.orderId} has been cancelled.` });
             setSelectedOrder(null);
+            setShowCancelSuccess(true);
+            setTimeout(() => setShowCancelSuccess(false), 2000); // hide after 2s
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Failed', description: error.message });
+            toast({ variant: 'destructive', title: 'Failed', description: error.message || 'Something went wrong.' });
         }
     };
+
 
     const filteredOrders = useMemo(() => myOrders.filter(order =>
         order.items.some(item => item.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
@@ -66,13 +83,16 @@ const ProfilePage = () => {
 
     const resetTilt = () => setTilt({ x: 0, y: 0 });
 
-    const Card = ({ children, className = '' }) => (
+    const Card = ({ children, className = '', onClick }) => (
         <div
             onMouseMove={handleMouseMove}
             onMouseLeave={resetTilt}
+            onClick={onClick}
             style={{ transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)` }}
             className={`bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl shadow-xl transition-transform duration-300 will-change-transform ${className}`}
-        >{children}</div>
+        >
+            {children}
+        </div>
     );
 
     const renderContent = () => {
@@ -109,7 +129,11 @@ const ProfilePage = () => {
                             {orderStatus === 'loading' && <PageLoader />}
                             {orderStatus === 'succeeded' && filteredOrders.length === 0 && <p className="text-neutral-400">No orders found.</p>}
                             {orderStatus === 'succeeded' && filteredOrders.map(order => (
-                                <Card key={order.orderId} className="cursor-pointer hover:shadow-2xl" onClick={() => setSelectedOrder(order)}>
+                                <Card
+                                    key={order.orderId}
+                                    className="cursor-pointer hover:shadow-2xl"
+                                    onClick={() => setSelectedOrder(order)}
+                                >
                                     <div className="flex justify-between">
                                         <div>
                                             <p className="text-sm font-mono text-neutral-400">#{order.orderId}</p>
@@ -118,8 +142,8 @@ const ProfilePage = () => {
                                         <div className="text-right">
                                             <p className="text-lg font-bold">Rp {order.totalAmount.toLocaleString('id-ID')}</p>
                                             <span className={`text-xs px-3 py-1 rounded-full ${order.status === 'Delivered' ? 'bg-green-500/20 text-green-300' :
-                                                    order.status === 'Cancelled' ? 'bg-red-500/20 text-red-300' :
-                                                        'bg-yellow-500/20 text-yellow-300'
+                                                order.status === 'Cancelled' ? 'bg-red-500/20 text-red-300' :
+                                                    'bg-yellow-500/20 text-yellow-300'
                                                 }`}>
                                                 {order.status}
                                             </span>
@@ -144,7 +168,9 @@ const ProfilePage = () => {
         >
             <div className="max-w-7xl mx-auto">
                 <div className="mb-12">
-                    <h1 className="text-5xl font-bold">Welcome, {user?.name.split(' ')[0]}</h1>
+                    <h1 className="text-5xl font-bold">
+                        Welcome, {typeof user?.name === 'string' ? user.name.split(' ')[0] : 'User'}
+                    </h1>
                     <p className="text-neutral-400 text-lg mt-2">Manage your profile, orders, and more.</p>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
@@ -154,8 +180,8 @@ const ProfilePage = () => {
                                 key={item.id}
                                 onClick={item.action || (() => setActiveView(item.id))}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-                  ${activeView === item.id ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-white'}
-                  ${item.id === 'logout' ? 'text-red-400 hover:bg-red-500/10' : ''}`}
+                                    ${activeView === item.id ? 'bg-white/10 text-white' : 'text-neutral-400 hover:bg-white/5 hover:text-white'}
+                                    ${item.id === 'logout' ? 'text-red-400 hover:bg-red-500/10' : ''}`}
                             >
                                 <item.icon size={20} /> <span>{item.label}</span>
                             </button>
@@ -179,17 +205,28 @@ const ProfilePage = () => {
 
             <AnimatePresence>
                 {selectedOrder && (
-                    <motion.div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-center items-center p-4"
-                        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedOrder(null)}>
-                        <motion.div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-lg bg-gradient-to-br from-gray-900 to-black border border-white/20 p-8 rounded-2xl text-white shadow-2xl"
-                            initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} transition={{ duration: 0.3 }}>
+                    <motion.div
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-center items-center p-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSelectedOrder(null)}
+                    >
+                        <motion.div
+                            onClick={(e) => e.stopPropagation()}
+                            className="relative w-full max-w-lg bg-gradient-to-br from-gray-900 to-black border border-white/20 p-8 rounded-2xl text-white shadow-2xl"
+                            initial={{ scale: 0.9 }}
+                            animate={{ scale: 1 }}
+                            exit={{ scale: 0.9 }}
+                            transition={{ duration: 0.3 }}
+                        >
                             <button onClick={() => setSelectedOrder(null)} className="absolute top-4 right-4 text-white/40 hover:text-red-500">
                                 <X size={24} />
                             </button>
                             <h3 className="text-2xl font-bold mb-1">Order #{selectedOrder.orderId}</h3>
                             <p className="text-neutral-400 text-sm mb-4">Placed: {new Date(selectedOrder.createdAt).toLocaleString()}</p>
                             <div className="space-y-2">
-                                {selectedOrder.items.map((item) => (
+                                {selectedOrder?.items?.map?.((item) => (
                                     <div key={item.product} className="flex justify-between text-sm">
                                         <span>{item.name} (x{item.quantity})</span>
                                         <span>Rp {(item.price * item.quantity).toLocaleString('id-ID')}</span>
@@ -200,12 +237,27 @@ const ProfilePage = () => {
                                 <div className="flex justify-between"><span>Status:</span><span className="font-semibold">{selectedOrder.status}</span></div>
                                 <div className="flex justify-between mt-2"><span>Total:</span><span className="font-semibold">Rp {selectedOrder.totalAmount.toLocaleString('id-ID')}</span></div>
                             </div>
-                            {selectedOrder.status === 'Pending Payment' && (
-                                <Button onClick={() => handleCancelOrder(selectedOrder.orderId)} variant="destructive" className="w-full mt-6">
+                            {['Diproses', 'Pending Payment'].includes(selectedOrder.status) && (
+                                <Button onClick={handleCancelOrder} variant="destructive" className="w-full mt-6">
                                     Cancel Order
                                 </Button>
                             )}
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
+                {showCancelSuccess && (
+                    <motion.div
+                        className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none"
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        <div className="bg-green-600/90 p-6 rounded-full shadow-2xl flex items-center justify-center">
+                            <CheckCircle className="text-white" size={48} />
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// --- Animation Variants for Staggering ---
-const containerVariants = {
+// Animation Variants
+const container = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -18,22 +18,22 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const item = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.6, ease: 'easeOut' }
+    transition: { duration: 0.6, ease: 'easeOut' },
   },
 };
 
 const Footer = () => {
   const { toast } = useToast();
 
-  const handleSocialClick = (socialMedia) => {
+  const handleSocialClick = (name) => {
     toast({
-      title: "🚀 Connecting...",
-      description: `Redirecting you to our ${socialMedia} page. Stay tuned!`,
+      title: '🔗 Opening...',
+      description: `Redirecting to ${name}.`,
     });
   };
 
@@ -42,43 +42,43 @@ const Footer = () => {
     const email = e.target.email.value;
     if (email) {
       toast({
-        title: "✅ Subscribed!",
-        description: "Thanks for joining our mailing list. Welcome to the club.",
+        title: '🎉 Subscribed!',
+        description: 'Thanks for joining our circle. Premium drops incoming.',
       });
       e.target.reset();
     } else {
       toast({
-        title: "⚠️ Whoops!",
-        description: "Please enter a valid email address.",
-        variant: "destructive",
+        title: '⚠️ Oops!',
+        description: 'Please enter a valid email.',
+        variant: 'destructive',
       });
     }
   };
 
   return (
-    <footer className="bg-black border-t border-white/10 overflow-hidden">
-      <div className="container mx-auto px-6 pt-24 pb-12">
+    <footer className="bg-black text-white border-t border-white/10 backdrop-blur-xl relative z-10">
+      <div className="max-w-7xl mx-auto px-6 pt-24 pb-12">
         <motion.div
-          variants={containerVariants}
+          variants={container}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12"
         >
-          {/* Brand & Mission */}
-          <motion.div variants={itemVariants} className="lg:col-span-2">
-            <h3 className="text-2xl font-bold text-white tracking-wider mb-4">
+          {/* Brand */}
+          <motion.div variants={item} className="lg:col-span-2">
+            <h2 className="text-3xl font-serif font-bold bg-gradient-to-r from-white via-slate-300 to-white bg-clip-text text-transparent mb-4 tracking-wide">
               NEO DERVISH
-            </h3>
-            <p className="text-neutral-400 max-w-md text-sm leading-relaxed">
-              Apparel designed with intention. Made for bold thinkers and aesthetic souls. We believe in movement—not just of the body, but of the soul.
+            </h2>
+            <p className="text-white/60 max-w-md text-sm leading-relaxed">
+              Crafted for those who move with intention. Timeless silhouettes for bold spirits. Welcome to luxury, redefined.
             </p>
           </motion.div>
 
-          {/* Navigation */}
-          <motion.div variants={itemVariants}>
-            <h4 className="text-white font-semibold text-base mb-5 tracking-wide">Explore</h4>
-            <ul className="space-y-3">
+          {/* Explore Links */}
+          <motion.div variants={item}>
+            <h4 className="text-white font-semibold text-base mb-5 uppercase tracking-widest">Explore</h4>
+            <ul className="space-y-3 text-sm">
               {[
                 { name: 'Shop All', to: '/shop' },
                 { name: 'Our Story', to: '/about' },
@@ -86,18 +86,19 @@ const Footer = () => {
                 { name: 'Contact', to: '/contact' },
               ].map((link) => (
                 <li key={link.name}>
-                  <Link to={link.to} className="text-neutral-400 hover:text-white transition-colors duration-300 text-sm group">
-                    {link.name} <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  <Link to={link.to} className="group flex items-center text-white/60 hover:text-white transition-colors">
+                    {link.name}
+                    <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                   </Link>
                 </li>
               ))}
             </ul>
           </motion.div>
 
-          {/* Support */}
-          <motion.div variants={itemVariants}>
-            <h4 className="text-white font-semibold text-base mb-5 tracking-wide">Support</h4>
-            <ul className="space-y-3">
+          {/* Support Links */}
+          <motion.div variants={item}>
+            <h4 className="text-white font-semibold text-base mb-5 uppercase tracking-widest">Support</h4>
+            <ul className="space-y-3 text-sm">
               {[
                 { name: 'FAQ', to: '/faq' },
                 { name: 'Shipping & Returns', to: '/shipping' },
@@ -105,8 +106,9 @@ const Footer = () => {
                 { name: 'Admin Portal', to: '/admin' },
               ].map((link) => (
                 <li key={link.name}>
-                  <Link to={link.to} className="text-neutral-400 hover:text-white transition-colors duration-300 text-sm group">
-                    {link.name} <span className="opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                  <Link to={link.to} className="group flex items-center text-white/60 hover:text-white transition-colors">
+                    {link.name}
+                    <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
                   </Link>
                 </li>
               ))}
@@ -114,36 +116,41 @@ const Footer = () => {
           </motion.div>
         </motion.div>
 
-        {/* Newsletter & Socials */}
+        {/* Newsletter + CTA */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4, ease: 'easeOut' }}
-          viewport={{ once: true, amount: 0.5 }}
-          className="mt-20 p-8 bg-white/5 rounded-2xl border border-white/10 flex flex-col lg:flex-row items-center justify-between gap-8"
+          transition={{ duration: 0.7, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="mt-20 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-lg p-8 flex flex-col lg:flex-row justify-between items-center gap-6"
         >
           <div>
-            <h4 className="text-white font-bold text-xl tracking-wide">Join The Movement</h4>
-            <p className="text-neutral-400 text-sm mt-1">Get early access to new drops and exclusive content.</p>
+            <h4 className="text-white font-bold text-xl tracking-wide">Stay in the Know</h4>
+            <p className="text-white/50 text-sm mt-1">Be the first to access exclusive drops & editorials.</p>
           </div>
-          <form onSubmit={handleNewsletterSubmit} className="w-full lg:w-auto flex-shrink-0 flex gap-2">
-            <Input name="email" type="email" placeholder="Enter your email" className="w-full lg:w-80 bg-black/20 border-white/20 h-12" />
-            <Button type="submit" size="icon" className="h-12 w-12 bg-white text-black flex-shrink-0 hover:bg-neutral-200">
+          <form onSubmit={handleNewsletterSubmit} className="w-full lg:w-auto flex flex-shrink-0 gap-2">
+            <Input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              className="w-full lg:w-80 h-12 bg-black/30 border border-white/20 text-white placeholder-white/40"
+            />
+            <Button type="submit" size="icon" className="h-12 w-12 bg-white text-black hover:bg-neutral-300 transition">
               <Send size={20} />
             </Button>
           </form>
         </motion.div>
 
         {/* Bottom Bar */}
-        <div className="mt-20 pt-8 border-t border-white/10 flex flex-col-reverse md:flex-row justify-between items-center gap-6">
+        <div className="mt-20 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
           <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 1 }}
             viewport={{ once: true }}
-            className="text-neutral-500 text-xs"
+            className="text-white/40 text-xs"
           >
-            &copy; {new Date().getFullYear()} Neo Dervish. All rights reserved.
+            &copy; {new Date().getFullYear()} Neo Dervish. Crafted with clarity and vision.
           </motion.p>
           <motion.div
             initial={{ opacity: 0 }}
@@ -152,15 +159,11 @@ const Footer = () => {
             viewport={{ once: true }}
             className="flex items-center gap-4"
           >
-            {[
-              { Icon: Instagram, name: 'Instagram' },
-              { Icon: Twitter, name: 'Twitter' },
-              { Icon: Facebook, name: 'Facebook' }
-            ].map(({ Icon, name }) => (
+            {[{ Icon: Instagram }, { Icon: Twitter }, { Icon: Facebook }].map(({ Icon }, idx) => (
               <button
-                key={name}
-                onClick={() => handleSocialClick(name)}
-                className="w-9 h-9 flex items-center justify-center bg-white/5 text-neutral-400 border border-white/10 rounded-full transition-all duration-300 hover:bg-white hover:text-black hover:scale-110"
+                key={idx}
+                onClick={() => handleSocialClick(Icon.name)}
+                className="w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white text-white/70 hover:text-black rounded-full transition duration-300 hover:scale-110"
               >
                 <Icon size={18} />
               </button>

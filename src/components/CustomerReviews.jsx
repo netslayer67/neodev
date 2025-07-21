@@ -1,4 +1,3 @@
-// CustomerReviews.jsx (Refactored for Luxury-Grade Design)
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
@@ -51,20 +50,28 @@ const reviews = [
 const ReviewCard = ({ review, variants }) => (
   <motion.div
     variants={variants}
-    whileHover={{ scale: 1.025 }}
-    transition={{ type: 'spring', stiffness: 180, damping: 14 }}
-    className="group relative p-[1px] rounded-3xl glass-card shadow-xl will-change-transform"
+    whileHover={{ scale: 1.02 }}
+    transition={{ type: 'spring', stiffness: 160, damping: 14 }}
+    className="group relative p-[1px] rounded-3xl shadow-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl will-change-transform"
   >
-    <div className="relative p-6 flex flex-col h-full bg-gradient-to-br from-gray-900/80 to-gray-950/90 backdrop-blur-xl rounded-3xl overflow-hidden">
+    <div className="relative p-6 flex flex-col h-full bg-black/70 rounded-3xl overflow-hidden">
       <Quote className="absolute top-5 right-5 h-10 w-10 text-white/10 group-hover:rotate-3 transition-transform duration-500" />
       <div className="flex items-center mb-4 gap-1">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} className={`h-5 w-5 transition-colors ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-neutral-700'}`} />
+          <Star
+            key={i}
+            className={`h-5 w-5 transition-colors ${i < review.rating ? 'fill-amber-400 text-amber-400' : 'text-white/20'
+              }`}
+          />
         ))}
       </div>
       <p className="text-white/90 italic text-base leading-relaxed flex-grow mb-6">"{review.review}"</p>
       <div className="flex items-center gap-4 mt-auto pt-4 border-t border-white/10">
-        <img src={review.avatar} alt={review.name} className="h-11 w-11 rounded-full border-2 border-white/10" />
+        <img
+          src={review.avatar}
+          alt={review.name}
+          className="h-11 w-11 rounded-full border-2 border-white/10"
+        />
         <div>
           <p className="font-semibold text-white text-sm">{review.name}</p>
           <p className="text-sm text-white/50">Purchased: {review.product}</p>
@@ -80,27 +87,26 @@ const CustomerReviews = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1,
+        staggerChildren: 0.15,
       },
     },
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 50, scale: 0.95 },
+    hidden: { opacity: 0, y: 60, scale: 0.95 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
-      transition: { type: 'spring', stiffness: 120, damping: 12 },
+      transition: { type: 'spring', stiffness: 100, damping: 12 },
     },
   };
 
   useEffect(() => {
     const tiltCards = document.querySelectorAll('.glass-card');
     const isTouch = window.matchMedia('(hover: none)').matches;
-
     if (!isTouch) {
-      tiltCards.forEach(card => {
+      tiltCards.forEach((card) => {
         card.addEventListener('mousemove', (e) => {
           const rect = card.getBoundingClientRect();
           const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -115,20 +121,22 @@ const CustomerReviews = () => {
   }, []);
 
   return (
-    <section className="relative py-24 sm:py-32 bg-black overflow-hidden">
-      {/* Luxury Gradient Background */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-br from-emerald-900/20 via-black to-indigo-900/20 blur-2xl" />
+    <section className="relative py-24 sm:py-36 bg-black overflow-hidden">
+      {/* Ambient Gradient Backdrop */}
+      <div className="absolute inset-0 z-0 bg-gradient-to-br from-gray-900/30 via-black to-gray-950 blur-2xl" />
 
       <div className="relative z-10 container mx-auto px-6">
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.6 }}
+          viewport={{ once: true, amount: 0.5 }}
           transition={{ duration: 1 }}
           className="text-center max-w-2xl mx-auto mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-heading tracking-tight text-white">VOICES OF THE FEARLESS</h2>
-          <p className="text-neutral-400 mt-4 text-lg">Kisah nyata dari komunitas kami yang hidup dalam gerakan dan makna.</p>
+          <p className="text-neutral-400 mt-4 text-lg font-light">
+            Kisah nyata dari komunitas kami yang hidup dalam gerakan dan makna.
+          </p>
         </motion.div>
 
         <motion.div

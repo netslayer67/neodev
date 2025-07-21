@@ -2,20 +2,19 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-// 1. Import action dari authSlice
 import { registerUser } from '../store/slices/authSlice';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { pageTransition } from '@/lib/motion';
+import { Sparkles } from 'lucide-react';
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
-  // Ambil status untuk menonaktifkan tombol saat loading
   const { status } = useSelector((state) => state.auth);
 
   const handleChange = (e) => {
@@ -26,26 +25,25 @@ const RegisterPage = () => {
     e.preventDefault();
     if (formData.password.length < 6) {
       toast({
-        variant: "destructive",
-        title: "Registration Failed",
-        description: "Password must be at least 6 characters long.",
+        variant: 'destructive',
+        title: 'Registration Failed',
+        description: 'Password must be at least 6 characters long.',
       });
       return;
     }
 
     try {
-      // 2. Dispatch action registerUser dan tunggu hasilnya dengan .unwrap()
       await dispatch(registerUser(formData)).unwrap();
-
-      // 3. Jika berhasil, tampilkan notifikasi dan arahkan ke profil
-      toast({ title: "Registration Successful!", description: "Welcome to Neo Dervish." });
+      toast({
+        title: 'Welcome Aboard',
+        description: 'Your journey with Neo Dervish begins now.',
+      });
       navigate('/profile');
     } catch (error) {
-      // Jika gagal, tampilkan pesan error dari backend
       toast({
-        variant: "destructive",
-        title: "Registration Failed",
-        description: error.message || "An error occurred. Please try again.",
+        variant: 'destructive',
+        title: 'Registration Failed',
+        description: error.message || 'An error occurred. Please try again.',
       });
     }
   };
@@ -56,44 +54,101 @@ const RegisterPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-gray-800 to-black px-6 py-20"
+      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-black px-6 py-24 font-sans"
     >
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: 'easeOut' }}
-        className="w-full max-w-md rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-2xl p-10"
+        className="w-full max-w-md relative z-10 rounded-3xl bg-white/5 border border-white/10 backdrop-blur-2xl shadow-[0_8px_32px_rgba(255,255,255,0.05)] p-10"
       >
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-heading text-white tracking-wider">Create Account</h1>
-          <p className="text-neutral-400 text-sm mt-2">Join the Neo Dervish collective.</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-white">Full Name</Label>
-            <Input id="name" type="text" value={formData.name} onChange={handleChange} required className="bg-neutral-800/80 border border-white/10 placeholder-neutral-500 text-white" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-white">Email</Label>
-            <Input id="email" type="email" value={formData.email} onChange={handleChange} required className="bg-neutral-800/80 border border-white/10 placeholder-neutral-500 text-white" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="password" className="text-white">Password</Label>
-            <Input id="password" type="password" value={formData.password} onChange={handleChange} required className="bg-neutral-800/80 border border-white/10 placeholder-neutral-500 text-white" />
-          </div>
-          <Button type="submit" size="lg" className="w-full mt-4 bg-white text-black hover:bg-neutral-300 rounded-full font-bold transition-colors" disabled={status === 'loading'}>
-            {status === 'loading' ? 'Creating Account...' : 'Create Account'}
-          </Button>
-        </form>
-        <div className="text-center mt-6">
-          <p className="text-sm text-neutral-400">
-            Already have an account?{' '}
-            <Link to="/login" className="text-white font-semibold hover:underline transition-colors">Sign In</Link>
+        {/* Ambient floating glass light */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.15 }}
+          transition={{ duration: 1, delay: 0.3 }}
+          className="absolute -top-28 -left-20 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl z-0"
+        />
+
+        <div className="text-center mb-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.4 }}
+            className="mx-auto mb-4 text-indigo-300"
+          >
+            <Sparkles className="mx-auto h-8 w-8" />
+          </motion.div>
+          <h1 className="text-3xl sm:text-4xl font-display text-white leading-tight tracking-wide">
+            Begin Your Journey
+          </h1>
+          <p className="text-sm text-white/60 mt-1">
+            Join the Neo Dervish collective — it all starts here.
           </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-white text-sm">Full Name</Label>
+            <Input
+              id="name"
+              type="text"
+              autoComplete="name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+              className="bg-white/5 border border-white/10 placeholder-white/40 text-white focus:ring-2 focus:ring-indigo-300/30 focus:outline-none transition-all rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-white text-sm">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+              className="bg-white/5 border border-white/10 placeholder-white/40 text-white focus:ring-2 focus:ring-indigo-300/30 focus:outline-none transition-all rounded-xl"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-white text-sm">Create Password</Label>
+            <Input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+              className="bg-white/5 border border-white/10 placeholder-white/40 text-white focus:ring-2 focus:ring-indigo-300/30 focus:outline-none transition-all rounded-xl"
+            />
+          </div>
+
+          <motion.div whileTap={{ scale: 0.97 }} className="pt-2">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full bg-white text-black font-bold tracking-wide rounded-full py-3 hover:bg-neutral-200 transition-all disabled:opacity-70"
+              disabled={status === 'loading'}
+            >
+              {status === 'loading' ? 'Creating Account...' : 'Create Account'}
+            </Button>
+          </motion.div>
+        </form>
+
+        <div className="text-center mt-6 text-sm text-white/60 relative z-10">
+          Already a member?{' '}
+          <Link
+            to="/login"
+            className="text-white font-medium underline hover:text-indigo-300 transition-colors"
+          >
+            Sign In
+          </Link>
         </div>
       </motion.div>
     </motion.div>
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;

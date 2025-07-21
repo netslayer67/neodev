@@ -41,6 +41,20 @@ export const loginUser = createAsyncThunk(
     }
 );
 
+// authSlice.js (tambahkan ini)
+export const updateProfile = createAsyncThunk(
+    'auth/updateProfile',
+    async (payload, { rejectWithValue }) => {
+        try {
+            const { data } = await axios.put('/api/v1/users/me', payload);
+            return data.data;
+        } catch (err) {
+            return rejectWithValue(err.response?.data?.message || 'Failed to update profile');
+        }
+    }
+);
+
+
 const authSlice = createSlice({
     name: 'auth',
     initialState: {

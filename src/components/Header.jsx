@@ -67,7 +67,6 @@ const Header = () => {
       <motion.header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300`}
         style={{
-          background: isScrolled ? 'rgba(10, 10, 10, 0.7)' : 'linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)',
           backdropFilter: isScrolled ? 'blur(16px)' : 'none',
           borderBottom: isScrolled ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid transparent',
         }}

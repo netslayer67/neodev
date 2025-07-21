@@ -1,4 +1,3 @@
-// src/store/slices/orderSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../api/axios';
 
@@ -9,9 +8,9 @@ export const createOrder = createAsyncThunk(
     async (orderData, { rejectWithValue }) => {
         try {
             const response = await axios.post('/orders', orderData);
-            return response.data.data;
+            return response.data.data; // { order, midtransSnapToken, redirectUrl }
         } catch (err) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data || { message: 'Something went wrong' });
         }
     }
 );
@@ -23,16 +22,11 @@ export const fetchMyOrders = createAsyncThunk(
             const response = await axios.get('/orders');
             return response.data.data;
         } catch (err) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data || { message: 'Failed to fetch orders' });
         }
     }
 );
 
-// --- ASYNC THUNK YANG HILANG DITAMBAHKAN DI SINI ---
-/**
- * Mengambil detail satu pesanan berdasarkan ID-nya.
- * @param {string} orderId - ID unik dari pesanan.
- */
 export const fetchOrderById = createAsyncThunk(
     'orders/fetchById',
     async (orderId, { rejectWithValue }) => {
@@ -40,7 +34,7 @@ export const fetchOrderById = createAsyncThunk(
             const response = await axios.get(`/orders/${orderId}`);
             return response.data.data;
         } catch (err) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data || { message: 'Order not found' });
         }
     }
 );
@@ -52,11 +46,10 @@ export const cancelOrder = createAsyncThunk(
             const response = await axios.put(`/orders/${orderId}/cancel`);
             return response.data.data;
         } catch (err) {
-            return rejectWithValue(err.response.data);
+            return rejectWithValue(err.response?.data || { message: 'Failed to cancel order' });
         }
     }
 );
-
 
 // --- ORDER SLICE ---
 
@@ -65,6 +58,8 @@ const orderSlice = createSlice({
     initialState: {
         myOrders: [],
         selectedOrder: null,
+        midtransSnapToken: null,
+        redirectUrl: null,
         status: 'idle',
         error: null,
     },
@@ -73,23 +68,33 @@ const orderSlice = createSlice({
             state.status = 'idle';
             state.error = null;
             state.selectedOrder = null;
+            state.midtransSnapToken = null;
+            state.redirectUrl = null;
         },
     },
-    // --- PERBAIKAN UTAMA PADA EXTRA REDUCERS ---
     extraReducers: (builder) => {
         builder
             // Create Order
             .addCase(createOrder.pending, (state) => {
                 state.status = 'loading';
+                state.error = null;
+                state.midtransSnapToken = null;
+                state.redirectUrl = null;
             })
             .addCase(createOrder.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.myOrders.unshift(action.payload);
+                const { order, midtransSnapToken, redirectUrl } = action.payload;
+
+                state.myOrders.unshift(order);
+                state.selectedOrder = order;
+                state.midtransSnapToken = midtransSnapToken;
+                state.redirectUrl = redirectUrl;
             })
             .addCase(createOrder.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload?.message;
             })
+
             // Fetch My Orders
             .addCase(fetchMyOrders.pending, (state) => {
                 state.status = 'loading';
@@ -102,6 +107,7 @@ const orderSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload?.message;
             })
+
             // Cancel Order
             .addCase(cancelOrder.pending, (state) => {
                 state.status = 'loading';
@@ -112,7 +118,6 @@ const orderSlice = createSlice({
                 if (index !== -1) {
                     state.myOrders[index] = action.payload;
                 }
-                // Jika pesanan yang dibatalkan adalah yang sedang dipilih, perbarui juga
                 if (state.selectedOrder?.orderId === action.payload.orderId) {
                     state.selectedOrder = action.payload;
                 }
@@ -121,7 +126,8 @@ const orderSlice = createSlice({
                 state.status = 'failed';
                 state.error = action.payload?.message;
             })
-            // Fetch Order By ID (yang sebelumnya error)
+
+            // Fetch Order By ID
             .addCase(fetchOrderById.pending, (state) => {
                 state.status = 'loading';
                 state.selectedOrder = null;

@@ -1,12 +1,13 @@
 import React, { Suspense, lazy, useMemo } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
+import ScrollToTop from './ScrollToTop';
 
 // --- UI Components ---
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { PageLoader } from '@/components/PageLoader';
+import PageLoader from '@/components/PageLoader';
 import ProtectedRoute from './components/ProtectedRoute'; // Asumsi komponen ini akan dibuat/
 
 // --- Page Imports (Lazy Loaded) ---
@@ -102,6 +103,7 @@ function App() {
     <>
       <Suspense fallback={<PageLoader />}>
         <AnimatePresence mode="wait">
+          <ScrollToTop />
           {routeElements}
         </AnimatePresence>
       </Suspense>

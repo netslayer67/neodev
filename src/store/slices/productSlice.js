@@ -136,9 +136,9 @@ const productSlice = createSlice({
             // ... (sisa extraReducers) ...
             .addCase(fetchProductBySlug.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                // Mengambil dari properti 'data'
-                state.selectedProduct = action.payload.data;
+                state.selectedProduct = action.payload.data || null;
             });
+
     },
 });
 

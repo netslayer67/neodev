@@ -23,6 +23,7 @@
     "axios": "^1.10.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "dotenv": "^17.2.0",
     "framer-motion": "^10.16.4",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.292.0",
@@ -31,6 +32,7 @@
     "react-helmet": "^6.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^6.16.0",
+    "react-scrollama": "^2.4.2",
     "recharts": "^2.10.3",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7"
