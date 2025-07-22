@@ -27,6 +27,13 @@ import {
 import PageLoader from '@/components/PageLoader';
 import OrderDetailModal from './OrderDetailModal';
 
+import io from 'socket.io-client';
+
+// Inisialisasi socket.io
+const socket = io(import.meta.env.VITE_API_BASE_URL, {
+  withCredentials: true,
+});
+
 const StatusBadge = ({ status }) => {
   const styles = {
     'Telah Sampai': 'bg-emerald-500/10 text-emerald-300 ring-1 ring-emerald-500/30',
@@ -55,6 +62,18 @@ const AdminOrdersPage = () => {
     dispatch(fetchAllOrders());
   }, [dispatch]);
 
+  // Socket.IO: Dengarkan event real-time
+  useEffect(() => {
+    const refreshOrders = () => dispatch(fetchAllOrders());
+    socket.on('new-order', refreshOrders);
+    socket.on('order-status-updated', refreshOrders);
+
+    return () => {
+      socket.off('new-order', refreshOrders);
+      socket.off('order-status-updated', refreshOrders);
+    };
+  }, [dispatch]);
+
   const filteredOrders = useMemo(() => {
     return allOrders
       .filter(order => statusFilter === 'All' || order.status === statusFilter)
@@ -68,7 +87,6 @@ const AdminOrdersPage = () => {
     try {
       await dispatch(action(orderId)).unwrap();
       toast({ title: 'Order Status Updated' });
-      dispatch(fetchAllOrders());
     } catch (error) {
       toast({ variant: 'destructive', title: 'Failed', description: error.message });
     }
