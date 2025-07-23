@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchDashboardStats } from '@/store/slices/dashboardSlice';
 import io from 'socket.io-client';
 
+// Di atas component:
 const socket = io(import.meta.env.VITE_SOCKET_URL, {
   transports: ['websocket'],
   withCredentials: true,
@@ -53,15 +54,26 @@ const DashboardPage = () => {
   const dispatch = useDispatch();
   const [activeIndex, setActiveIndex] = useState(null);
 
+  const dashboard = useSelector((state) => state.dashboard) || {};
+
   const {
-    revenue, sales, subscriptions, activeUsers, chartData, recentActivities, status
-  } = useSelector((state) => state.dashboard);
+    revenue = { total: 0, change: '0%' },
+    sales = { total: 0, change: '0%' },
+    subscriptions = { total: 0, change: '0%' },
+    activeUsers = { total: 0 },
+    chartData = [],
+    recentActivities = [],
+    status = 'idle',
+  } = dashboard;
+
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
+
     socket.on('dashboard-update', () => {
       dispatch(fetchDashboardStats());
     });
+
     return () => {
       socket.off('dashboard-update');
     };

@@ -5,6 +5,7 @@ import authReducer from './slices/authSlice';
 import cartReducer from './slices/cartSlice';
 import orderReducer from './slices/orderSlice';
 import adminReducer from './slices/adminSlice'; // <-- Pastikan ini diimpor
+import dashboardReducer from './slices/dashboardSlice';
 
 export const store = configureStore({
     reducer: {
@@ -13,5 +14,6 @@ export const store = configureStore({
         cart: cartReducer,
         orders: orderReducer,
         admin: adminReducer, // <-- Dan pastikan ini ditambahkan di sini
+        dashboard: dashboardReducer,
     },
 });

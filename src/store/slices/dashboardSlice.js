@@ -3,7 +3,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async thunk to fetch dashboard stats
 export const fetchDashboardStats = createAsyncThunk(
     'dashboard/fetchStats',
     async (_, { rejectWithValue }) => {
@@ -19,14 +18,13 @@ export const fetchDashboardStats = createAsyncThunk(
 const dashboardSlice = createSlice({
     name: 'dashboard',
     initialState: {
-        stats: {
-            revenue: { total: 0, percentageChange: 0, history: [] },
-            sales: { total: 0, percentageChange: 0 },
-            users: { newLast30Days: 0, percentageChange: 0 },
-            activeNow: 0,
-        },
+        revenue: { total: 0, change: '0%' },
+        sales: { total: 0, change: '0%' },
+        subscriptions: { total: 0, change: '0%' },
+        activeUsers: { total: 0 },
+        chartData: [],
         recentActivities: [],
-        status: 'idle', // 'idle' | 'loading' | 'succeeded' | 'failed'
+        status: 'idle',
         error: null,
     },
     reducers: {},
@@ -37,8 +35,21 @@ const dashboardSlice = createSlice({
             })
             .addCase(fetchDashboardStats.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                state.stats = action.payload;
-                state.recentActivities = action.payload.recentActivities || [];
+                const {
+                    revenue,
+                    sales,
+                    subscriptions,
+                    activeUsers,
+                    chartData,
+                    recentActivities,
+                } = action.payload;
+
+                state.revenue = revenue || { total: 0, change: '0%' };
+                state.sales = sales || { total: 0, change: '0%' };
+                state.subscriptions = subscriptions || { total: 0, change: '0%' };
+                state.activeUsers = activeUsers || { total: 0 };
+                state.chartData = chartData || [];
+                state.recentActivities = recentActivities || [];
             })
             .addCase(fetchDashboardStats.rejected, (state, action) => {
                 state.status = 'failed';
