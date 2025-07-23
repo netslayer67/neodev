@@ -30,7 +30,8 @@ import OrderDetailModal from './OrderDetailModal';
 import io from 'socket.io-client';
 
 // Inisialisasi socket.io
-const socket = io(import.meta.env.VITE_API_BASE_URL, {
+const socket = io(import.meta.env.VITE_SOCKET_URL, {
+  transports: ['websocket'],
   withCredentials: true,
 });
 
