@@ -58,21 +58,39 @@ const AdminOrdersPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
+
   useEffect(() => {
     dispatch(fetchAllOrders());
   }, [dispatch]);
 
   // Socket.IO: Dengarkan event real-time
   useEffect(() => {
+    console.log('Connecting to socket at:', import.meta.env.VITE_API_BASE_URL);
+
     const refreshOrders = () => dispatch(fetchAllOrders());
+
+    // Socket connection logs
+    socket.on('connect', () => {
+      console.log('[Socket.IO] Connected:', socket.id);
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('[Socket.IO] Connection Error:', err.message);
+    });
+
+    // Real-time update events
     socket.on('new-order', refreshOrders);
     socket.on('order-status-updated', refreshOrders);
 
+    // Cleanup
     return () => {
+      socket.off('connect');
+      socket.off('connect_error');
       socket.off('new-order', refreshOrders);
       socket.off('order-status-updated', refreshOrders);
     };
   }, [dispatch]);
+
 
   const filteredOrders = useMemo(() => {
     return allOrders
