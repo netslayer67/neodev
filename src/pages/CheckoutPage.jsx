@@ -73,7 +73,7 @@ const CheckoutPage = () => {
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
         const orderData = {
-            items: cartItems.map((item) => ({ product: item._id, quantity: item.quantity })),
+            items: cartItems.map((item) => ({ product: item._id, quantity: item.quantity, size: item.size, })),
             shippingAddress: { ...shippingAddress, fullName: user.name },
             paymentMethod,
             itemsPrice: subtotal,
@@ -258,25 +258,17 @@ const CheckoutPage = () => {
                     </motion.div>
 
                     {/* Summary */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.4 }}
-                        className="lg:col-span-2 w-full self-start lg:sticky lg:top-28"
-                    >
+                    <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="lg:col-span-2 w-full self-start lg:sticky lg:top-28">
                         <div className="w-full relative rounded-3xl p-6 sm:p-8 border border-white/10 bg-white/5 backdrop-blur-xl shadow-xl">
                             <h2 className="text-xl sm:text-2xl font-semibold mb-6">Order Summary</h2>
                             <div className="space-y-4">
                                 {cartItems.map((item) => (
-                                    <div key={item._id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                    <div key={`${item._id}-${item.size}`} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                                         <div className="flex items-start gap-4">
-                                            <img
-                                                src={item.images?.[0]?.url}
-                                                alt={item.images?.[0]?.alt}
-                                                className="w-16 h-16 object-cover rounded-lg"
-                                            />
+                                            <img src={item.images?.[0]?.url} alt={item.images?.[0]?.alt} className="w-16 h-16 object-cover rounded-lg" />
                                             <div className="flex flex-col">
                                                 <p className="font-semibold text-white leading-tight">{item.name}</p>
+                                                <p className="text-sm text-white/50">Size: {item.size}</p>
                                                 <p className="text-sm text-white/50">Qty: {item.quantity}</p>
                                                 <p className="sm:hidden font-mono font-semibold text-white mt-1">
                                                     Rp {(item.price * item.quantity).toLocaleString('id-ID')}
@@ -289,37 +281,21 @@ const CheckoutPage = () => {
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Summary Total */}
                             <div className="border-t border-white/10 my-6" />
                             <div className="space-y-3 text-sm">
-                                <div className="flex justify-between text-white/70">
-                                    <span>Subtotal</span>
-                                    <span className="font-mono">Rp {subtotal.toLocaleString('id-ID')}</span>
-                                </div>
-                                <div className="flex justify-between text-white/70">
-                                    <span>Shipping</span>
-                                    <span className="font-mono">Rp {shippingFee.toLocaleString('id-ID')}</span>
-                                </div>
+                                <div className="flex justify-between text-white/70"><span>Subtotal</span><span className="font-mono">Rp {subtotal.toLocaleString('id-ID')}</span></div>
+                                <div className="flex justify-between text-white/70"><span>Shipping</span><span className="font-mono">Rp {shippingFee.toLocaleString('id-ID')}</span></div>
                                 <AnimatePresence mode="wait">
                                     {paymentMethod === 'offline' && (
-                                        <motion.div
-                                            key="admin"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="flex justify-between text-white/70"
-                                        >
+                                        <motion.div key="admin" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-white/70">
                                             <span>Admin Fee</span>
                                             <span className="font-mono">Rp {adminFee.toLocaleString('id-ID')}</span>
                                         </motion.div>
                                     )}
                                     {paymentMethod === 'online' && (
-                                        <motion.div
-                                            key="discount"
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            exit={{ opacity: 0 }}
-                                            className="flex justify-between text-green-400"
-                                        >
+                                        <motion.div key="discount" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex justify-between text-green-400">
                                             <span>Online Discount</span>
                                             <span className="font-mono">-Rp {onlineDiscount.toLocaleString('id-ID')}</span>
                                         </motion.div>
@@ -327,22 +303,10 @@ const CheckoutPage = () => {
                                 </AnimatePresence>
                             </div>
                             <div className="border-t border-white/10 my-6" />
-                            <div className="flex justify-between font-bold text-xl">
-                                <span>Total</span>
-                                <span className="font-mono">Rp {total.toLocaleString('id-ID')}</span>
-                            </div>
-                            <Button
-                                type="submit"
-                                size="lg"
-                                disabled={activeSection !== 'payment' || orderStatus === 'loading'}
-                                className="w-full mt-8 py-5 font-bold text-lg bg-white text-black hover:bg-neutral-200 rounded-2xl transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
+                            <div className="flex justify-between font-bold text-xl"><span>Total</span><span className="font-mono">Rp {total.toLocaleString('id-ID')}</span></div>
+                            <Button type="submit" size="lg" disabled={activeSection !== 'payment' || orderStatus === 'loading'} className="w-full mt-8 py-5 font-bold text-lg bg-white text-black hover:bg-neutral-200 rounded-2xl transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                                 <Lock size={20} className="mr-2" />
-                                {orderStatus === 'loading'
-                                    ? 'Finalizing Elegance...'
-                                    : paymentMethod === 'offline'
-                                        ? 'Place Order'
-                                        : 'Pay Now'}
+                                {orderStatus === 'loading' ? 'Finalizing Elegance...' : paymentMethod === 'offline' ? 'Place Order' : 'Pay Now'}
                             </Button>
                         </div>
                     </motion.div>

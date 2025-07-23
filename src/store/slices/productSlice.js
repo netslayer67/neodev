@@ -8,15 +8,13 @@ import axios from '../../api/axios';
 
 /**
  * Mengambil daftar produk dari endpoint /products.
- * Logika filter dan paginasi sekarang diasumsikan ditangani oleh parameter query default di backend.
+ * Backend mengembalikan { success, message, data: { products, pagination } }
  */
 export const fetchProducts = createAsyncThunk(
     'products/fetchProducts',
     async (_, { rejectWithValue }) => {
         try {
             const response = await axios.get('/products');
-            // Backend mengembalikan { success, message, data: { products, pagination } }
-            // Kita kembalikan `data`-nya
             return response.data.data;
         } catch (err) {
             return rejectWithValue(err.response.data);
@@ -26,13 +24,11 @@ export const fetchProducts = createAsyncThunk(
 
 /**
  * Mengambil satu produk berdasarkan slug-nya.
- * @param {string} slug - Slug produk.
  */
 export const fetchProductBySlug = createAsyncThunk(
     'products/fetchProductBySlug',
     async (slug, { rejectWithValue }) => {
         try {
-            // Menggunakan endpoint /products/:slug dari product.route.ts
             const response = await axios.get(`/products/slug/${slug}`);
             return response.data;
         } catch (err) {
@@ -44,7 +40,6 @@ export const fetchProductBySlug = createAsyncThunk(
 /**
  * Membuat produk baru (Admin).
  * Menggunakan FormData karena ada upload gambar.
- * @param {FormData} productData - Data produk dalam bentuk FormData.
  */
 export const createProduct = createAsyncThunk(
     'products/createProduct',
@@ -63,8 +58,7 @@ export const createProduct = createAsyncThunk(
 );
 
 /**
- * Memperbarui produk yang ada (Admin).
- * @param {object} { id, productData } - ID produk dan data FormData baru.
+ * Memperbarui produk (Admin).
  */
 export const updateProduct = createAsyncThunk(
     'products/updateProduct',
@@ -84,14 +78,32 @@ export const updateProduct = createAsyncThunk(
 
 /**
  * Menghapus produk (Admin).
- * @param {string} id - ID produk yang akan dihapus.
  */
 export const deleteProduct = createAsyncThunk(
     'products/deleteProduct',
     async (id, { rejectWithValue }) => {
         try {
             await axios.delete(`/products/${id}`);
-            return id; // Kembalikan ID untuk dihapus dari state
+            return id;
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+);
+
+/**
+ * ✅ Update stok produk (khusus untuk ukuran tertentu).
+ * Biasanya dipanggil saat order/cancel.
+ */
+export const updateProductStock = createAsyncThunk(
+    'products/updateProductStock',
+    async ({ productId, size, quantity }, { rejectWithValue }) => {
+        try {
+            const response = await axios.patch(`/products/${productId}/stock`, {
+                size,
+                quantity,
+            });
+            return response.data.data; // return updated product
         } catch (err) {
             return rejectWithValue(err.response.data);
         }
@@ -99,7 +111,7 @@ export const deleteProduct = createAsyncThunk(
 );
 
 // ====================================================================
-// Product Slice - State Management
+// Product Slice - Redux State Management
 // ====================================================================
 
 const productSlice = createSlice({
@@ -118,30 +130,65 @@ const productSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Fetch All Products
+            // Fetch all products
             .addCase(fetchProducts.pending, (state) => {
                 state.status = 'loading';
             })
             .addCase(fetchProducts.fulfilled, (state, action) => {
                 state.status = 'succeeded';
-                // --- PERBAIKAN DI SINI ---
-                // Pastikan untuk mengakses data produk dan paginasi dengan benar dari payload
-                state.items = action.payload.products || []; // Fallback ke array kosong
-                state.pagination = action.payload.pagination || {}; // Fallback ke objek kosong
+                state.items = action.payload.products || [];
+                state.pagination = action.payload.pagination || {};
             })
             .addCase(fetchProducts.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload?.message || 'Failed to fetch products';
             })
-            // ... (sisa extraReducers) ...
+
+            // Fetch single product by slug
             .addCase(fetchProductBySlug.fulfilled, (state, action) => {
                 state.status = 'succeeded';
                 state.selectedProduct = action.payload.data || null;
-            });
+            })
 
+            // Update stock (real-time)
+            .addCase(updateProductStock.fulfilled, (state, action) => {
+                const updated = action.payload;
+                const index = state.items.findIndex(p => p._id === updated._id);
+                if (index !== -1) {
+                    state.items[index] = updated;
+                }
+                if (state.selectedProduct && state.selectedProduct._id === updated._id) {
+                    state.selectedProduct = updated;
+                }
+            })
+
+            // Create product
+            .addCase(createProduct.fulfilled, (state, action) => {
+                state.items.unshift(action.payload.data); // tambahkan ke awal list
+            })
+
+            // Update product
+            .addCase(updateProduct.fulfilled, (state, action) => {
+                const updated = action.payload.data;
+                const index = state.items.findIndex(p => p._id === updated._id);
+                if (index !== -1) {
+                    state.items[index] = updated;
+                }
+                if (state.selectedProduct && state.selectedProduct._id === updated._id) {
+                    state.selectedProduct = updated;
+                }
+            })
+
+            // Delete product
+            .addCase(deleteProduct.fulfilled, (state, action) => {
+                state.items = state.items.filter(p => p._id !== action.payload);
+                if (state.selectedProduct && state.selectedProduct._id === action.payload) {
+                    state.selectedProduct = null;
+                }
+            });
     },
 });
 
+// Export actions and reducer
 export const { clearSelectedProduct } = productSlice.actions;
-
 export default productSlice.reducer;

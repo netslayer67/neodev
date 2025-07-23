@@ -110,7 +110,14 @@ const CartPage = () => {
                               {item.name}
                             </h3>
                           </Link>
-                          <p className="text-sm text-white/50">Rp {item.price.toLocaleString('id-ID')}</p>
+
+                          {/* === Tampilkan Ukuran (Size) === */}
+                          <div className="flex justify-center sm:justify-start gap-2 mt-2">
+                            <span className="text-xs font-medium px-2 py-1 border border-white/10 rounded-full bg-white/10 text-white/70">
+                              Size {item.size || '-'}
+                            </span>
+                          </div>
+                          <p className="text-sm text-white/50 mt-1">Rp {item.price.toLocaleString('id-ID')}</p>
                         </div>
 
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4">
@@ -127,6 +134,7 @@ const CartPage = () => {
                           </p>
                         </div>
                       </div>
+
                     </motion.div>
                   </motion.div>
                 ))}

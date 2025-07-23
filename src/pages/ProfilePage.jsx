@@ -224,14 +224,38 @@ const ProfilePage = () => {
                                 <X size={24} />
                             </button>
                             <h3 className="text-2xl font-bold mb-1">Order #{selectedOrder.orderId}</h3>
-                            <p className="text-neutral-400 text-sm mb-4">Placed: {new Date(selectedOrder.createdAt).toLocaleString()}</p>
+                            <p className="text-neutral-400 text-sm mb-4">
+                                Placed:&nbsp;
+                                {new Intl.DateTimeFormat('id-ID', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    timeZone: 'Asia/Jakarta',
+                                }).format(new Date(selectedOrder.createdAt))}
+
+                                {' pukul '}
+                                {new Date(selectedOrder.createdAt)
+                                    .toLocaleTimeString('id-ID', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                        hour12: false,
+                                        timeZone: 'Asia/Jakarta',
+                                    })
+                                    .replace('.', ' : ')}
+                            </p>
+
                             <div className="space-y-2">
                                 {selectedOrder?.items?.map?.((item) => (
                                     <div key={item.product} className="flex justify-between text-sm">
-                                        <span>{item.name} (x{item.quantity})</span>
+                                        <span>
+                                            {item.name} &nbsp;
+                                            <span className="text-neutral-400 italic">(Size: {item.size})</span>
+                                            &nbsp;×{item.quantity}
+                                        </span>
                                         <span>Rp {(item.price * item.quantity).toLocaleString('id-ID')}</span>
                                     </div>
                                 ))}
+
                             </div>
                             <div className="mt-4 border-t border-white/10 pt-4 text-sm">
                                 <div className="flex justify-between"><span>Status:</span><span className="font-semibold">{selectedOrder.status}</span></div>

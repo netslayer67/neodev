@@ -1,7 +1,7 @@
 // src/store/slices/cartSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
-// Fungsi untuk menyimpan state ke localStorage
+// --- localStorage helpers ---
 const saveState = (state) => {
     try {
         const serializedState = JSON.stringify(state);
@@ -11,13 +11,10 @@ const saveState = (state) => {
     }
 };
 
-// Fungsi untuk memuat state dari localStorage
 const loadState = () => {
     try {
         const serializedState = localStorage.getItem('cart');
-        if (serializedState === null) {
-            return []; // Jika tidak ada, kembalikan array kosong
-        }
+        if (serializedState === null) return [];
         return JSON.parse(serializedState);
     } catch (e) {
         console.warn("Could not load cart state", e);
@@ -28,53 +25,64 @@ const loadState = () => {
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
-        cartItems: loadState(), // Muat state saat aplikasi pertama kali dibuka
+        cartItems: loadState(),
     },
     reducers: {
-        // Reducer untuk menambahkan item ke keranjang
         addToCart: (state, action) => {
-            const { product, quantity = 1 } = action.payload;
-            const existingItem = state.cartItems.find((item) => item._id === product._id);
+            const { product, quantity = 1, size } = action.payload;
+
+            // ✅ Cari berdasarkan product._id & size
+            const existingItem = state.cartItems.find(
+                (item) => item._id === product._id && item.size === size
+            );
 
             if (existingItem) {
-                // Jika item sudah ada, tambahkan kuantitasnya
                 existingItem.quantity += quantity;
             } else {
-                // Jika item baru, tambahkan ke keranjang
-                state.cartItems.push({ ...product, quantity });
+                state.cartItems.push({ ...product, quantity, size });
             }
-            saveState(state.cartItems); // Simpan perubahan ke localStorage
+
+            saveState(state.cartItems);
         },
 
-        // Reducer untuk mengurangi kuantitas item
         decreaseQuantity: (state, action) => {
-            const itemIndex = state.cartItems.findIndex((item) => item._id === action.payload._id);
+            const { _id, size } = action.payload;
 
-            if (itemIndex >= 0 && state.cartItems[itemIndex].quantity > 1) {
-                state.cartItems[itemIndex].quantity -= 1;
-            } else {
-                // Jika kuantitas 1 atau kurang, hapus item
-                state.cartItems.splice(itemIndex, 1);
+            const itemIndex = state.cartItems.findIndex(
+                (item) => item._id === _id && item.size === size
+            );
+
+            if (itemIndex >= 0) {
+                if (state.cartItems[itemIndex].quantity > 1) {
+                    state.cartItems[itemIndex].quantity -= 1;
+                } else {
+                    state.cartItems.splice(itemIndex, 1);
+                }
+                saveState(state.cartItems);
             }
-            saveState(state.cartItems);
         },
 
-        // Reducer untuk menghapus item dari keranjang
         removeFromCart: (state, action) => {
-            state.cartItems = state.cartItems.filter((item) => item._id !== action.payload._id);
+            const { _id, size } = action.payload;
+
+            state.cartItems = state.cartItems.filter(
+                (item) => !(item._id === _id && item.size === size)
+            );
             saveState(state.cartItems);
         },
 
-        // --- PENAMBAHAN DI SINI ---
-        // Reducer untuk mengosongkan seluruh keranjang
         clearCart: (state) => {
-            state.cartItems = []; // Set array item menjadi kosong
-            saveState(state.cartItems); // Perbarui localStorage juga
+            state.cartItems = [];
+            saveState(state.cartItems);
         },
     },
 });
 
-// Ekspor action creator yang baru
-export const { addToCart, decreaseQuantity, removeFromCart, clearCart } = cartSlice.actions;
+export const {
+    addToCart,
+    decreaseQuantity,
+    removeFromCart,
+    clearCart,
+} = cartSlice.actions;
 
 export default cartSlice.reducer;
