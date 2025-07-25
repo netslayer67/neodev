@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkle, Leaf, Heart } from "lucide-react";
+import { ArrowRight, Sparkle, Heart, Leaf } from "lucide-react";
 import { Scrollama, Step } from "react-scrollama";
 import clsx from "clsx";
 import CreativeTeam from "@/components/CreativeTeam";
@@ -25,82 +25,84 @@ const FluidBackground = () => {
 
 const values = [
     {
-        icon: <Sparkle className="w-8 h-8 text-white/90" />,
+        icon: <Sparkle className="w-8 h-8 text-white" />,
         title: "Refined Spirit",
-        desc: "Elegance that whispers. Our garments echo serenity through subtle strength.",
+        desc: "Every thread whispers clarity. We craft with intention, not noise.",
     },
     {
-        icon: <Heart className="w-8 h-8 text-white/90" />,
+        icon: <Heart className="w-8 h-8 text-white" />,
         title: "Human Touch",
-        desc: "Designed with warmth. Every fiber carries intentional care and ritual.",
+        desc: "Each garment is ritual. A quiet act of warmth and presence.",
     },
     {
-        icon: <Leaf className="w-8 h-8 text-white/90" />,
-        title: "Conscious Craft",
-        desc: "Sustainability is sacred. Our forms harmonize ethics and aesthetics.",
+        icon: <Leaf className="w-8 h-8 text-white" />,
+        title: "Sacred Sustainability",
+        desc: "Design in harmony. Luxury with responsibility.",
     },
 ];
 
 const timeline = [
-    { year: "2021", event: "Born in silence, Neo Dervish awakens — sacred soulwear envisioned." },
-    { year: "2022", event: "‘Whirl in Soul’ debuts — spiritual couture enters the now." },
-    { year: "2023", event: "Bridges built from Istanbul to Tokyo — global artistry in motion." },
-    { year: "2024", event: "Eco-shift at 80%. Our legacy moves gently and responsibly." },
+    { year: "2021", event: "Born in silence. Neo Dervish awakens — soulwear begins." },
+    { year: "2022", event: "‘Whirl in Soul’ debuts. Ritual garments step into the now." },
+    { year: "2023", event: "Istanbul to Tokyo. Craft transcends borders." },
+    { year: "2024", event: "Eco-shift at 80%. Legacy, redefined in care." },
 ];
 
 const AboutPage = () => {
     const [currentStep, setCurrentStep] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    const handleStepEnter = ({ data }) => setCurrentStep(data);
-
     useEffect(() => {
         const timeout = setTimeout(() => setLoading(false), 1200);
         return () => clearTimeout(timeout);
     }, []);
 
+    const handleStepEnter = ({ data }) => setCurrentStep(data);
+
     return (
-        <main className="text-white font-sans">
+        <main className="relative font-sans text-white ">
+            {/* Fluid WebGL Background */}
+            <FluidBackground />
+
             {/* HERO */}
-            <motion.section className="relative h-[100dvh] overflow-hidden px-6 flex items-center justify-center text-center">
-                <div className="absolute inset-0 z-0 bg-[url('https://images.unsplash.com/photo-1570184637811-f1c88f539275')] bg-cover bg-center scale-110" />
-                <FluidBackground />
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[6px] z-10" />
+            <motion.section className="relative min-h-[100dvh] flex items-center justify-center px-6 text-center overflow-hidden">
+                <div className="absolute inset-0 z-0 scale-110" />
+                <div className="absolute inset-0 bg-black/60 backdrop-blur-[8px] z-10" />
                 <motion.div
-                    initial={{ opacity: 0, y: 30 }}
+                    initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 1 }}
-                    className="relative z-20 max-w-3xl"
+                    transition={{ duration: 1 }}
+                    className="relative z-20 max-w-4xl"
                 >
-                    <h1 className="text-5xl md:text-7xl font-serif font-bold tracking-tight">
-                        Transcend the Fabric
+                    <h1 className="text-5xl md:text-7xl font-serif tracking-tight font-semibold">
+                        Beyond Fabric, Into Ritual
                     </h1>
-                    <p className="text-white/80 text-lg md:text-xl mt-6">
-                        Neo Dervish weaves clarity, purpose, and quiet revolution into every form.
+                    <p className="text-lg md:text-xl mt-6 text-white/80">
+                        Neo Dervish channels motion, emotion, and intention into every silhouette.
                     </p>
                 </motion.div>
             </motion.section>
 
             {/* PHILOSOPHY + VIDEO */}
             <section className="py-32 px-6 md:px-12">
-                <div className="grid md:grid-cols-12 items-center max-w-7xl mx-auto gap-12">
+                <div className="grid md:grid-cols-12 items-center max-w-7xl mx-auto gap-16">
                     <motion.div
-                        className="md:col-span-5"
+                        className="md:col-span-6"
                         initial={{ opacity: 0, x: -50 }}
                         whileInView={{ opacity: 1, x: 0 }}
                         transition={{ duration: 1 }}
                         viewport={{ once: true }}
                     >
                         <h2 className="text-4xl md:text-5xl font-serif font-semibold mb-6">
-                            Our Philosophy
+                            Philosophy
                         </h2>
-                        <p className="text-white/70 text-lg leading-relaxed">
-                            We are not a brand — we are a rhythm. Neo Dervish is revelation through form, freedom in motion.
+                        <p className="text-white/70 text-lg leading-loose">
+                            We are not a brand. We are a slow revolution. Each piece is form and flow — soul first.
                         </p>
                     </motion.div>
                     <motion.div
-                        className="md:col-span-7 relative aspect-square w-full rounded-3xl overflow-hidden border border-white/10 shadow-2xl backdrop-blur-2xl"
-                        initial={{ opacity: 0, scale: 0.95 }}
+                        className="md:col-span-6 aspect-square rounded-[3rem] border border-white/10 overflow-hidden shadow-xl backdrop-blur-xl relative"
+                        initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 1 }}
                         viewport={{ once: true }}
@@ -119,54 +121,52 @@ const AboutPage = () => {
                                 <source src={Logo} type="video/webm" />
                             </video>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     </motion.div>
                 </div>
             </section>
 
             {/* CORE VALUES */}
-            <section className="py-32 px-6 md:px-12 bg-white/5 backdrop-blur-3xl rounded-t-[3rem]">
-                <div className="max-w-7xl mx-auto">
-                    <motion.h2
-                        className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
-                    >
-                        Our Core Values
-                    </motion.h2>
-                    <div className="grid md:grid-cols-3 gap-10">
-                        {values.map((val, i) => (
-                            <motion.div
-                                key={i}
-                                className="p-8 bg-white/5 rounded-3xl border border-white/10 shadow-xl backdrop-blur-xl"
-                                initial={{ opacity: 0, y: 50 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.8, delay: i * 0.2 }}
-                            >
-                                {val.icon}
-                                <h3 className="text-2xl font-serif mt-4 mb-2">{val.title}</h3>
-                                <p className="text-white/70">{val.desc}</p>
-                            </motion.div>
-                        ))}
-                    </div>
+            <section className="py-32 px-6 md:px-12 bg-white/5 backdrop-blur-[12px] rounded-t-[3rem]">
+                <motion.h2
+                    className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
+                >
+                    Core Ethos
+                </motion.h2>
+                <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
+                    {values.map((val, i) => (
+                        <motion.div
+                            key={i}
+                            className="p-8 rounded-3xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-2xl"
+                            initial={{ opacity: 0, y: 40 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.2, duration: 0.8 }}
+                        >
+                            {val.icon}
+                            <h3 className="text-2xl font-serif mt-4 mb-2">{val.title}</h3>
+                            <p className="text-white/70">{val.desc}</p>
+                        </motion.div>
+                    ))}
                 </div>
             </section>
 
-            {/* TEAM */}
+            {/* CREATIVE TEAM */}
             <CreativeTeam />
 
             {/* TIMELINE */}
             <section className="py-32 px-6 md:px-12">
+                <motion.h2
+                    className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1 }}
+                >
+                    The Journey
+                </motion.h2>
                 <div className="max-w-4xl mx-auto">
-                    <motion.h2
-                        className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 1 }}
-                    >
-                        Our Journey
-                    </motion.h2>
                     <Scrollama onStepEnter={handleStepEnter} offset={0.6}>
                         {timeline.map((item, i) => (
                             <Step data={i} key={i}>
@@ -194,10 +194,8 @@ const AboutPage = () => {
             </section>
 
             {/* CTA */}
-            <section className="relative px-6 py-40 text-center bg-black/90 rounded-t-[2rem] overflow-hidden">
-                <div
-                    className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f')] bg-cover bg-center opacity-30 scale-110"
-                />
+            <section className="relative px-6 py-40 text-center bg-black/90 rounded-t-[3rem] overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f')] bg-cover bg-center opacity-30 scale-110" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}

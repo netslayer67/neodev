@@ -134,7 +134,6 @@ const ProfilePage = () => {
                         </div>
                     </motion.div>
                 );
-
             case 'reviews':
                 return (
                     <Review
@@ -155,6 +154,7 @@ const ProfilePage = () => {
                     <h1 className="text-5xl font-serif font-semibold">Welcome, {user?.name?.split?.(' ')[0] || 'User'}</h1>
                     <p className="text-white/60 text-lg mt-2">Manage your profile, orders, and more.</p>
                 </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                     <aside className="lg:col-span-1 space-y-2">
                         {navItems.map((item) => (
@@ -167,6 +167,7 @@ const ProfilePage = () => {
                             </button>
                         ))}
                     </aside>
+
                     <main className="lg:col-span-4">
                         <AnimatePresence mode="wait">
                             <motion.div key={activeView} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4 }}>
@@ -176,6 +177,56 @@ const ProfilePage = () => {
                     </main>
                 </div>
             </div>
+
+            {/* Order Modal */}
+            <AnimatePresence>
+                {selectedOrder && (
+                    <motion.div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-center items-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedOrder(null)}>
+                        <motion.div onClick={(e) => e.stopPropagation()} className="relative w-full max-w-lg bg-gradient-to-br from-gray-900 to-black border border-white/20 p-8 rounded-3xl text-white shadow-2xl" initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }} transition={{ duration: 0.3 }}>
+                            <button onClick={() => setSelectedOrder(null)} className="absolute top-4 right-4 text-white/40 hover:text-red-500">
+                                <X size={24} />
+                            </button>
+                            <h3 className="text-2xl font-serif font-semibold mb-1">Order #{selectedOrder.orderId}</h3>
+                            <p className="text-white/60 text-sm mb-4">
+                                Placed:&nbsp;
+                                {new Intl.DateTimeFormat('id-ID', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Jakarta' }).format(new Date(selectedOrder.createdAt))}
+                                {' pukul '}
+                                {new Date(selectedOrder.createdAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Jakarta' }).replace('.', ' : ')}
+                            </p>
+                            <div className="space-y-2">
+                                {selectedOrder?.items?.map?.((item) => (
+                                    <div key={item.product} className="flex justify-between text-sm">
+                                        <span>
+                                            {item.name} <span className="text-white/50 italic">(Size: {item.size})</span> ×{item.quantity}
+                                        </span>
+                                        <span>Rp {(item.price * item.quantity).toLocaleString('id-ID')}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="mt-4 border-t border-white/10 pt-4 text-sm">
+                                <div className="flex justify-between"><span>Status:</span><span className="font-semibold">{selectedOrder.status}</span></div>
+                                <div className="flex justify-between mt-2"><span>Total:</span><span className="font-semibold">Rp {selectedOrder.totalAmount.toLocaleString('id-ID')}</span></div>
+                            </div>
+                            {['Diproses', 'Pending Payment'].includes(selectedOrder.status) && (
+                                <Button onClick={handleCancelOrder} variant="destructive" className="w-full mt-6">
+                                    Cancel Order
+                                </Button>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Cancel Success Animation */}
+            <AnimatePresence>
+                {showCancelSuccess && (
+                    <motion.div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.5 }}>
+                        <div className="bg-green-600/90 p-6 rounded-full shadow-2xl flex items-center justify-center">
+                            <CheckCircle className="text-white" size={48} />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </motion.div>
     );
 };

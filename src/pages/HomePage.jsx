@@ -1,20 +1,22 @@
 import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { Helmet } from "react-helmet";
+import { motion } from "framer-motion";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchProducts } from "../store/slices/productSlice";
+import { Helmet } from "react-helmet";
+import { ArrowRight } from "lucide-react";
 
+import { fetchProducts } from "../store/slices/productSlice";
 import ProductCard from "@/components/ProductCard";
 import PageLoader from "@/components/PageLoader";
 import CustomerReviews from "@/components/CustomerReviews";
 import LookbookSection from "@/components/LookbookSection";
 import ManifestoSection from "@/components/ManifestoSection";
 import CTASection from "@/components/CTASection";
+import { Button } from "@/components/ui/button";
 
 import Vid from "../assets/vid.mp4";
-import { Button } from "@/components/ui/button";
+
+const shimmer = "animate-pulse bg-gradient-to-r from-neutral-800 via-neutral-700 to-neutral-800";
 
 const HomePage = () => {
   const dispatch = useDispatch();
@@ -25,53 +27,47 @@ const HomePage = () => {
     if (products.length === 0) dispatch(fetchProducts());
   }, [dispatch, products.length]);
 
-  const { scrollYProgress } = useScroll();
-  const parallax = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
-
   return (
     <motion.main
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.6 }}
-      className="bg-gradient-to-br from-black via-neutral-950 to-black text-white font-sans antialiased overflow-x-hidden"
+      transition={{ duration: 0.8 }}
+      className="bg-gradient-to-br from-neutral-950 via-black to-neutral-900 text-white font-sans antialiased"
     >
       <Helmet>
-        <title>Neo Dervish — Where Soul Meets Style</title>
-        <meta name="description" content="Luxury streetwear infused with soul and movement. Discover the void." />
+        <title>Neo Dervish — Soul Meets Style</title>
+        <meta name="description" content="Luxury streetwear infused with soul and movement." />
         <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@400;500;700&display=swap" rel="stylesheet" />
       </Helmet>
 
-      {/* HERO */}
-      <section className="relative h-[100dvh] flex items-center justify-center text-center overflow-hidden">
+      {/* HERO VIDEO */}
+      <section className="relative w-full h-[100dvh] overflow-hidden flex items-center justify-center text-center">
         <motion.video
           src={Vid}
           autoPlay
-          muted
           loop
+          muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ y: parallax }}
         />
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-md z-0" />
-
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm z-10" />
         <motion.div
-          className="relative z-10 px-6 max-w-3xl space-y-6"
-          initial={{ y: 50, opacity: 0 }}
+          className="z-20 px-6 max-w-2xl space-y-6"
+          initial={{ y: 40, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3, duration: 1 }}
+          transition={{ duration: 1 }}
         >
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif font-bold tracking-tight leading-tight">
+          <h1 className="text-5xl md:text-7xl font-serif font-bold tracking-tight leading-[1.2]">
             NEO DERVISH
           </h1>
-          <p className="text-xl sm:text-2xl text-white/70 italic">“In Soul We Move.”</p>
+          <p className="text-xl md:text-2xl text-white/70 italic">“In Soul We Move.”</p>
           <Button
             asChild
             size="lg"
-            className="bg-white text-black font-semibold px-8 py-4 rounded-full transition hover:scale-105 hover:bg-neutral-200"
+            className="bg-white/90 text-black font-semibold px-8 py-4 rounded-full hover:bg-white transition-all"
           >
             <Link to="/shop" className="flex items-center group gap-2">
-              Explore The Void
+              Explore the Void
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>
@@ -79,29 +75,40 @@ const HomePage = () => {
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section className="py-28 px-6 md:px-12 backdrop-blur-xl border-y border-white/10 bg-black/30">
+      <section className="py-24 px-6 md:px-16 bg-black/10 backdrop-blur-xl border-t border-white/10">
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center max-w-xl mx-auto mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-serif font-semibold mb-3">Latest Drops</h2>
-          <p className="text-white/60 text-lg">Curated for motion. Designed for spirit.</p>
+          <h2 className="text-4xl md:text-5xl font-serif font-semibold mb-4">Latest Drops</h2>
+          <p className="text-white/60 text-lg">Where movement meets material.</p>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
-          {productStatus === "loading" && <PageLoader />}
+          {productStatus === "loading" &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl p-6 space-y-4"
+              >
+                <div className={`w-full h-64 rounded-xl ${shimmer}`} />
+                <div className={`w-3/4 h-5 rounded ${shimmer}`} />
+                <div className={`w-1/2 h-4 rounded ${shimmer}`} />
+              </div>
+            ))}
+
           {productStatus === "succeeded" &&
             featuredProducts.map((product, i) => (
               <motion.div
                 key={product._id}
-                className="rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 p-4 hover:scale-[1.02] transition-transform shadow-lg"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.2, duration: 0.8 }}
+                transition={{ duration: 0.8, delay: i * 0.2 }}
                 viewport={{ once: true }}
+                className="rounded-3xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-xl hover:scale-[1.02] transition-transform"
               >
                 <ProductCard product={product} index={i} />
               </motion.div>
@@ -115,7 +122,7 @@ const HomePage = () => {
       {/* MANIFESTO */}
       <ManifestoSection />
 
-      {/* REVIEWS */}
+      {/* CUSTOMER REVIEWS */}
       <CustomerReviews />
 
       {/* CTA */}
