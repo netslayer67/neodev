@@ -5,11 +5,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { fetchProducts } from '@/store/slices/productSlice';
-import { ShoppingCart, Sun, Moon } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 import PageLoader from '@/components/PageLoader';
 
-const categories = ['All', 'Hoodies', 'T-Shirts', 'Pants', 'Jackets', 'Accessories'];
 
 export default function ShopPage() {
   const dispatch = useDispatch();
@@ -55,26 +53,6 @@ export default function ShopPage() {
             <p className="text-neutral-400 mt-2">Modern fashion crafted for timeless presence.</p>
           </div>
         </div>
-
-        {/* Category Filters */}
-        <div className="mt-10 flex flex-wrap gap-3">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => {
-                setActiveCategory(cat);
-                setPage(1);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className={`relative px-4 py-2 rounded-full text-sm font-medium border transition-all duration-300 backdrop-blur-md ${activeCategory === cat
-                ? 'bg-white/10 text-white border-gold-500 shadow-[0_0_10px_rgba(255,215,0,0.25)]'
-                : 'bg-neutral-800/30 text-neutral-400 border-transparent hover:text-white hover:border-neutral-600'
-                }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Product Grid */}
@@ -100,10 +78,11 @@ export default function ShopPage() {
               transition={{ type: 'spring', stiffness: 200, damping: 20 }}
               className="bg-white/5 backdrop-blur-md rounded-xl p-4 shadow-xl transition-all duration-500 border border-white/10 hover:shadow-2xl group"
             >
-              <ProductCard product={product} />
+              <ProductCard product={product} index={i} />
             </motion.div>
           );
         })}
+
       </motion.div>
 
       {/* Loader */}

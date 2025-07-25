@@ -109,7 +109,7 @@ const ManifestoSection = () => {
                 />
 
                 <AnimatedText
-                    text="More than fashion — RADIANT is a canvas for the soul. A bold expression of inner truth through modern design, crafted for those who move with purpose."
+                    text="More than fashion — NEO DERVISH is a canvas for the soul. A bold expression of inner truth through modern design, crafted for those who move with purpose."
                     el="p"
                     className="text-lg md:text-xl text-white/80 font-light leading-relaxed max-w-prose mx-auto"
                 />

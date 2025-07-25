@@ -88,13 +88,16 @@ const ProductDetailPage = () => {
       return;
     }
 
-    dispatch(addToCart({ product, quantity, size: selectedSize }));
+    // ✅ Pass size into the product object
+    dispatch(addToCart({ product: { ...product, size: selectedSize }, quantity }));
+
     toast({
       title: '🛒 Added to Cart',
       description: `${quantity} x ${product.name} (Size ${selectedSize}) added.`,
       className: 'bg-black border border-white/10 text-white',
     });
   };
+
 
   if (status === 'loading') return <PageLoader />;
   if (status === 'failed' || !product) {
@@ -116,7 +119,7 @@ const ProductDetailPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="bg-gradient-to-br from-zinc-950 via-neutral-900 to-zinc-950 text-white min-h-screen pt-24 pb-32 font-sans"
+      className="text-white min-h-screen pt-24 pb-32 font-sans"
     >
       <Helmet>
         <title>{product.name} - Neo Dervish</title>

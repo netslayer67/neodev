@@ -27,7 +27,7 @@ const CartPage = () => {
   const total = subtotal + shipping;
 
   const handleRemoveItem = (item) => dispatch(removeFromCart(item));
-  const handleIncreaseQuantity = (item) => dispatch(addToCart({ product: item, quantity: 1 }));
+  const handleIncreaseQuantity = (item) => dispatch(addToCart({ product: { ...item, size: item.size }, quantity: 1 }));
   const handleDecreaseQuantity = (item) => dispatch(decreaseQuantity(item));
 
   return (

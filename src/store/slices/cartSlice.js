@@ -29,9 +29,9 @@ const cartSlice = createSlice({
     },
     reducers: {
         addToCart: (state, action) => {
-            const { product, quantity = 1, size } = action.payload;
+            const { product, quantity = 1 } = action.payload;
+            const size = product.size;
 
-            // ✅ Cari berdasarkan product._id & size
             const existingItem = state.cartItems.find(
                 (item) => item._id === product._id && item.size === size
             );
@@ -39,7 +39,11 @@ const cartSlice = createSlice({
             if (existingItem) {
                 existingItem.quantity += quantity;
             } else {
-                state.cartItems.push({ ...product, quantity, size });
+                state.cartItems.push({
+                    ...product,
+                    quantity,
+                    size,
+                });
             }
 
             saveState(state.cartItems);
@@ -58,6 +62,7 @@ const cartSlice = createSlice({
                 } else {
                     state.cartItems.splice(itemIndex, 1);
                 }
+
                 saveState(state.cartItems);
             }
         },
@@ -68,6 +73,7 @@ const cartSlice = createSlice({
             state.cartItems = state.cartItems.filter(
                 (item) => !(item._id === _id && item.size === size)
             );
+
             saveState(state.cartItems);
         },
 
