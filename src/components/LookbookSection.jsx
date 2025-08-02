@@ -42,7 +42,7 @@ const galleryItems = [
 
 const GalleryCard = ({ item, index, loaded }) => (
     <motion.div
-        className="relative rounded-3xl overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 shadow-[inset_0_0_0.5px_white/10] group snap-center w-[85vw] sm:w-[55vw] lg:w-[30vw] h-[80vh] flex-shrink-0 transition-transform hover:scale-[1.015]"
+        className="relative rounded-3xl overflow-hidden backdrop-blur-xl bg-white/5 border border-white/10 shadow-[inset_0_0_0.5px_white/10] group snap-center w-[85vw] sm:w-[55vw] lg:w-[30vw] h-[60vh] md:h-[80vh] flex-shrink-0 transition-transform hover:scale-[1.015]"
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.2, duration: 0.9, ease: 'easeOut' }}
@@ -111,11 +111,12 @@ const LookbookSection = () => {
 
                 {/* Horizontal Gallery */}
                 <motion.div
-                    className="flex gap-8 overflow-x-auto px-4 md:px-0 snap-x snap-mandatory scroll-smooth"
+                    className="flex gap-8 overflow-x-auto overflow-y-hidden px-4 md:px-0 snap-x snap-mandatory scroll-smooth"
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
                 >
+
                     {galleryItems.map((item, index) => (
                         <GalleryCard key={item.id} item={item} index={index} loaded={loaded} />
                     ))}

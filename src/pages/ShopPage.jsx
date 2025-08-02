@@ -7,13 +7,12 @@ import { motion } from 'framer-motion';
 import { fetchProducts } from '@/store/slices/productSlice';
 import ProductCard from '@/components/ProductCard';
 import PageLoader from '@/components/PageLoader';
-
+import { Sparkles } from 'lucide-react';
 
 export default function ShopPage() {
   const dispatch = useDispatch();
   const [activeCategory, setActiveCategory] = useState('All');
   const [page, setPage] = useState(1);
-  const [darkMode, setDarkMode] = useState(true);
   const observer = useRef(null);
 
   const { items: products, pagination, status } = useSelector((state) => state.products);
@@ -36,24 +35,33 @@ export default function ShopPage() {
     [status, pagination]
   );
 
-  const toggleDarkMode = () => setDarkMode((prev) => !prev);
-
   return (
-    <div className={`${darkMode ? 'bg-gradient-to-br from-black via-gray-900 to-black text-white' : 'bg-neutral-100 text-neutral-900'} transition-colors duration-700`}>
+    <div className="bg-gradient-to-br from-black via-gray-900 to-black min-h-screen text-white transition-colors duration-700">
       <Helmet>
         <title>Shop — Premium Collection</title>
         <meta name="description" content="Explore our exclusive luxury collection crafted with elegance and detail." />
       </Helmet>
 
-      {/* Header */}
-      <div className="relative pt-32 pb-16 px-6 lg:px-24">
-        <div className="flex justify-between items-center flex-wrap gap-4">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold tracking-tight">The Luxe Collection</h1>
-            <p className="text-neutral-400 mt-2">Modern fashion crafted for timeless presence.</p>
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-24">
+        <motion.div
+          initial={{ opacity: 0, y: 60 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+          className="max-w-4xl mx-auto text-center"
+        >
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-br from-white to-neutral-300">
+            Curated For Elegance
+          </h1>
+          <p className="mt-4 text-neutral-400 max-w-xl mx-auto text-sm sm:text-base font-light">
+            Discover refined pieces handpicked for modern icons. Elevated essentials, effortless luxury.
+          </p>
+          <div className="mt-6 flex justify-center items-center gap-3">
+            <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
+            <span className="text-xs uppercase tracking-widest text-yellow-400">Luxe Edition</span>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </section>
 
       {/* Product Grid */}
       <motion.div
@@ -63,37 +71,42 @@ export default function ShopPage() {
           hidden: { opacity: 0 },
           visible: {
             opacity: 1,
-            transition: { staggerChildren: 0.1 },
+            transition: { staggerChildren: 0.08 },
           },
         }}
-        className="px-6 lg:px-24 pb-24 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"
+        className="px-4 sm:px-6 lg:px-24 pb-24 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
-        {products.map((product, i) => {
+        {status === 'loading' && Array.from({ length: 8 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 aspect-[4/5] animate-pulse"
+          >
+            <div className="w-full h-4/5 bg-neutral-800 rounded mb-4 shimmer" />
+            <div className="h-4 w-3/4 bg-neutral-700 rounded mb-2 shimmer" />
+            <div className="h-3 w-1/2 bg-neutral-700 rounded shimmer" />
+          </motion.div>
+        ))}
+
+        {status !== 'loading' && products.map((product, i) => {
           const ref = i === products.length - 1 ? lastProductElementRef : null;
           return (
             <motion.div
               key={product._id}
               ref={ref}
-              whileHover={{ scale: 1.03, rotateX: 2, rotateY: -2 }}
-              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-              className="bg-white/5 backdrop-blur-md rounded-xl p-4 shadow-xl transition-all duration-500 border border-white/10 hover:shadow-2xl group"
+              whileHover={{ scale: 1.02 }}
+              transition={{ type: 'spring', stiffness: 180, damping: 20 }}
             >
               <ProductCard product={product} index={i} />
             </motion.div>
           );
         })}
-
       </motion.div>
 
-      {/* Loader */}
-      {status === 'loading' && (
-        <div className="flex justify-center py-10">
-          <PageLoader />
-        </div>
-      )}
-
+      {/* End Collection Notice */}
       {status === 'succeeded' && pagination.currentPage >= pagination.totalPages && (
-        <div className="text-center text-neutral-400 mt-12">You’ve reached the end of the collection.</div>
+        <div className="text-center text-neutral-500 mt-12 text-sm tracking-widest uppercase">
+          You’ve reached the end of the collection.
+        </div>
       )}
     </div>
   );

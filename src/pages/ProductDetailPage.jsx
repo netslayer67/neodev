@@ -132,34 +132,31 @@ const ProductDetailPage = () => {
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* GALLERY */}
-          <div className="space-y-6">
-            <div className="flex gap-3 overflow-x-auto scrollbar-hide">
+          <div className="space-y-4">
+            <div className="rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_4px_60px_rgba(255,255,255,0.05)]">
+              <motion.img
+                key={selectedImage?.url}
+                src={selectedImage?.url}
+                alt={product.name}
+                initial={{ opacity: 0.3, scale: 1.05 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5 }}
+                className="object-cover w-full h-auto"
+              />
+            </div>
+            <div className="flex gap-2 overflow-x-auto scrollbar-hide">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(img)}
-                  className={`rounded-xl border-2 transition ${selectedImage === img
+                  className={`w-20 h-20 rounded-xl border transition ${selectedImage?.url === img.url
                     ? 'border-white'
                     : 'border-white/20 hover:border-white/40'
                     }`}
                 >
-                  <img src={img.url} alt={img.alt || `thumb-${idx}`} className="w-20 h-20 object-cover rounded-lg" loading="lazy" />
+                  <img src={img.url} alt={`thumb-${idx}`} className="rounded-xl object-cover w-full h-full" />
                 </button>
               ))}
-            </div>
-            <div className="relative rounded-3xl overflow-hidden border border-white/10 backdrop-blur-2xl bg-white/5 shadow-[0_4px_40px_rgba(255,255,255,0.05)]">
-              <AnimatePresence mode="wait">
-                <motion.img
-                  key={selectedImage?.url}
-                  src={selectedImage?.url}
-                  alt={selectedImage?.alt || product.name}
-                  initial={{ opacity: 0.4, scale: 1.02 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0.4, scale: 1.01 }}
-                  transition={{ duration: 0.5 }}
-                  className="w-full object-cover rounded-3xl"
-                />
-              </AnimatePresence>
             </div>
           </div>
 
