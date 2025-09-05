@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { fadeIn } from '@/lib/motion';
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import { Star, MessageSquare, ShoppingBag } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const StarRating = ({ rating, setRating }) => {
     return (
-        <div className="flex gap-2">
+        <div className="flex gap-3">
             {[1, 2, 3, 4, 5].map((star) => (
                 <motion.div
                     key={star}
@@ -18,9 +17,11 @@ const StarRating = ({ rating, setRating }) => {
                     whileTap={{ scale: 0.9 }}
                 >
                     <Star
-                        size={30}
+                        size={28}
                         onClick={() => setRating(star)}
-                        className={`cursor-pointer transition-colors duration-300 ${star <= rating ? 'text-yellow-400 fill-yellow-400' : 'text-white/30'
+                        className={`cursor-pointer transition-colors duration-300 ${star <= rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-white/30"
                             }`}
                     />
                 </motion.div>
@@ -31,79 +32,99 @@ const StarRating = ({ rating, setRating }) => {
 
 const ReviewManager = ({ products, onSubmit }) => {
     const { user } = useSelector((state) => state.auth);
-    const [productId, setProductId] = useState(products?.[0]?._id || '');
+    const [productId, setProductId] = useState(products?.[0]?._id || "");
     const [rating, setRating] = useState(0);
-    const [comment, setComment] = useState('');
+    const [comment, setComment] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
         if (!productId || rating === 0 || !comment) return;
         onSubmit({ productId, rating, comment });
         setRating(0);
-        setComment('');
+        setComment("");
     };
 
     return (
         <motion.div
-            variants={fadeIn('up')}
-            initial="hidden"
-            animate="show"
-            className="bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-3xl p-8 md:p-10 backdrop-blur-2xl shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] text-white space-y-6"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="relative bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47] to-[#0F0F1A] rounded-3xl p-6 sm:p-10 text-white shadow-xl border border-white/10 backdrop-blur-2xl"
         >
-            <h2 className="text-3xl font-serif font-semibold tracking-tight">Leave a Product Review</h2>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Decorative Blobs */}
+            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#8A5CF6]/30 rounded-full blur-3xl animate-pulse" />
+            <div className="absolute bottom-0 right-0 w-56 h-56 bg-[#8A5CF6]/20 rounded-full blur-3xl animate-pulse" />
+
+            <div className="relative space-y-6">
                 <div>
-                    <Label className="text-white/60 mb-1 block text-sm">Your Name</Label>
-                    <Input
-                        value={user?.name || ''}
-                        readOnly
-                        className="bg-white/10 text-white/80 border border-white/10 rounded-xl"
-                    />
+                    <h2 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
+                        <MessageSquare className="text-[#8A5CF6]" size={26} />
+                        Leave a Review
+                    </h2>
+                    <p className="text-white/60 text-sm mt-1">
+                        Quick feedback helps us grow better 🚀
+                    </p>
                 </div>
 
-                <div>
-                    <Label htmlFor="product" className="text-white/60 mb-1 block text-sm">Product</Label>
-                    <select
-                        id="product"
-                        value={productId}
-                        onChange={(e) => setProductId(e.target.value)}
-                        className="w-full p-3 rounded-xl bg-white/10 text-white/90 border border-white/10 backdrop-blur-sm"
-                    >
-                        {products.map((p) => (
-                            <option key={p._id} value={p._id} className="bg-zinc-900 text-white">
-                                {p.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* Name */}
+                    <div>
+                        <Label className="text-white/70 mb-1 block text-sm">Your Name</Label>
+                        <Input
+                            value={user?.name || ""}
+                            readOnly
+                            className="bg-white/10 text-white/90 border border-white/10 rounded-xl backdrop-blur-sm"
+                        />
+                    </div>
 
-                <div>
-                    <Label className="text-white/60 mb-1 block text-sm">Rating</Label>
-                    <StarRating rating={rating} setRating={setRating} />
-                </div>
+                    {/* Product Select */}
+                    <div>
+                        <Label className="text-white/70 mb-1 block text-sm flex items-center gap-2">
+                            <ShoppingBag size={16} className="text-[#8A5CF6]" /> Product
+                        </Label>
+                        <select
+                            value={productId}
+                            onChange={(e) => setProductId(e.target.value)}
+                            className="w-full p-3 rounded-xl bg-white/10 text-white/90 border border-white/10 backdrop-blur-sm focus:outline-none"
+                        >
+                            {products.map((p) => (
+                                <option key={p._id} value={p._id} className="bg-[#0F0F1A]">
+                                    {p.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div>
-                    <Label htmlFor="comment" className="text-white/60 mb-1 block text-sm">Comment</Label>
-                    <Textarea
-                        id="comment"
-                        rows={5}
-                        placeholder="Share your thoughts about the product..."
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        className="bg-white/10 text-white/90 border border-white/10 rounded-xl backdrop-blur-md"
-                        required
-                    />
-                </div>
+                    {/* Rating */}
+                    <div>
+                        <Label className="text-white/70 mb-1 block text-sm">Rating</Label>
+                        <StarRating rating={rating} setRating={setRating} />
+                    </div>
 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                    <Button
-                        type="submit"
-                        className="w-full py-4 text-lg font-semibold rounded-xl bg-white text-black hover:bg-white/90"
-                    >
-                        Kirim Review
-                    </Button>
-                </motion.div>
-            </form>
+                    {/* Comment */}
+                    <div>
+                        <Label className="text-white/70 mb-1 block text-sm">Comment</Label>
+                        <Textarea
+                            rows={4}
+                            placeholder="Share a quick thought..."
+                            value={comment}
+                            onChange={(e) => setComment(e.target.value)}
+                            className="bg-white/10 text-white/90 border border-white/10 rounded-xl backdrop-blur-md"
+                            required
+                        />
+                    </div>
+
+                    {/* Submit */}
+                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                        <Button
+                            type="submit"
+                            className="w-full py-3 text-lg font-semibold rounded-xl bg-[#8A5CF6] text-white hover:bg-[#7a4ee3] transition-colors"
+                        >
+                            Submit Review
+                        </Button>
+                    </motion.div>
+                </form>
+            </div>
         </motion.div>
     );
 };

@@ -6,7 +6,6 @@ import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { fetchProducts } from '@/store/slices/productSlice';
 import ProductCard from '@/components/ProductCard';
-import PageLoader from '@/components/PageLoader';
 import { Sparkles } from 'lucide-react';
 
 export default function ShopPage() {
@@ -36,29 +35,33 @@ export default function ShopPage() {
   );
 
   return (
-    <div className="bg-gradient-to-br from-black via-gray-900 to-black min-h-screen text-white transition-colors duration-700">
+    <div className="relative min-h-screen text-white bg-[#0F0F1A] overflow-hidden">
       <Helmet>
         <title>Shop — Premium Collection</title>
-        <meta name="description" content="Explore our exclusive luxury collection crafted with elegance and detail." />
+        <meta name="description" content="Discover our premium collection — refined, timeless, effortless." />
       </Helmet>
 
+      {/* 🔮 Blobs Background */}
+      <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#8A5CF6]/30 rounded-full mix-blend-screen filter blur-3xl animate-pulse" />
+      <div className="absolute top-1/2 -right-32 w-[28rem] h-[28rem] bg-[#1E2A47]/40 rounded-full mix-blend-overlay filter blur-3xl animate-ping" />
+
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-24">
+      <section className="relative pt-28 pb-16 px-4 sm:px-6 lg:px-24">
         <motion.div
-          initial={{ opacity: 0, y: 60 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           className="max-w-4xl mx-auto text-center"
         >
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-br from-white to-neutral-300">
-            Curated For Elegance
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-neutral-300">
+            Curated for Icons
           </h1>
-          <p className="mt-4 text-neutral-400 max-w-xl mx-auto text-sm sm:text-base font-light">
-            Discover refined pieces handpicked for modern icons. Elevated essentials, effortless luxury.
+          <p className="mt-3 text-neutral-400 max-w-md mx-auto text-sm sm:text-base">
+            Timeless pieces. Effortless style.
           </p>
-          <div className="mt-6 flex justify-center items-center gap-3">
-            <Sparkles className="w-4 h-4 text-yellow-400 animate-pulse" />
-            <span className="text-xs uppercase tracking-widest text-yellow-400">Luxe Edition</span>
+          <div className="mt-5 flex justify-center items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#8A5CF6] animate-pulse" />
+            <span className="text-xs uppercase tracking-widest text-[#8A5CF6]">Luxe Edition</span>
           </div>
         </motion.div>
       </section>
@@ -74,39 +77,46 @@ export default function ShopPage() {
             transition: { staggerChildren: 0.08 },
           },
         }}
-        className="px-4 sm:px-6 lg:px-24 pb-24 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+        className="px-4 sm:px-6 lg:px-24 pb-20 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
       >
-        {status === 'loading' && Array.from({ length: 8 }).map((_, i) => (
-          <motion.div
-            key={i}
-            className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 aspect-[4/5] animate-pulse"
-          >
-            <div className="w-full h-4/5 bg-neutral-800 rounded mb-4 shimmer" />
-            <div className="h-4 w-3/4 bg-neutral-700 rounded mb-2 shimmer" />
-            <div className="h-3 w-1/2 bg-neutral-700 rounded shimmer" />
-          </motion.div>
-        ))}
-
-        {status !== 'loading' && products.map((product, i) => {
-          const ref = i === products.length - 1 ? lastProductElementRef : null;
-          return (
+        {status === 'loading' &&
+          Array.from({ length: 8 }).map((_, i) => (
             <motion.div
-              key={product._id}
-              ref={ref}
-              whileHover={{ scale: 1.02 }}
-              transition={{ type: 'spring', stiffness: 180, damping: 20 }}
+              key={i}
+              className="rounded-xl border border-white/10 bg-white/5 backdrop-blur-md p-4 aspect-[4/5] animate-pulse"
             >
-              <ProductCard product={product} index={i} />
+              <div className="w-full h-4/5 bg-neutral-800 rounded mb-3" />
+              <div className="h-4 w-3/4 bg-neutral-700 rounded mb-2" />
+              <div className="h-3 w-1/2 bg-neutral-700 rounded" />
             </motion.div>
-          );
-        })}
+          ))}
+
+        {status !== 'loading' &&
+          products.map((product, i) => {
+            const ref = i === products.length - 1 ? lastProductElementRef : null;
+            return (
+              <motion.div
+                key={product._id}
+                ref={ref}
+                whileHover={{ scale: 1.03 }}
+                transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+                className="rounded-2xl bg-[#1E2A47]/20 backdrop-blur-lg border border-white/10 hover:border-[#8A5CF6]/50 transition"
+              >
+                <ProductCard product={product} index={i} />
+              </motion.div>
+            );
+          })}
       </motion.div>
 
-      {/* End Collection Notice */}
+      {/* End Collection */}
       {status === 'succeeded' && pagination.currentPage >= pagination.totalPages && (
-        <div className="text-center text-neutral-500 mt-12 text-sm tracking-widest uppercase">
-          You’ve reached the end of the collection.
-        </div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-neutral-500 mb-16 text-sm tracking-wide"
+        >
+          You’ve reached the end.
+        </motion.div>
       )}
     </div>
   );

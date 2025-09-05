@@ -1,34 +1,68 @@
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+'use client';
+
+import React, { useMemo } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, decreaseQuantity, removeFromCart } from '../store/slices/cartSlice';
 import { Button } from '@/components/ui/button';
-import { X, Plus, Minus, ArrowRight, ShoppingCart, MoveHorizontal } from 'lucide-react';
-import { pageTransition, fadeIn, staggerContainer } from '@/lib/motion';
+import {
+  X,
+  Plus,
+  Minus,
+  ArrowRight,
+  ShoppingCart,
+  MoveHorizontal,
+  Trash2,
+} from 'lucide-react';
+import { pageTransition } from '@/lib/motion';
 
-const IconBtn = ({ icon: Icon, onClick, className = '' }) => (
+/* ---------- Small helpers ---------- */
+const formatIDR = (n) => `Rp ${Number(n || 0).toLocaleString('id-ID')}`;
+
+/* Accessible icon button */
+const IconBtn = ({ icon: Icon, onClick, label, className = '', disabled }) => (
   <Button
+    type="button"
     variant="ghost"
     size="icon"
+    aria-label={label}
+    title={label}
     onClick={onClick}
-    className={`h-10 w-10 rounded-full transition-all hover:scale-110 active:scale-95 ${className}`}
+    disabled={disabled}
+    className={`h-10 w-10 rounded-full transition-all hover:scale-110 active:scale-95 focus-visible:ring-2 focus-visible:ring-[#8A5CF6] ${className}`}
   >
-    <Icon size={18} />
+    <Icon size={18} aria-hidden="true" />
   </Button>
 );
 
+/* ---------- Page ---------- */
 const CartPage = () => {
   const dispatch = useDispatch();
-  const { cartItems } = useSelector(state => state.cart);
-  const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const shipping = cartItems.length > 0 ? 15000 : 0;
-  const total = subtotal + shipping;
+  const { cartItems } = useSelector((s) => s.cart);
+  const shouldReduceMotion = useReducedMotion();
 
-  const handleRemoveItem = (item) => dispatch(removeFromCart(item));
-  const handleIncreaseQuantity = (item) => dispatch(addToCart({ product: { ...item, size: item.size }, quantity: 1 }));
-  const handleDecreaseQuantity = (item) => dispatch(decreaseQuantity(item));
+  const { subtotal, shipping, total } = useMemo(() => {
+    const sub = cartItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
+    const ship = cartItems.length > 0 ? 15000 : 0;
+    return { subtotal: sub, shipping: ship, total: sub + ship };
+  }, [cartItems]);
+
+  const handleRemove = (item) => dispatch(removeFromCart(item));
+  const inc = (item) => dispatch(addToCart({ product: { ...item, size: item.size }, quantity: 1 }));
+  const dec = (item) => dispatch(decreaseQuantity(item));
+
+  /* Motion variants */
+  const listVariants = {
+    hidden: { opacity: 0, y: 30 },
+    show: (i = 1) => ({
+      opacity: 1,
+      y: 0,
+      transition: { delay: shouldReduceMotion ? 0 : i * 0.04, type: 'spring', stiffness: 220, damping: 22 },
+    }),
+    exit: { opacity: 0, y: 30, transition: { duration: 0.2 } },
+  };
 
   return (
     <motion.div
@@ -36,178 +70,225 @@ const CartPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black text-white pt-32 pb-28 px-4 sm:px-6 lg:px-10 font-sans"
+      className="relative min-h-screen text-white pt-24 pb-28"
+      style={{
+        background:
+          'radial-gradient(1200px 600px at 10% -10%, rgba(138,92,246,0.12), transparent 60%), linear-gradient(180deg, #0F0F1A 10%, #1E2A47 120%)',
+      }}
     >
       <Helmet>
-        <title>Cart - Neo Dervish</title>
+        <title>Cart — Neo Dervish</title>
+        <meta name="description" content="Review your picks. Smooth checkout, premium feel." />
       </Helmet>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="show"
-        className="max-w-7xl mx-auto"
-      >
-        <motion.div variants={fadeIn('down')} className="text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-serif tracking-tight">Your Cart</h1>
-          <p className="text-neutral-400 mt-4 text-lg">Refined choices, curated just for you.</p>
-        </motion.div>
+      {/* Decorative blobs */}
+      <div aria-hidden="true" className="pointer-events-none">
+        <div className="absolute -top-24 -left-20 h-64 w-64 rounded-full blur-3xl opacity-70"
+          style={{ background: 'radial-gradient(circle at 30% 30%, rgba(138,92,246,0.35), transparent 60%)' }} />
+        <div className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full blur-3xl opacity-60"
+          style={{ background: 'radial-gradient(circle at 70% 70%, rgba(30,42,71,0.6), transparent 55%)' }} />
+        {/* soft grid pattern */}
+        <div className="absolute inset-0 opacity-[0.06] mix-blend-overlay"
+          style={{
+            backgroundImage: 'radial-gradient(#fff 0.6px, transparent 0.6px)',
+            backgroundSize: '18px 18px'
+          }} />
+      </div>
 
+      <div className="relative z-10 mx-auto w-full max-w-7xl px-4 sm:px-6">
+        {/* Header */}
+        <div className="mb-8 sm:mb-12 text-center">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-serif tracking-tight">Your Cart</h1>
+          <p className="mt-2 text-sm sm:text-base text-white/60">Good taste. Keep it going.</p>
+        </div>
+
+        {/* Content */}
         {cartItems.length > 0 ? (
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-12">
-            {/* Cart Items */}
-            <div className="xl:col-span-2 space-y-8">
-              <AnimatePresence>
-                {cartItems.map(item => (
+          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 lg:gap-10">
+            {/* Items */}
+            <div className="xl:col-span-2 space-y-4 sm:space-y-6">
+              <AnimatePresence initial={false}>
+                {cartItems.map((item, idx) => (
                   <motion.div
-                    key={item._id}
-                    layout
-                    initial={{ opacity: 0, y: 60 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 60 }}
-                    transition={{ duration: 0.5, type: 'spring' }}
+                    key={`${item._id}-${item.size}`}
+                    custom={idx}
+                    initial="hidden"
+                    animate="show"
+                    exit="exit"
+                    variants={listVariants}
                   >
                     <motion.div
                       drag="x"
                       dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.2}
-                      onDragEnd={(e, info) => {
-                        if (info.offset.x < -100) handleRemoveItem(item);
+                      dragElastic={0.18}
+                      onDragEnd={(_, info) => {
+                        if (info.offset.x < -120) handleRemove(item);
                       }}
-                      className="relative bg-white/5 backdrop-blur-xl border border-white/10 p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-4 shadow-xl"
+                      className="relative flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6
+                                 rounded-3xl p-5 sm:p-6
+                                 border border-white/10 shadow-[0_8px_40px_rgba(0,0,0,0.3)]
+                                 bg-[rgba(255,255,255,0.06)] backdrop-blur-xl"
                     >
-                      {/* Swipe Hint (mobile only) */}
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 sm:hidden flex items-center text-white/30 text-xs gap-1">
-                        <MoveHorizontal size={14} /> Swipe to remove
+                      {/* swipe hint mobile */}
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2 sm:hidden flex items-center gap-1 text-[11px] text-white/50">
+                        <MoveHorizontal size={14} /> swipe to remove
                       </div>
 
-                      {/* Tombol Hapus (desktop) */}
+                      {/* remove desktop */}
                       <button
-                        onClick={() => handleRemoveItem(item)}
-                        className="hidden sm:block absolute top-4 right-4 p-2 rounded-full hover:bg-red-500/20 text-white/60 hover:text-red-400 transition"
+                        onClick={() => handleRemove(item)}
                         aria-label="Remove item"
+                        className="hidden sm:block absolute top-3 right-3 rounded-full p-2 text-white/60 hover:text-[#ff6b6b] hover:bg-[#ff6b6b]/10 transition"
                       >
                         <X size={18} />
                       </button>
 
-                      {/* Gambar */}
-                      <Link to={`/product/${item.slug}`}>
+                      {/* Image */}
+                      <Link to={`/product/${item.slug}`} className="shrink-0 mx-auto sm:mx-0">
                         <motion.img
-                          src={item.images?.[0]?.url || 'https://via.placeholder.com/112'}
-                          alt={item.images?.[0]?.alt}
+                          src={item.images?.[0]?.url || 'https://via.placeholder.com/128'}
+                          alt={item.images?.[0]?.alt || item.name}
+                          className="h-28 w-28 sm:h-32 sm:w-32 object-cover rounded-2xl"
+                          whileHover={shouldReduceMotion ? {} : { scale: 1.03 }}
+                          transition={{ duration: 0.2 }}
                           loading="lazy"
-                          className="w-32 h-32 object-cover rounded-2xl mx-auto sm:mx-0"
-                          whileHover={{ scale: 1.05 }}
-                          transition={{ duration: 0.3 }}
                         />
                       </Link>
 
-                      {/* Info & Kontrol */}
-                      <div className="flex flex-col text-center sm:text-left sm:flex-1 sm:items-start gap-4 w-full">
-                        <div>
-                          <Link to={`/product/${item.slug}`}>
-                            <h3 className="text-base sm:text-lg font-serif font-semibold hover:text-white/80 transition">
+                      {/* Info */}
+                      <div className="flex w-full flex-col gap-3 sm:gap-4">
+                        <div className="text-center sm:text-left">
+                          <Link to={`/product/${item.slug}`} className="inline-block">
+                            <h3 className="text-base sm:text-lg font-serif font-semibold hover:text-white/85 transition">
                               {item.name}
                             </h3>
                           </Link>
-
-                          {/* === Tampilkan Ukuran (Size) === */}
-                          <div className="flex justify-center sm:justify-start gap-2 mt-2">
-                            <span className="text-xs font-medium px-2 py-1 border border-white/10 rounded-full bg-white/10 text-white/70">
+                          <div className="mt-1 flex items-center justify-center sm:justify-start gap-2">
+                            <span className="text-[11px] px-2 py-1 rounded-full border border-white/10 bg-white/10 text-white/70">
                               Size {item.size || '-'}
                             </span>
+                            <span className="text-[11px] px-2 py-1 rounded-full border border-white/10 bg-white/5 text-white/60">
+                              {formatIDR(item.price)}
+                            </span>
                           </div>
-                          <p className="text-sm text-white/50 mt-1">Rp {item.price.toLocaleString('id-ID')}</p>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between w-full gap-4">
-                          {/* Quantity */}
-                          <div className="flex justify-center sm:justify-start items-center gap-3 bg-white/10 border border-white/10 backdrop-blur-sm rounded-full px-4 py-2 w-full sm:w-auto max-w-[220px] mx-auto sm:mx-0">
-                            <IconBtn icon={Minus} onClick={() => handleDecreaseQuantity(item)} className="text-white/70 hover:text-white" />
-                            <span className="w-8 text-center text-sm font-bold">{item.quantity}</span>
-                            <IconBtn icon={Plus} onClick={() => handleIncreaseQuantity(item)} className="text-white/70 hover:text-white" />
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          {/* Qty */}
+                          <div
+                            className="mx-auto sm:mx-0 flex items-center gap-2 rounded-full px-3 py-1.5
+                                       bg-[rgba(255,255,255,0.07)] border border-white/10 backdrop-blur-lg"
+                            role="group"
+                            aria-label={`Quantity for ${item.name}`}
+                          >
+                            <IconBtn icon={Minus} onClick={() => dec(item)} label="Decrease quantity" />
+                            <span className="w-8 text-center text-sm font-bold" aria-live="polite">
+                              {item.quantity}
+                            </span>
+                            <IconBtn icon={Plus} onClick={() => inc(item)} label="Increase quantity" />
                           </div>
 
-                          {/* Harga Total */}
-                          <p className="text-lg font-bold text-gold-400">
-                            Rp {(item.price * item.quantity).toLocaleString('id-ID')}
-                          </p>
+                          {/* Row right */}
+                          <div className="flex items-center justify-center sm:justify-end gap-3">
+                            <p className="text-lg font-bold">
+                              {formatIDR(item.price * item.quantity)}
+                            </p>
+                            <IconBtn
+                              icon={Trash2}
+                              onClick={() => handleRemove(item)}
+                              label="Remove item"
+                              className="hidden sm:flex text-white/70 hover:text-[#ff6b6b]"
+                            />
+                          </div>
                         </div>
                       </div>
-
                     </motion.div>
                   </motion.div>
                 ))}
               </AnimatePresence>
-
             </div>
 
-            {/* Order Summary */}
-            <motion.div
-              initial={{ opacity: 0, y: 60 }}
+            {/* Summary */}
+            <motion.aside
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
-              className="sticky top-28 self-start"
+              transition={{ duration: 0.4, delay: 0.05 }}
+              className="xl:sticky xl:top-24 self-start"
             >
-              <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
-                <h2 className="text-2xl font-semibold font-serif">Order Summary</h2>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between text-white/70">
+              <div
+                className="rounded-3xl p-6 sm:p-7 space-y-5
+                           border border-white/10 shadow-[0_10px_50px_rgba(0,0,0,0.35)]
+                           bg-[rgba(255,255,255,0.07)] backdrop-blur-2xl"
+              >
+                <h2 className="text-xl sm:text-2xl font-serif font-semibold">Summary</h2>
+
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center justify-between text-white/70">
                     <span>Subtotal</span>
-                    <span className="font-mono text-white">Rp {subtotal.toLocaleString('id-ID')}</span>
+                    <span className="font-mono text-white">{formatIDR(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between text-white/70">
+                  <div className="flex items-center justify-between text-white/70">
                     <span>Shipping</span>
-                    <span className="font-mono text-white">Rp {shipping.toLocaleString('id-ID')}</span>
+                    <span className="font-mono text-white">{formatIDR(shipping)}</span>
                   </div>
-                  <div className="border-t border-white/10" />
-                  <div className="flex justify-between text-white font-bold text-lg">
+                  <div className="h-px bg-white/10 my-1" />
+                  <div className="flex items-center justify-between text-white font-bold text-lg">
                     <span>Total</span>
-                    <span className="font-mono text-gold-400">Rp {total.toLocaleString('id-ID')}</span>
+                    <span className="font-mono" style={{ color: '#8A5CF6' }}>
+                      {formatIDR(total)}
+                    </span>
                   </div>
                 </div>
+
                 <Button
                   asChild
                   size="lg"
-                  className="w-full rounded-full bg-white text-black hover:bg-neutral-200 transition duration-300 font-bold shadow-lg"
+                  className="w-full rounded-full font-bold transition
+                             bg-[#8A5CF6] text-white hover:bg-[#8A5CF6]/90 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#8A5CF6] focus-visible:ring-offset-[#0F0F1A]"
                 >
                   <Link to="/checkout" className="flex items-center justify-center">
-                    Proceed to Checkout <ArrowRight className="ml-2 w-5 h-5" />
+                    Checkout <ArrowRight className="ml-2 h-4 w-4" />
                   </Link>
                 </Button>
+
+                <Link
+                  to="/shop"
+                  className="block text-center text-xs text-white/60 hover:text-white transition"
+                >
+                  or keep shopping
+                </Link>
               </div>
-            </motion.div>
+            </motion.aside>
           </div>
         ) : (
+          /* Empty state */
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-center py-24"
+            transition={{ duration: 0.35 }}
+            className="mx-auto max-w-md text-center"
           >
-            {/* Ikon ditengah */}
-            <div className="flex justify-center mb-6">
-              <ShoppingCart size={64} className="text-white/30" strokeWidth={1} />
+            <div
+              className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl
+                         border border-white/10 bg-[rgba(255,255,255,0.06)] backdrop-blur-xl"
+            >
+              <ShoppingCart size={36} className="text-white/60" aria-hidden="true" />
             </div>
-
-            <h2 className="text-3xl font-semibold font-serif mb-3">Your cart is currently empty</h2>
-            <p className="text-white/50 max-w-md mx-auto mb-8">
-              Explore our curated collection and find pieces that speak to your soul.
-            </p>
+            <h2 className="text-2xl sm:text-3xl font-serif font-semibold">Cart is empty</h2>
+            <p className="mt-2 text-white/60 text-sm">Pick your favorites. Simple, solid, premium.</p>
 
             <Button
               asChild
               size="lg"
-              className="rounded-full font-bold bg-white text-black hover:bg-neutral-200"
+              className="mt-6 rounded-full font-bold bg-white text-black hover:bg-neutral-200"
             >
               <Link to="/shop">
-                Continue Shopping <ArrowRight className="ml-2 w-4 h-4" />
+                Browse Collection <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
           </motion.div>
-
         )}
-      </motion.div>
+      </div>
     </motion.div>
   );
 };

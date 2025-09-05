@@ -8,44 +8,29 @@ import CreativeTeam from "@/components/CreativeTeam";
 import { Button } from "@/components/ui/button";
 import Logo from "../assets/logo.webm";
 
-const FluidBackground = () => {
-    const canvasRef = useRef();
-    useEffect(() => {
-        if (window?.initFluidSimulation) {
-            window.initFluidSimulation(canvasRef.current);
-        }
-    }, []);
-    return (
-        <canvas
-            ref={canvasRef}
-            className="absolute inset-0 w-full h-full pointer-events-none z-0"
-        />
-    );
-};
-
 const values = [
     {
-        icon: <Sparkle className="w-8 h-8 text-white" />,
+        icon: <Sparkle className="w-8 h-8 text-[#8A5CF6]" />,
         title: "Refined Spirit",
-        desc: "Every thread whispers clarity. We craft with intention, not noise.",
+        desc: "Clarity in every detail. Designed with purpose.",
     },
     {
-        icon: <Heart className="w-8 h-8 text-white" />,
+        icon: <Heart className="w-8 h-8 text-[#8A5CF6]" />,
         title: "Human Touch",
-        desc: "Each garment is ritual. A quiet act of warmth and presence.",
+        desc: "Made with care. Fashion that feels close.",
     },
     {
-        icon: <Leaf className="w-8 h-8 text-white" />,
-        title: "Sacred Sustainability",
-        desc: "Design in harmony. Luxury with responsibility.",
+        icon: <Leaf className="w-8 h-8 text-[#8A5CF6]" />,
+        title: "Sustainable Flow",
+        desc: "Modern design, future-friendly choices.",
     },
 ];
 
 const timeline = [
-    { year: "2021", event: "Born in silence. Neo Dervish awakens — soulwear begins." },
-    { year: "2022", event: "‘Whirl in Soul’ debuts. Ritual garments step into the now." },
-    { year: "2023", event: "Istanbul to Tokyo. Craft transcends borders." },
-    { year: "2024", event: "Eco-shift at 80%. Legacy, redefined in care." },
+    { year: "2021", event: "The brand was born." },
+    { year: "2022", event: "First collection launched." },
+    { year: "2023", event: "Expanded globally." },
+    { year: "2024", event: "Shifted to 80% eco materials." },
 ];
 
 const AboutPage = () => {
@@ -60,55 +45,52 @@ const AboutPage = () => {
     const handleStepEnter = ({ data }) => setCurrentStep(data);
 
     return (
-        <main className="relative font-sans text-white ">
-            {/* Fluid WebGL Background */}
-            <FluidBackground />
+        <main className="relative font-sans text-white bg-[#0F0F1A]">
+            {/* Blobs */}
+            <div className="absolute top-[-10%] left-[-10%] w-[30rem] h-[30rem] rounded-full bg-[#8A5CF6]/20 blur-3xl animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[30rem] h-[30rem] rounded-full bg-[#1E2A47]/40 blur-3xl animate-pulse" />
 
             {/* HERO */}
-            <motion.section className="relative min-h-[100dvh] flex items-center justify-center px-6 text-center overflow-hidden">
-                <div className="absolute inset-0 z-0 scale-110" />
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-[8px] z-10" />
-                <motion.div
-                    initial={{ opacity: 0, y: 40 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
-                    className="relative z-20 max-w-4xl"
-                >
-                    <h1 className="text-5xl md:text-7xl font-serif tracking-tight font-semibold">
-                        Beyond Fabric, Into Ritual
-                    </h1>
-                    <p className="text-lg md:text-xl mt-6 text-white/80">
-                        Neo Dervish channels motion, emotion, and intention into every silhouette.
-                    </p>
-                </motion.div>
+            <motion.section
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1 }}
+                className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-6"
+            >
+                <h1 className="text-4xl md:text-6xl font-serif font-semibold leading-tight">
+                    Beyond Fabric, Into Ritual
+                </h1>
+                <p className="text-white/70 text-lg md:text-xl mt-6 max-w-2xl">
+                    Motion, emotion, and intention in every piece.
+                </p>
             </motion.section>
 
             {/* PHILOSOPHY + VIDEO */}
-            <section className="py-32 px-6 md:px-12">
-                <div className="grid md:grid-cols-12 items-center max-w-7xl mx-auto gap-16">
+            <section className="py-24 px-6 md:px-12">
+                <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
                     <motion.div
-                        className="md:col-span-6"
-                        initial={{ opacity: 0, x: -50 }}
+                        initial={{ opacity: 0, x: -40 }}
                         whileInView={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-serif font-semibold mb-6">
+                        <h2 className="text-3xl md:text-4xl font-serif font-semibold mb-4">
                             Philosophy
                         </h2>
-                        <p className="text-white/70 text-lg leading-loose">
-                            We are not a brand. We are a slow revolution. Each piece is form and flow — soul first.
+                        <p className="text-white/70 text-lg leading-relaxed">
+                            We move with clarity. Each design balances flow, form, and soul.
                         </p>
                     </motion.div>
+
                     <motion.div
-                        className="md:col-span-6 aspect-square rounded-[3rem] border border-white/10 overflow-hidden shadow-xl backdrop-blur-xl relative"
+                        className="aspect-square rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl overflow-hidden relative"
                         initial={{ opacity: 0, scale: 0.9 }}
                         whileInView={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 1 }}
+                        transition={{ duration: 0.9 }}
                         viewport={{ once: true }}
                     >
                         {loading ? (
-                            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-neutral-800 via-neutral-700 to-neutral-900" />
+                            <div className="absolute inset-0 animate-pulse bg-gradient-to-br from-[#1E2A47] to-[#0F0F1A]" />
                         ) : (
                             <video
                                 autoPlay
@@ -121,32 +103,33 @@ const AboutPage = () => {
                                 <source src={Logo} type="video/webm" />
                             </video>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
                     </motion.div>
                 </div>
             </section>
 
             {/* CORE VALUES */}
-            <section className="py-32 px-6 md:px-12 bg-white/5 backdrop-blur-[12px] rounded-t-[3rem]">
+            <section className="py-24 px-6 md:px-12 bg-white/5 backdrop-blur-lg rounded-t-[3rem]">
                 <motion.h2
-                    className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center text-3xl md:text-4xl font-serif font-semibold mb-16"
                 >
-                    Core Ethos
+                    Core Values
                 </motion.h2>
-                <div className="max-w-7xl mx-auto grid md:grid-cols-3 gap-10">
+
+                <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-8">
                     {values.map((val, i) => (
                         <motion.div
                             key={i}
-                            className="p-8 rounded-3xl border border-white/10 bg-white/5 shadow-xl backdrop-blur-2xl"
                             initial={{ opacity: 0, y: 40 }}
                             whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ delay: i * 0.2, duration: 0.8 }}
+                            transition={{ delay: i * 0.2, duration: 0.7 }}
+                            className="p-8 rounded-3xl border border-white/10 bg-[#1E2A47]/40 backdrop-blur-xl shadow-xl"
                         >
                             {val.icon}
-                            <h3 className="text-2xl font-serif mt-4 mb-2">{val.title}</h3>
+                            <h3 className="text-xl font-serif mt-4 mb-2">{val.title}</h3>
                             <p className="text-white/70">{val.desc}</p>
                         </motion.div>
                     ))}
@@ -157,34 +140,37 @@ const AboutPage = () => {
             <CreativeTeam />
 
             {/* TIMELINE */}
-            <section className="py-32 px-6 md:px-12">
+            <section className="py-24 px-6 md:px-12">
                 <motion.h2
-                    className="text-center text-4xl md:text-5xl font-serif font-semibold mb-20"
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center text-3xl md:text-4xl font-serif font-semibold mb-16"
                 >
                     The Journey
                 </motion.h2>
-                <div className="max-w-4xl mx-auto">
+
+                <div className="max-w-3xl mx-auto">
                     <Scrollama onStepEnter={handleStepEnter} offset={0.6}>
                         {timeline.map((item, i) => (
                             <Step data={i} key={i}>
                                 <div
                                     className={clsx(
-                                        "pl-8 py-8 border-l-4 relative transition-all duration-500",
+                                        "pl-6 py-6 border-l-4 relative rounded-xl transition-all duration-500",
                                         currentStep === i
-                                            ? "border-white/80 bg-white/5 backdrop-blur-md shadow-xl scale-[1.02]"
+                                            ? "border-[#8A5CF6] bg-white/5 backdrop-blur-md shadow-lg"
                                             : "border-white/10"
                                     )}
                                 >
                                     <span
                                         className={clsx(
                                             "absolute -left-2 top-4 h-3 w-3 rounded-full",
-                                            currentStep === i ? "bg-white" : "bg-white/30"
+                                            currentStep === i ? "bg-[#8A5CF6]" : "bg-white/40"
                                         )}
                                     />
-                                    <h4 className="text-2xl font-serif font-semibold">{item.year}</h4>
+                                    <h4 className="text-xl font-serif font-semibold">
+                                        {item.year}
+                                    </h4>
                                     <p className="text-white/70 mt-1">{item.event}</p>
                                 </div>
                             </Step>
@@ -194,29 +180,27 @@ const AboutPage = () => {
             </section>
 
             {/* CTA */}
-            <section className="relative px-6 py-40 text-center bg-black/90 rounded-t-[3rem] overflow-hidden">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f')] bg-cover bg-center opacity-30 scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-transparent" />
+            <section className="relative px-6 py-32 text-center bg-[#1E2A47]/80 backdrop-blur-xl rounded-t-[3rem] overflow-hidden">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1 }}
+                    transition={{ duration: 0.9 }}
                     className="relative z-10 max-w-3xl mx-auto space-y-6"
                 >
-                    <h2 className="text-4xl md:text-5xl font-serif font-semibold">
+                    <h2 className="text-3xl md:text-4xl font-serif font-semibold">
                         Step Into the Ritual
                     </h2>
-                    <p className="text-lg text-white/80">
-                        Move with meaning. Dress the becoming.
+                    <p className="text-white/70 text-lg">
+                        Move with meaning. Dress with soul.
                     </p>
                     <Button
                         asChild
                         size="lg"
-                        className="bg-white text-black font-medium px-10 py-6 rounded-full text-base hover:bg-neutral-200 hover:scale-105 transition"
+                        className="bg-[#8A5CF6] text-white font-medium px-8 py-5 rounded-full text-base hover:bg-[#7a4ee0] transition-all duration-300 shadow-xl"
                     >
-                        <Link to="/shop" className="group flex items-center">
-                            Explore the Collection
-                            <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition" />
+                        <Link to="/shop" className="flex items-center justify-center gap-2">
+                            Explore Collection
+                            <ArrowRight className="h-5 w-5" />
                         </Link>
                     </Button>
                 </motion.div>
