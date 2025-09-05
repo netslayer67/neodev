@@ -1,49 +1,62 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
+import { DollarSign, ShoppingCart, Users, Package } from "lucide-react";
 import {
-  DollarSign, ShoppingCart, Users, Package
-} from 'lucide-react';
-import {
-  BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
-} from 'recharts';
-import { motion } from 'framer-motion';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchDashboardStats } from '@/store/slices/dashboardSlice';
-import io from 'socket.io-client';
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { motion } from "framer-motion";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDashboardStats } from "@/store/slices/dashboardSlice";
+import io from "socket.io-client";
 
-// Di atas component:
 const socket = io(import.meta.env.VITE_SOCKET_URL, {
-  transports: ['websocket'],
+  transports: ["websocket"],
   withCredentials: true,
 });
 
+// --- Stat Card Component ---
 const StatCard = ({ item }) => (
   <motion.div
-    variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-    className="relative p-px overflow-hidden rounded-2xl bg-transparent"
-    whileHover={{ scale: 1.03, transition: { type: 'spring', stiffness: 300 } }}
+    variants={{
+      hidden: { opacity: 0, y: 20 },
+      visible: { opacity: 1, y: 0 },
+    }}
+    whileHover={{
+      scale: 1.03,
+      transition: { type: "spring", stiffness: 300 },
+    }}
+    className="relative p-px overflow-hidden rounded-2xl"
   >
-    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent rounded-2xl" aria-hidden="true" />
-    <div className="relative flex flex-col h-full p-6 bg-gray-900/60 backdrop-blur-xl rounded-[15px]">
+    <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/5 to-transparent rounded-2xl" />
+    <div className="relative flex flex-col h-full p-5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
       <div className="flex items-start justify-between">
-        <div className="flex flex-col">
-          <p className="text-sm font-medium text-neutral-400">{item.label}</p>
+        <div>
+          <p className="text-sm text-neutral-300">{item.label}</p>
           <p className="mt-2 text-2xl font-bold text-white">{item.value}</p>
         </div>
-        <div className="p-2 bg-white/10 rounded-lg">
-          <item.icon className="w-5 h-5 text-neutral-300" />
+        <div className="p-2 bg-[#1E2A47]/60 rounded-lg">
+          <item.icon className="w-5 h-5 text-[#8A5CF6]" />
         </div>
       </div>
-      <p className="mt-4 text-xs text-neutral-500">{item.change}</p>
+      <p className="mt-3 text-xs text-neutral-400">{item.change}</p>
     </div>
   </motion.div>
 );
 
+// --- Custom Tooltip for Chart ---
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="p-4 bg-gray-900/80 backdrop-blur-md border border-white/10 rounded-lg shadow-xl">
+      <div className="p-3 bg-[#0F0F1A]/80 backdrop-blur-md border border-white/10 rounded-lg shadow-lg">
         <p className="text-sm font-bold text-white">{label}</p>
-        <p className="text-sm text-indigo-400">{`Sales: Rp${payload[0].value.toLocaleString('id-ID')}`}</p>
+        <p className="text-sm text-[#8A5CF6]">
+          {`Sales: Rp${payload[0].value.toLocaleString("id-ID")}`}
+        </p>
       </div>
     );
   }
@@ -55,127 +68,165 @@ const DashboardPage = () => {
   const [activeIndex, setActiveIndex] = useState(null);
 
   const dashboard = useSelector((state) => state.dashboard) || {};
-
   const {
-    revenue = { total: 0, change: '0%' },
-    sales = { total: 0, change: '0%' },
-    subscriptions = { total: 0, change: '0%' },
+    revenue = { total: 0, change: "0%" },
+    sales = { total: 0, change: "0%" },
+    subscriptions = { total: 0, change: "0%" },
     activeUsers = { total: 0 },
     chartData = [],
     recentActivities = [],
-    status = 'idle',
   } = dashboard;
-
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
-
-    socket.on('dashboard-update', () => {
+    socket.on("dashboard-update", () => {
       dispatch(fetchDashboardStats());
     });
-
     return () => {
-      socket.off('dashboard-update');
+      socket.off("dashboard-update");
     };
   }, [dispatch]);
 
   const stats = [
     {
-      label: 'Total Revenue',
-      value: `Rp ${revenue?.total?.toLocaleString('id-ID') || 0}`,
-      change: `${revenue?.change || '0%'} from last month`,
+      label: "Revenue",
+      value: `Rp ${revenue?.total?.toLocaleString("id-ID") || 0}`,
+      change: `${revenue?.change || "0%"} vs last month`,
       icon: DollarSign,
     },
     {
-      label: 'Subscriptions',
+      label: "Subscriptions",
       value: `+${subscriptions?.total || 0}`,
-      change: `${subscriptions?.change || '0%'} from last month`,
+      change: `${subscriptions?.change || "0%"} vs last month`,
       icon: Users,
     },
     {
-      label: 'Sales',
+      label: "Sales",
       value: `+${sales?.total || 0}`,
-      change: `${sales?.change || '0%'} from last month`,
+      change: `${sales?.change || "0%"} vs last month`,
       icon: ShoppingCart,
     },
     {
-      label: 'Active Now',
+      label: "Active Now",
       value: `${activeUsers?.total || 0}`,
-      change: 'on the platform',
+      change: "on platform",
       icon: Package,
     },
   ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: 'spring', stiffness: 100, duration: 0.8 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-b from-black via-gray-900 to-black text-white p-4 sm:p-6 lg:p-8">
-      <motion.div className="max-w-7xl mx-auto space-y-8" initial="hidden" animate="visible" variants={containerVariants}>
-        <motion.div variants={itemVariants} className="flex items-center justify-between">
+    <div className="relative min-h-screen w-full text-white p-4 sm:p-6 lg:p-8 overflow-hidden">
+      {/* --- Decorative Blobs --- */}
+      <motion.div
+        className="absolute -top-24 -left-24 w-72 h-72 bg-[#8A5CF6]/20 rounded-full blur-3xl"
+        animate={{ scale: [1, 1.1, 1] }}
+        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <motion.div
+        className="absolute bottom-0 right-0 w-96 h-96 bg-[#1E2A47]/30 rounded-full blur-3xl"
+        animate={{ scale: [1.1, 1, 1.1] }}
+        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+      />
+
+      {/* --- Dashboard Content --- */}
+      <motion.div
+        className="relative max-w-7xl mx-auto space-y-8"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        {/* Header */}
+        <motion.div
+          variants={containerVariants}
+          className="flex items-center justify-between"
+        >
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-neutral-400 mt-1">Welcome back, here's your business snapshot.</p>
+            <p className="text-neutral-400 mt-1">Your snapshot today.</p>
           </div>
         </motion.div>
 
+        {/* Stats + Main Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <motion.div variants={itemVariants} className="lg:col-span-2 space-y-8">
+          {/* Left: Stats + Chart */}
+          <motion.div
+            variants={containerVariants}
+            className="lg:col-span-2 space-y-8"
+          >
+            {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {stats.map((item) => <StatCard key={item.label} item={item} />)}
+              {stats.map((item) => (
+                <StatCard key={item.label} item={item} />
+              ))}
             </div>
 
-            <motion.div variants={itemVariants} className="relative p-px overflow-hidden rounded-2xl bg-transparent">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-2xl" aria-hidden="true" />
-              <div className="relative p-6 bg-gray-900/70 backdrop-blur-xl rounded-[15px]">
+            {/* Chart */}
+            <motion.div
+              variants={containerVariants}
+              className="relative p-px overflow-hidden rounded-2xl"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-2xl" />
+              <div className="relative p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-lg font-semibold text-white">Sales Overview</h2>
-                    <p className="text-sm text-neutral-400">Last 7 Months Performance</p>
+                    <h2 className="text-lg font-semibold">Sales Overview</h2>
+                    <p className="text-sm text-neutral-400">Last 7 months</p>
                   </div>
-                  <button className="px-3 py-1 text-xs font-medium text-white bg-white/10 border border-white/20 rounded-md hover:bg-white/20 transition-colors">
-                    View Report
+                  <button className="px-3 py-1 text-xs font-medium text-white bg-[#8A5CF6]/20 border border-[#8A5CF6]/30 rounded-md hover:bg-[#8A5CF6]/30 transition-colors">
+                    Report
                   </button>
                 </div>
-                <div className="h-[350px] w-full">
+                <div className="h-[300px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={chartData || []} margin={{ top: 20, right: 0, left: -20, bottom: 5 }}
-                      onMouseMove={(state) => {
-                        if (state.isTooltipActive) {
-                          setActiveIndex(state.activeTooltipIndex);
-                        } else {
-                          setActiveIndex(null);
-                        }
-                      }}
+                    <BarChart
+                      data={chartData || []}
+                      margin={{ top: 20, right: 0, left: -20, bottom: 5 }}
+                      onMouseMove={(state) =>
+                        setActiveIndex(
+                          state.isTooltipActive ? state.activeTooltipIndex : null
+                        )
+                      }
                     >
                       <defs>
-                        <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#818cf8" stopOpacity={0.8} />
-                          <stop offset="95%" stopColor="#4f46e5" stopOpacity={0.2} />
+                        <linearGradient
+                          id="colorSales"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
+                          <stop offset="5%" stopColor="#8A5CF6" stopOpacity={0.8} />
+                          <stop offset="95%" stopColor="#1E2A47" stopOpacity={0.2} />
                         </linearGradient>
                       </defs>
-                      <XAxis dataKey="month" stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#a3a3a3" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `Rp${value / 1000000}jt`} />
-                      <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(129, 140, 248, 0.1)' }} />
+                      <XAxis
+                        dataKey="month"
+                        stroke="#a3a3a3"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="#a3a3a3"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(value) => `Rp${value / 1000000}jt`}
+                      />
+                      <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(138, 92, 246, 0.1)" }} />
                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                         {(chartData || []).map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={index === activeIndex ? '#818cf8' : '#4f46e5'} />
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={
+                              index === activeIndex ? "#8A5CF6" : "url(#colorSales)"
+                            }
+                          />
                         ))}
                       </Bar>
                     </BarChart>
@@ -185,21 +236,27 @@ const DashboardPage = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div variants={itemVariants} className="space-y-8">
-            <div className="relative p-px overflow-hidden rounded-2xl bg-transparent">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-2xl" aria-hidden="true" />
-              <div className="relative p-6 bg-gray-900/70 backdrop-blur-xl rounded-[15px]">
-                <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
-                <p className="text-sm text-neutral-400 mb-6">Latest customer actions.</p>
+          {/* Right: Recent Activity */}
+          <motion.div variants={containerVariants} className="space-y-8">
+            <div className="relative p-px overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-white/5 to-transparent rounded-2xl" />
+              <div className="relative p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10">
+                <h2 className="text-lg font-semibold">Recent Activity</h2>
+                <p className="text-sm text-neutral-400 mb-5">Latest updates</p>
 
                 <div className="space-y-5">
                   {(recentActivities || []).map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                    <div
+                      key={index}
+                      className="flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full bg-[#8A5CF6] animate-pulse"></div>
                         <div>
-                          <p className="text-sm text-white font-medium">{activity.user}</p>
-                          <p className="text-xs text-neutral-400">{activity.action}</p>
+                          <p className="text-sm font-medium">{activity.user}</p>
+                          <p className="text-xs text-neutral-400">
+                            {activity.action}
+                          </p>
                         </div>
                       </div>
                       <p className="text-xs text-neutral-500">{activity.time}</p>
@@ -207,7 +264,7 @@ const DashboardPage = () => {
                   ))}
                 </div>
 
-                <button className="mt-6 w-full text-center text-sm text-indigo-400 font-medium hover:text-indigo-300 transition-colors">
+                <button className="mt-6 w-full text-center text-sm text-[#8A5CF6] hover:text-white transition-colors">
                   View all
                 </button>
               </div>

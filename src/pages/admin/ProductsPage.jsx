@@ -1,96 +1,84 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSelector, useDispatch } from "react-redux";
 import {
   fetchProducts,
   createProduct,
   updateProduct,
   deleteProduct,
-} from '../../store/slices/productSlice';
+} from "../../store/slices/productSlice";
+import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import PageLoader from "@/components/PageLoader";
 import {
   PlusCircle,
   MoreVertical,
   Edit,
   Trash2,
-  X,
   Search,
-} from 'lucide-react';
-import PageLoader from '@/components/PageLoader';
+} from "lucide-react";
 
+// --- Product Card ---
 const ProductCard = ({ product, onEdit, onDelete }) => (
   <motion.div
     layout
-    whileHover={{ scale: 1.015 }}
-    whileTap={{ scale: 0.985 }}
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3 }}
-    className="relative group overflow-hidden rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300"
+    className="relative group overflow-hidden rounded-2xl border border-white/10 
+      bg-[#0F0F1A]/60 backdrop-blur-xl shadow-lg hover:shadow-2xl 
+      transition-all duration-300"
   >
     <div className="relative">
       <img
-        src={product.images?.[0]?.url || 'https://via.placeholder.com/300'}
-        alt={product.images?.[0]?.alt || 'Product Image'}
-        className="w-full h-48 object-cover rounded-t-2xl"
+        src={product.images?.[0]?.url || "https://via.placeholder.com/300"}
+        alt={product.images?.[0]?.alt || "Product"}
+        className="w-full h-44 object-cover rounded-t-2xl"
       />
     </div>
-    <div className="p-5 flex flex-col flex-grow">
-      <p className="text-xs text-amber-300 font-medium tracking-wide uppercase">
+    <div className="p-5 flex flex-col">
+      <p className="text-xs text-[#8A5CF6] font-medium tracking-wide uppercase">
         {product.category}
       </p>
-      <h3 className="font-display font-semibold text-white mt-1 line-clamp-1">
+      <h3 className="font-semibold text-white mt-1 truncate">
         {product.name}
       </h3>
       <div className="flex items-end justify-between mt-4">
         <p className="text-lg font-bold text-white font-mono">
-          Rp {product.price.toLocaleString('id-ID')}
+          Rp {product.price.toLocaleString("id-ID")}
         </p>
         <p
-          className={`text-xs px-2 py-1 rounded-full font-medium transition-all duration-300 ${product.stock > 10
-            ? 'bg-green-500/10 text-green-300'
-            : 'bg-red-500/10 text-red-300'
+          className={`text-xs px-2 py-1 rounded-full font-medium ${product.stock > 10
+              ? "bg-green-500/10 text-green-300"
+              : "bg-red-500/10 text-red-300"
             }`}
         >
-          {product.stock > 0 ? `${product.stock} in stock` : 'Out of Stock'}
+          {product.stock > 0 ? `${product.stock} in stock` : "Out of Stock"}
         </p>
       </div>
     </div>
-    <div className="absolute top-2 right-2">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-white bg-black/30 hover:bg-black/60 rounded-full"
-          >
-            <MoreVertical className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent
-          align="end"
-          className="bg-black/70 backdrop-blur-md border border-white/10 text-white"
-        >
-          <DropdownMenuItem onClick={() => onEdit(product)}>
-            <Edit className="mr-2 h-4 w-4" /> Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => onDelete(product)}
-            className="text-red-400 hover:bg-red-500/10"
-          >
-            <Trash2 className="mr-2 h-4 w-4" /> Delete
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+
+    {/* Dropdown simple (ganti hover → click biar mobile friendly) */}
+    <div className="absolute top-3 right-3">
+      <motion.div
+        whileTap={{ scale: 0.9 }}
+        className="bg-black/40 hover:bg-black/70 p-2 rounded-full cursor-pointer"
+        onClick={() => {
+          if (window.confirm("Edit this item?")) onEdit(product);
+        }}
+      >
+        <Edit className="w-4 h-4 text-white" />
+      </motion.div>
+      <motion.div
+        whileTap={{ scale: 0.9 }}
+        className="bg-black/40 hover:bg-black/70 p-2 mt-2 rounded-full cursor-pointer"
+        onClick={() => onDelete(product)}
+      >
+        <Trash2 className="w-4 h-4 text-red-400" />
+      </motion.div>
     </div>
   </motion.div>
 );
@@ -98,57 +86,25 @@ const ProductCard = ({ product, onEdit, onDelete }) => (
 const AdminProductsPage = () => {
   const dispatch = useDispatch();
   const { toast } = useToast();
-  const { items: products, status } = useSelector((state) => state.products);
+  const { items: products, status } = useSelector((s) => s.products);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
 
-  const handleOpenModal = (product = null) => {
-    setEditingProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingProduct(null);
-  };
-
-  const handleSaveProduct = async (formData, id) => {
-    try {
-      if (id) {
-        await dispatch(updateProduct({ id, productData: formData })).unwrap();
-        toast({ title: 'Product Updated!' });
-      } else {
-        await dispatch(createProduct(formData)).unwrap();
-        toast({ title: 'Product Added!' });
-      }
-      dispatch(fetchProducts());
-      handleCloseModal();
-    } catch (error) {
-      toast({
-        variant: 'destructive',
-        title: 'Operation Failed',
-        description: error.message,
-      });
-    }
-  };
-
   const handleDeleteProduct = async (product) => {
-    if (window.confirm(`Are you sure you want to delete "${product.name}"?`)) {
+    if (window.confirm(`Delete "${product.name}"?`)) {
       try {
         await dispatch(deleteProduct(product._id)).unwrap();
-        toast({ title: 'Product Deleted' });
+        toast({ title: "Product Deleted" });
         dispatch(fetchProducts());
-      } catch (error) {
+      } catch (err) {
         toast({
-          variant: 'destructive',
-          title: 'Deletion Failed',
-          description: error.message,
+          variant: "destructive",
+          title: "Deletion Failed",
+          description: err.message,
         });
       }
     }
@@ -163,45 +119,58 @@ const AdminProductsPage = () => {
   );
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-black via-slate-900 to-black text-white p-4 sm:p-6 lg:p-10 font-sans">
-      <div className="max-w-7xl mx-auto space-y-10">
+    <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47] to-[#0F0F1A] text-white font-sans">
+      {/* --- Decorative Blobs --- */}
+      <motion.div
+        className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-[#8A5CF6]/20 blur-3xl"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 8, repeat: Infinity }}
+      />
+      <motion.div
+        className="absolute bottom-0 right-0 w-[28rem] h-[28rem] rounded-full bg-[#1E2A47]/40 blur-3xl"
+        animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 10, repeat: Infinity }}
+      />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-10 space-y-10">
+        {/* Header */}
         <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
             <div>
-              <h1 className="text-4xl font-display font-bold tracking-tight text-white">
-                Curate Your Collection
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+                Manage Products
               </h1>
               <p className="text-neutral-400 mt-1 text-sm">
-                Organize, refine, and showcase your product lineup.
+                Easy, clean, and fast control of your lineup.
               </p>
             </div>
             <Button
-              onClick={() => handleOpenModal()}
-              className="bg-white text-black font-bold px-5 py-3 rounded-xl hover:bg-neutral-200 transition-all"
+              onClick={() => alert("Modal form belum di-wire up.")}
+              className="bg-[#8A5CF6] hover:bg-[#7a4ee0] text-white font-semibold px-5 py-3 rounded-xl transition-all"
             >
-              <PlusCircle className="h-5 w-5 mr-2" /> Craft New Piece
+              <PlusCircle className="h-5 w-5 mr-2" /> Add Product
             </Button>
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
-          className="relative w-full"
-        >
+        {/* Search */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 w-5 h-5" />
             <Input
-              placeholder="Search by product name..."
+              placeholder="Search products..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-white/5 border border-white/10 text-white placeholder-white/40 backdrop-blur-md rounded-xl py-4 px-5"
+              className="bg-white/5 border border-white/10 text-white 
+                placeholder-white/40 backdrop-blur-md rounded-xl py-4 pl-12"
             />
           </div>
         </motion.div>
 
-        {status === 'loading' && <PageLoader />}
+        {/* Product Grid */}
+        {status === "loading" && <PageLoader />}
 
-        {status === 'succeeded' && (
+        {status === "succeeded" && (
           <motion.div
             key={filteredProducts.length}
             variants={{
@@ -219,20 +188,21 @@ const AdminProductsPage = () => {
               <ProductCard
                 key={product._id}
                 product={product}
-                onEdit={handleOpenModal}
+                onEdit={() => alert("Edit modal belum di-wire up.")}
                 onDelete={handleDeleteProduct}
               />
             ))}
           </motion.div>
         )}
 
-        {status === 'succeeded' && filteredProducts.length === 0 && (
+        {/* Empty State */}
+        {status === "succeeded" && filteredProducts.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-24 text-white/70"
           >
-            <p className="text-xl font-display">No curation yet. Let’s begin crafting.</p>
+            <p className="text-xl">No products yet. Let’s add some.</p>
           </motion.div>
         )}
       </div>
