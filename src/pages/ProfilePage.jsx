@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -9,6 +9,8 @@ import {
     X,
     Search,
     CheckCircle,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -19,9 +21,11 @@ import PageLoader from "@/components/PageLoader";
 import Review from "@/components/Review";
 import { useToast } from "@/components/ui/use-toast";
 
-// sanitizer buat input
-const sanitizeInput = (val) =>
-    val.replace(/(<([^>]+)>)/gi, "").replace(/(https?:\/\/[^\s]+)/g, "");
+// small sanitizer to strip tags/links
+const sanitizeInput = (val = "") =>
+    String(val).slice(0, 80).replace(/(<([^>]+)>)/gi, "").replace(/https?:\/\/[^"]+/gi, "").trim();
+
+const UI_DUR = 0.32;
 
 const ProfilePage = () => {
     const dispatch = useDispatch();
@@ -29,13 +33,13 @@ const ProfilePage = () => {
     const location = useLocation();
     const { toast } = useToast();
 
-    const [activeView, setActiveView] = useState(location.state?.activeView || "account");
+    const [activeView, setActiveView] = useState(location.state?.activeView || "orders");
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [showCancelSuccess, setShowCancelSuccess] = useState(false);
 
-    const { user, status: authStatus } = useSelector((s) => s.auth);
-    const { myOrders, status: orderStatus } = useSelector((s) => s.orders);
+    const { user, status: authStatus } = useSelector((s) => s.auth || {});
+    const { myOrders = [], status: orderStatus } = useSelector((s) => s.orders || {});
 
     useEffect(() => {
         if (user) dispatch(fetchMyOrders());
@@ -45,301 +49,225 @@ const ProfilePage = () => {
         document.body.style.overflow = selectedOrder ? "hidden" : "";
     }, [selectedOrder]);
 
-    const handleLogout = () => {
+    const handleLogout = useCallback(() => {
         dispatch(logout());
         navigate("/");
-    };
+    }, [dispatch, navigate]);
 
-    const handleCancelOrder = async () => {
+    const handleCancelOrder = useCallback(async () => {
         try {
             await dispatch(cancelOrder(selectedOrder.orderId)).unwrap();
-            toast({
-                title: "Order Cancelled",
-                description: `Order #${selectedOrder.orderId} has been cancelled.`,
-            });
+            toast({ title: "Order Cancelled", description: `Order #${selectedOrder.orderId} cancelled.` });
             setSelectedOrder(null);
             setShowCancelSuccess(true);
             setTimeout(() => setShowCancelSuccess(false), 2000);
         } catch (err) {
-            toast({
-                variant: "destructive",
-                title: "Failed",
-                description: err.message || "Something went wrong.",
-            });
+            toast({ variant: "destructive", title: "Failed", description: err.message || "Something went wrong." });
         }
-    };
+    }, [dispatch, selectedOrder, toast]);
 
-    const filteredOrders = useMemo(
-        () =>
-            myOrders.filter(
-                (o) =>
-                    o.items.some((i) =>
-                        i.name.toLowerCase().includes(searchQuery.toLowerCase())
-                    ) || o.orderId.toLowerCase().includes(searchQuery.toLowerCase())
-            ),
-        [myOrders, searchQuery]
-    );
+    const filteredOrders = useMemo(() => {
+        const q = sanitizeInput(searchQuery).toLowerCase();
+        if (!q) return myOrders;
+        return myOrders.filter((o) => {
+            return (
+                o.orderId.toLowerCase().includes(q) ||
+                o.items.some((i) => (i.name || "").toLowerCase().includes(q))
+            );
+        });
+    }, [myOrders, searchQuery]);
 
-    const navItems = [
-        { id: "account", label: "Info", icon: User },
-        { id: "orders", label: "Orders", icon: ShoppingBag },
-        { id: "reviews", label: "Reviews", icon: Star },
-        { id: "logout", label: "Logout", icon: LogOut, action: handleLogout },
-    ];
+    // compact card for order list (mobile-first)
+    const OrderRow = ({ order }) => {
+        const statusColor =
+            order.status === "Delivered"
+                ? "bg-success/20 text-success"
+                : order.status === "Cancelled"
+                    ? "bg-error/20 text-error"
+                    : "bg-warning/20 text-warning";
 
-    const Card = ({ children, className = "", onClick }) => (
-        <motion.div
-            onClick={onClick}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.32 }}
-            className={`glass-card p-6 rounded-3xl shadow-xl transition-all duration-320 ${className}`}
-        >
-            {children}
-        </motion.div>
-    );
-
-    const renderContent = () => {
-        if (authStatus === "loading" || !user) return <PageLoader />;
-
-        switch (activeView) {
-            case "account":
-                return (
-                    <Card>
-                        <h2 className="text-2xl font-semibold mb-4 text-foreground">Account</h2>
-                        <p className="text-muted-foreground">Name: {user.name}</p>
-                        <p className="text-muted-foreground">Email: {user.email}</p>
-                        <p className="text-muted-foreground text-sm mt-2">
-                            Joined {new Date(user.createdAt).toLocaleDateString("en-US")}
-                        </p>
-                    </Card>
-                );
-
-            case "orders":
-                return (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
-                            <h2 className="text-2xl font-semibold text-foreground">Orders</h2>
-                            <div className="relative w-full sm:max-w-xs">
-                                <Input
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(sanitizeInput(e.target.value))}
-                                    placeholder="Search..."
-                                    className="pl-10 bg-input border border-border text-foreground placeholder:muted-foreground rounded-xl focus:ring-2 focus:ring-accent transition-all duration-320"
-                                />
-                                <Search
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                    size={18}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            {orderStatus === "loading" && <PageLoader />}
-                            {orderStatus === "succeeded" && filteredOrders.length === 0 && (
-                                <p className="text-muted-foreground">No orders found.</p>
-                            )}
-                            {orderStatus === "succeeded" &&
-                                filteredOrders.map((o) => (
-                                    <Card
-                                        key={o.orderId}
-                                        className="cursor-pointer hover:shadow-2xl"
-                                        onClick={() => setSelectedOrder(o)}
-                                    >
-                                        <div className="flex justify-between items-center">
-                                            <div>
-                                                <p className="text-sm font-mono text-muted-foreground">
-                                                    #{o.orderId}
-                                                </p>
-                                                <p className="text-muted-foreground text-sm">
-                                                    {new Date(o.createdAt).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-secondary">
-                                                    Rp {o.totalAmount.toLocaleString("id-ID")}
-                                                </p>
-                                                <span
-                                                    className={`text-xs px-3 py-1 rounded-full transition-colors duration-320 ${o.status === "Delivered"
-                                                            ? "bg-success/20 text-success"
-                                                            : o.status === "Cancelled"
-                                                                ? "bg-error/20 text-error"
-                                                                : "bg-warning/20 text-warning"
-                                                        }`}
-                                                >
-                                                    {o.status}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
-                        </div>
-                    </motion.div>
-                );
-
-            case "reviews":
-                return (
-                    <Review
-                        products={myOrders.flatMap((o) =>
-                            o.items.map((i) => i.productData || i)
-                        )}
-                        onSubmit={(r) => console.log("Review:", r)}
-                    />
-                );
-
-            default:
-                return null;
-        }
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.7 }}
-            className="relative min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-10 bg-background text-foreground font-sans"
-        >
-            {/* Decorative blobs */}
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 0.3, scale: 1 }}
-                transition={{ duration: 2 }}
-                className="absolute -top-20 -left-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl"
-            />
-            <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 0.25, scale: 1 }}
-                transition={{ duration: 2, delay: 0.3 }}
-                className="absolute bottom-0 right-0 w-96 h-96 bg-primary/30 rounded-full blur-3xl"
-            />
-
-            <div className="relative max-w-7xl mx-auto">
-                {/* Header */}
-                <div className="mb-10">
-                    <h1 className="text-4xl font-heading font-bold bg-gradient-to-r from-foreground via-secondary to-accent bg-clip-text text-transparent">
-                        Hey, {user?.name?.split?.(" ")[0] || "User"} 👋
-                    </h1>
-                    <p className="text-muted-foreground mt-1">Manage your profile and orders</p>
+        return (
+            <motion.button
+                whileHover={{ scale: 1.01 }}
+                transition={{ duration: UI_DUR }}
+                onClick={() => setSelectedOrder(order)}
+                className="w-full text-left p-4 rounded-2xl glass-card flex items-center justify-between gap-4"
+            >
+                <div className="flex items-start gap-3">
+                    <div className="min-w-0">
+                        <p className="text-sm font-mono text-muted-foreground truncate">#{order.orderId}</p>
+                        <p className="text-sm text-foreground truncate">{order.items?.[0]?.name} {order.items?.length > 1 ? `+${order.items.length - 1} more` : ''}</p>
+                        <p className="text-xs text-muted-foreground">{new Date(order.createdAt).toLocaleDateString()}</p>
+                    </div>
                 </div>
 
-                {/* Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-                    {/* Sidebar */}
-                    <aside className="lg:col-span-1 flex lg:flex-col gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        {navItems.map((i) => (
-                            <button
-                                key={i.id}
-                                onClick={i.action || (() => setActiveView(i.id))}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-all duration-320 ${activeView === i.id
-                                        ? "bg-accent/20 text-foreground"
-                                        : "text-muted-foreground hover:bg-card/50"
-                                    } ${i.id === "logout" ? "text-error hover:bg-error/20" : ""}`}
-                            >
-                                <i.icon size={18} />
-                                <span>{i.label}</span>
-                            </button>
-                        ))}
-                    </aside>
+                <div className="flex flex-col items-end">
+                    <p className="font-bold text-secondary">Rp {order.totalAmount.toLocaleString('id-ID')}</p>
+                    <span className={`text-xs px-3 py-1 rounded-full mt-2 ${statusColor}`}>{order.status}</span>
+                </div>
+            </motion.button>
+        );
+    };
 
-                    {/* Main Content */}
-                    <main className="lg:col-span-4">
-                        <AnimatePresence mode="wait">
-                            <motion.div
-                                key={activeView}
-                                initial={{ opacity: 0, y: 15 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -15 }}
-                                transition={{ duration: 0.4 }}
-                            >
-                                {renderContent()}
-                            </motion.div>
-                        </AnimatePresence>
-                    </main>
+    // layout: mobile-first with bottom navigation
+    return (
+        <motion.div className="relative min-h-screen pt-20 pb-24 px-4 bg-background text-foreground font-sans">
+            {/* decorative blobs */}
+            <motion.div className="absolute -top-16 -left-12 w-64 h-64 rounded-full blur-3xl bg-accent/14" animate={{ scale: [1, 1.06, 1] }} transition={{ duration: 10, repeat: Infinity }} aria-hidden />
+            <motion.div className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl bg-primary/18" animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 12, repeat: Infinity }} aria-hidden />
+
+            <div className="max-w-3xl mx-auto">
+                <header className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-2xl font-heading font-bold">Hey, {user?.name?.split?.(' ')[0] || 'User'} 👋</h1>
+                        <p className="text-muted-foreground text-sm">Manage your account & orders</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="rounded-lg border border-border">
+                            <ChevronLeft size={18} />
+                        </Button>
+                        <Button variant="ghost" size="icon" onClick={handleLogout} className="rounded-lg border border-border">
+                            <LogOut size={18} />
+                        </Button>
+                    </div>
+                </header>
+
+                {/* Search + quick stats */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+                    <div className="flex-1 relative">
+                        <Input
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search orders or items..."
+                            className="pl-10 bg-card/60 border border-border rounded-xl focus:ring-2 focus:ring-accent/30 transition duration-[320ms]"
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <div className="text-center">
+                            <p className="text-sm text-muted-foreground">Orders</p>
+                            <p className="font-bold">{myOrders.length}</p>
+                        </div>
+                        <div className="text-center">
+                            <p className="text-sm text-muted-foreground">Spent</p>
+                            <p className="font-bold">Rp {myOrders.reduce((s, o) => s + (o.totalAmount || 0), 0).toLocaleString('id-ID')}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Main content: account / orders / reviews */}
+                <div className="space-y-6">
+                    {activeView === 'account' && (
+                        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                            <div className="glass-card p-4 rounded-2xl">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-16 h-16 rounded-lg bg-card/80 flex items-center justify-center overflow-hidden">
+                                        <User size={28} />
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-lg">{user?.name}</p>
+                                        <p className="text-sm text-muted-foreground">{user?.email}</p>
+                                        <p className="text-xs text-muted-foreground mt-1">Joined {new Date(user?.createdAt).toLocaleDateString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeView === 'orders' && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
+                            {orderStatus === 'loading' && <PageLoader />}
+
+                            <div className="flex flex-col gap-3">
+                                {orderStatus === 'succeeded' && filteredOrders.length === 0 && (
+                                    <div className="glass-card p-6 text-center text-muted-foreground">No orders yet.</div>
+                                )}
+
+                                {orderStatus === 'succeeded' && filteredOrders.map((o) => (
+                                    <OrderRow key={o.orderId} order={o} />
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {activeView === 'reviews' && (
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                            <Review
+                                products={myOrders.flatMap((o) => o.items.map((i) => i.productData || i))}
+                                onSubmit={(r) => console.log('Review:', r)}
+                            />
+                        </motion.div>
+                    )}
                 </div>
             </div>
 
-            {/* Order Modal */}
+            {/* Bottom nav for mobile */}
+            <nav className="fixed left-1/2 -translate-x-1/2 bottom-4 z-40 w-[94%] max-w-3xl flex items-center justify-between glass-card px-3 py-2 rounded-3xl shadow-xl md:hidden">
+                <button onClick={() => setActiveView('account')} className={`flex-1 py-2 flex flex-col items-center gap-1 ${activeView === 'account' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    <User size={18} />
+                    <span className="text-xs">Info</span>
+                </button>
+                <button onClick={() => setActiveView('orders')} className={`flex-1 py-2 flex flex-col items-center gap-1 ${activeView === 'orders' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    <ShoppingBag size={18} />
+                    <span className="text-xs">Orders</span>
+                </button>
+                <button onClick={() => setActiveView('reviews')} className={`flex-1 py-2 flex flex-col items-center gap-1 ${activeView === 'reviews' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    <Star size={18} />
+                    <span className="text-xs">Reviews</span>
+                </button>
+                <button onClick={handleLogout} className="py-2 px-3 rounded-xl text-error">
+                    <LogOut size={18} />
+                </button>
+            </nav>
+
+            {/* Modal */}
             <AnimatePresence>
                 {selectedOrder && (
-                    <motion.div
-                        className="fixed inset-0 z-50 bg-overlay backdrop-blur-md flex justify-center items-center p-4"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        onClick={() => setSelectedOrder(null)}
-                    >
-                        <motion.div
-                            onClick={(e) => e.stopPropagation()}
-                            className="relative w-full max-w-lg glass-card p-8 shadow-2xl rounded-3xl"
-                            initial={{ scale: 0.9 }}
-                            animate={{ scale: 1 }}
-                            exit={{ scale: 0.9 }}
-                        >
-                            <button
-                                onClick={() => setSelectedOrder(null)}
-                                className="absolute top-4 right-4 text-muted-foreground hover:text-error transition-colors duration-320"
-                            >
-                                <X size={22} />
-                            </button>
-                            <h3 className="text-xl font-semibold mb-2 text-foreground">
-                                Order #{selectedOrder.orderId}
-                            </h3>
-                            <p className="text-muted-foreground text-sm mb-4">
-                                {new Date(selectedOrder.createdAt).toLocaleString("id-ID")}
-                            </p>
-                            <div className="space-y-2 text-sm text-foreground">
+                    <motion.div className="fixed inset-0 z-50 bg-overlay backdrop-blur-md flex justify-center items-end md:items-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedOrder(null)}>
+                        <motion.div onClick={(e) => e.stopPropagation()} initial={{ y: 40 }} animate={{ y: 0 }} exit={{ y: 40 }} transition={{ duration: UI_DUR }} className="w-full md:max-w-lg glass-card p-6 rounded-t-2xl md:rounded-3xl">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold">Order #{selectedOrder.orderId}</h3>
+                                <button onClick={() => setSelectedOrder(null)} className="text-muted-foreground"><X /></button>
+                            </div>
+                            <div className="space-y-3 text-sm text-foreground">
                                 {selectedOrder.items.map((i) => (
                                     <div key={i.product} className="flex justify-between">
-                                        <span>
-                                            {i.name} <span className="text-muted-foreground">({i.size})</span> ×
-                                            {i.quantity}
-                                        </span>
-                                        <span>
-                                            Rp {(i.price * i.quantity).toLocaleString("id-ID")}
-                                        </span>
+                                        <div className="min-w-0 truncate">{i.name} <span className="text-muted-foreground">({i.size})</span> × {i.quantity}</div>
+                                        <div className="font-mono">Rp {(i.price * i.quantity).toLocaleString('id-ID')}</div>
                                     </div>
                                 ))}
                             </div>
-                            <div className="mt-4 border-t border-border pt-4 text-sm">
-                                <div className="flex justify-between">
-                                    <span>Status:</span>
-                                    <span className="font-semibold">{selectedOrder.status}</span>
-                                </div>
-                                <div className="flex justify-between mt-2">
-                                    <span>Total:</span>
-                                    <span className="font-semibold text-secondary">
-                                        Rp {selectedOrder.totalAmount.toLocaleString("id-ID")}
-                                    </span>
-                                </div>
+
+                            <div className="mt-4 border-t border-border pt-4 flex gap-3">
+                                {['Diproses', 'Pending Payment'].includes(selectedOrder.status) && (
+                                    <Button variant="destructive" className="flex-1" onClick={handleCancelOrder}>Cancel</Button>
+                                )}
+                                <Button className="flex-1" onClick={() => navigate(`/order/${selectedOrder.orderId}`)}>Details</Button>
                             </div>
-                            {["Diproses", "Pending Payment"].includes(selectedOrder.status) && (
-                                <Button
-                                    onClick={handleCancelOrder}
-                                    variant="destructive"
-                                    className="w-full mt-6"
-                                >
-                                    Cancel Order
-                                </Button>
-                            )}
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Cancel Success */}
+            {/* Cancel success */}
             <AnimatePresence>
                 {showCancelSuccess && (
-                    <motion.div
-                        className="fixed inset-0 z-50 flex items-center justify-center"
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                    >
-                        <div className="bg-success/90 p-6 rounded-full shadow-2xl">
-                            <CheckCircle className="text-foreground" size={40} />
-                        </div>
+                    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
+                        <div className="bg-success/90 p-5 rounded-full shadow-2xl"><CheckCircle className="text-foreground" size={36} /></div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Desktop sidebar */}
+            <div className="hidden md:block fixed top-32 right-6 w-48">
+                <aside className="glass-card p-3 rounded-2xl space-y-2">
+                    <button onClick={() => setActiveView('account')} className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 ${activeView === 'account' ? 'bg-accent/20 text-foreground' : 'text-muted-foreground hover:bg-card/50'}`}><User size={16} /> Info</button>
+                    <button onClick={() => setActiveView('orders')} className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 ${activeView === 'orders' ? 'bg-accent/20 text-foreground' : 'text-muted-foreground hover:bg-card/50'}`}><ShoppingBag size={16} /> Orders</button>
+                    <button onClick={() => setActiveView('reviews')} className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 ${activeView === 'reviews' ? 'bg-accent/20 text-foreground' : 'text-muted-foreground hover:bg-card/50'}`}><Star size={16} /> Reviews</button>
+                    <button onClick={handleLogout} className="w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 text-error hover:bg-error/10"><LogOut size={16} /> Logout</button>
+                </aside>
+            </div>
         </motion.div>
     );
 };
