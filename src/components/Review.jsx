@@ -25,8 +25,8 @@ const StarRating = ({ rating, setRating }) => (
                 <Star
                     size={28}
                     className={`cursor-pointer transition-colors duration-320 ${star <= rating
-                            ? "text-secondary fill-secondary"
-                            : "text-muted-foreground"
+                        ? "text-secondary fill-secondary"
+                        : "text-muted-foreground"
                         }`}
                 />
             </motion.button>
@@ -55,17 +55,6 @@ const ReviewManager = ({ products, onSubmit }) => {
             transition={{ duration: 0.6 }}
             className="relative glass-card p-6 sm:p-10 shadow-xl overflow-hidden"
         >
-            {/* Decorative Blobs */}
-            <motion.div
-                animate={{ y: [0, 25, 0] }}
-                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute -top-10 -left-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl"
-            />
-            <motion.div
-                animate={{ y: [0, -30, 0] }}
-                transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-0 right-0 w-56 h-56 bg-primary/30 rounded-full blur-3xl"
-            />
 
             <div className="relative space-y-6">
                 {/* Header */}

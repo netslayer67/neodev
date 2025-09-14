@@ -64,8 +64,8 @@ const ReviewCard = ({ review, variants }) => (
           <Star
             key={i}
             className={`h-5 w-5 ${i < review.rating
-                ? "fill-accent text-accent"
-                : "text-muted/40"
+              ? "fill-accent text-accent"
+              : "text-muted/40"
               }`}
           />
         ))}
@@ -113,17 +113,15 @@ const CustomerReviews = () => {
   };
 
   return (
-    <section className="relative py-16 sm:py-24 bg-background overflow-hidden">
-      {/* Decorative Blobs */}
+    <section className="relative py-16 sm:py-24 overflow-hidden">
+      {/* Blobs */}
       <motion.div
-        className="absolute -top-20 -left-20 w-72 h-72 bg-primary/25 rounded-full blur-3xl"
-        animate={{ y: [0, 40, 0], opacity: [0.6, 0.9, 0.6] }}
-        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+
+        className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
       />
       <motion.div
-        className="absolute -bottom-20 -right-20 w-80 h-80 bg-secondary/30 rounded-full blur-3xl"
-        animate={{ y: [0, -30, 0], opacity: [0.5, 0.8, 0.5] }}
-        transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+
+        className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
       />
 
       {/* Heading */}

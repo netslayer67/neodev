@@ -35,18 +35,14 @@ const MainLayout = ({ children }) => (
     <div className="absolute inset-0 -z-10">
       <div className="absolute inset-0 bg-gradient-to-br from-background via-card/80 to-background opacity-95 transition-all duration-[320ms]" />
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-
-      {/* Decorative Animated Blobs */}
+      {/* Blobs */}
       <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: [1, 1.15, 1], rotate: [0, 30, 0] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -top-20 -right-20 w-80 h-80 bg-accent/25 rounded-full blur-3xl"
+
+        className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
       />
       <motion.div
-        animate={{ y: [0, 40, 0], opacity: [0.5, 0.85, 0.5] }}
-        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute -bottom-24 -left-16 w-72 h-72 bg-secondary/30 rounded-full blur-3xl"
+
+        className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
       />
     </div>
 

@@ -136,20 +136,18 @@ const CheckoutPage = () => {
             initial="hidden"
             animate="show"
             exit="hidden"
-            className="relative min-h-screen px-4 pt-24 pb-20 sm:px-6 lg:px-10 font-sans bg-background text-foreground"
+            className="relative min-h-screen px-4 pt-24 pb-20 sm:px-6 lg:px-10 font-sans text-foreground"
         >
             <Helmet><title>Checkout</title></Helmet>
 
-            {/* decorative blobs */}
+            {/* Blobs */}
             <motion.div
-                animate={{ y: [0, 30, 0] }}
-                transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -top-24 -left-20 w-64 h-64 rounded-full blur-3xl bg-accent/20"
+
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
             />
             <motion.div
-                animate={{ y: [0, -25, 0] }}
-                transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -bottom-28 -right-16 w-80 h-80 rounded-full blur-3xl bg-primary/30"
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
             />
 
             <motion.div variants={fadeIn} className="relative z-10 max-w-6xl mx-auto">

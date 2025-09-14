@@ -147,7 +147,7 @@ const ProductDetailPage = () => {
   if (status === "loading") return <PageLoader />;
   if (status === "failed") {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center text-foreground">
+      <div className="min-h-screen flex items-center justify-center text-foreground">
         <div className="text-center space-y-4">
           <h1 className="text-2xl font-bold">Product Not Found</h1>
           <button onClick={() => navigate("/shop")} className="text-accent hover:underline">Back to Shop</button>
@@ -167,16 +167,22 @@ const ProductDetailPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="min-h-screen pt-20 pb-32 font-sans bg-background relative text-foreground"
+      className="min-h-screen pt-20 pb-32 font-sans relative text-foreground"
     >
       <Helmet>
         <title>{product.name} — Neo Dervish</title>
         <meta name="description" content={product.description?.slice(0, 150) || "Premium streetwear."} />
       </Helmet>
 
-      {/* Decorative blobs token-driven */}
-      <motion.div animate={{ y: [0, 14, 0] }} transition={{ duration: 12, repeat: Infinity }} className="absolute -top-20 -left-20 w-60 h-60 bg-accent/20 rounded-full blur-3xl" aria-hidden />
-      <motion.div animate={{ y: [0, -18, 0] }} transition={{ duration: 14, repeat: Infinity }} className="absolute -bottom-20 -right-20 w-72 h-72 bg-primary/30 rounded-full blur-3xl" aria-hidden />
+      {/* Blobs */}
+      <motion.div
+
+        className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+      />
+      <motion.div
+
+        className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+      />
 
       <div className="container mx-auto px-4 relative z-10">
         <Link to="/shop" className="flex items-center mb-6 text-sm text-muted-foreground hover:text-foreground transition duration-[320ms]">
@@ -243,6 +249,7 @@ const ProductDetailPage = () => {
 
           {/* Info column */}
           <div className="flex flex-col gap-6">
+
             <div>
               <p className="uppercase text-xs tracking-widest text-secondary mb-1 font-semibold">{product.category}</p>
               <h1 className="text-3xl lg:text-5xl font-heading font-bold leading-tight">{product.name}</h1>

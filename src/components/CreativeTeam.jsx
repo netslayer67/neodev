@@ -28,16 +28,16 @@ const CreativeTeam = () => {
     return (
         <section
             ref={sectionRef}
-            className="relative px-6 py-24 md:py-32 bg-background text-foreground overflow-hidden"
+            className="relative px-6 py-24 md:py-32 text-foreground overflow-hidden"
         >
-            {/* Decorative Blobs */}
+            {/* Blobs */}
             <motion.div
-                style={{ y: orb1 }}
-                className="absolute top-[-80px] left-[-60px] w-72 h-72 rounded-full bg-accent/20 blur-3xl"
+
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
             />
             <motion.div
-                style={{ y: orb2 }}
-                className="absolute bottom-[-80px] right-[-60px] w-72 h-72 rounded-full bg-primary/30 blur-3xl"
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
             />
 
             <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center space-y-16">

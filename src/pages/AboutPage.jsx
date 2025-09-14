@@ -45,11 +45,7 @@ const AboutPage = () => {
     const handleStepEnter = ({ data }) => setCurrentStep(data);
 
     return (
-        <main className="relative font-sans bg-background text-foreground overflow-hidden">
-            {/* Decorative blobs */}
-            <div className="absolute -top-32 -left-32 w-[28rem] h-[28rem] rounded-full bg-accent/20 blur-3xl animate-pulse" />
-            <div className="absolute -bottom-32 -right-32 w-[28rem] h-[28rem] rounded-full bg-primary/30 blur-3xl animate-ping" />
-
+        <main className="relative font-sans text-foreground overflow-hidden">
             {/* HERO */}
             <motion.section
                 initial={{ opacity: 0, y: 30 }}
@@ -57,6 +53,15 @@ const AboutPage = () => {
                 transition={{ duration: 1 }}
                 className="relative min-h-[100dvh] flex flex-col items-center justify-center text-center px-6"
             >
+                {/* Blobs */}
+                <motion.div
+
+                    className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+                />
+                <motion.div
+
+                    className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+                />
                 <h1 className="font-heading text-4xl md:text-6xl font-semibold leading-tight drop-shadow">
                     Beyond Fabric, Into Ritual
                 </h1>
@@ -67,6 +72,7 @@ const AboutPage = () => {
 
             {/* PHILOSOPHY + VIDEO */}
             <section className="py-24 px-6 md:px-12">
+
                 <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
                     <motion.div
                         initial={{ opacity: 0, x: -40 }}
@@ -74,6 +80,7 @@ const AboutPage = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
+
                         <h2 className="font-heading text-3xl md:text-4xl font-semibold mb-4">
                             Philosophy
                         </h2>
@@ -103,13 +110,23 @@ const AboutPage = () => {
                                 <source src={Logo} type="video/webm" />
                             </video>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
+                        <div className="absolute inset-0 " />
                     </motion.div>
+
                 </div>
             </section>
 
             {/* CORE VALUES */}
             <section className="py-24 px-6 md:px-12 bg-card/50 backdrop-blur-lg rounded-t-[3rem]">
+                {/* Blobs */}
+                <motion.div
+
+                    className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+                />
+                <motion.div
+
+                    className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+                />
                 <motion.h2
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
@@ -181,6 +198,7 @@ const AboutPage = () => {
 
             {/* CTA */}
             <section className="relative px-6 py-32 text-center bg-card/70 backdrop-blur-xl rounded-t-[3rem] overflow-hidden">
+
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}

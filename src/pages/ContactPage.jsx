@@ -35,19 +35,15 @@ const ContactPage = () => {
         value.replace(/(<([^>]+)>)/gi, "").replace(/(https?:\/\/[^\s]+)/g, "");
 
     return (
-        <div className="relative min-h-screen px-6 py-20 text-foreground overflow-hidden bg-background">
-            {/* Decorative Blobs */}
+        <div className="relative min-h-screen px-6 py-20 text-foreground overflow-hidden">
+            {/* Blobs */}
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.4, scale: 1 }}
-                transition={{ duration: 2 }}
-                className="absolute top-[-120px] left-[-100px] w-96 h-96 rounded-full bg-accent/25 blur-3xl"
+
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
             />
             <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 0.4, scale: 1 }}
-                transition={{ duration: 2, delay: 0.5 }}
-                className="absolute bottom-[-120px] right-[-100px] w-96 h-96 rounded-full bg-primary/30 blur-3xl"
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
             />
 
             {/* Header */}

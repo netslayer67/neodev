@@ -46,13 +46,11 @@ const Footer = () => {
 
         {/* Blobs */}
         <motion.div
-          animate={{ y: [0, 30, 0], opacity: [0.4, 0.7, 0.4] }}
-          transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+
           className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
         />
         <motion.div
-          animate={{ y: [0, -35, 0], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+
           className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
         />
       </div>

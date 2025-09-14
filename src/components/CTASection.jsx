@@ -16,25 +16,21 @@ const CTASection = () => {
     }, []);
 
     return (
-        <section className="relative py-20 md:py-28 px-6 md:px-12 overflow-hidden bg-background text-foreground">
+        <section className="relative py-20 md:py-28 px-6 md:px-12 overflow-hidden text-foreground">
             {/* Background Layers */}
-            <div className="absolute inset-0 z-0">
+            {/* Blobs */}
+            <motion.div
+
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+            />
+            <motion.div
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+            />
+            {/* <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-br from-background via-card/80 to-background opacity-95" />
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-
-                {/* Animated Blobs */}
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: [1, 1.2, 1], rotate: [0, 45, 0] }}
-                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-20 -right-20 w-80 h-80 bg-accent/25 rounded-full blur-3xl"
-                />
-                <motion.div
-                    animate={{ y: [0, 40, 0], opacity: [0.6, 0.9, 0.6] }}
-                    transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -bottom-24 -left-16 w-72 h-72 bg-secondary/30 rounded-full blur-3xl"
-                />
-            </div>
+            </div> */}
 
             {/* Content */}
             <motion.div

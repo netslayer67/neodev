@@ -79,19 +79,16 @@ const LookbookSection = () => {
     const loaded = useFakeLoad();
 
     return (
-        <section className="relative overflow-hidden py-20 md:py-32 bg-background">
-            {/* Decorative Blobs */}
+        <section className="relative overflow-hidden py-20 md:py-32">
+            {/* Blobs */}
             <motion.div
-                className="absolute top-20 -left-20 w-72 h-72 bg-accent/20 rounded-full blur-3xl"
-                animate={{ y: [0, 40, 0] }}
-                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-                className="absolute bottom-10 -right-20 w-80 h-80 bg-card/40 rounded-full blur-3xl"
-                animate={{ y: [0, -30, 0] }}
-                transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            />
 
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+            />
+            <motion.div
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+            />
             <div className="relative z-10 max-w-7xl mx-auto px-6">
                 {/* Section Heading */}
                 <motion.div

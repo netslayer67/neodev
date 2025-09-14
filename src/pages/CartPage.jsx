@@ -67,7 +67,7 @@ const CartPage = () => {
       animate="animate"
       exit="exit"
       variants={pageTransition}
-      className="relative min-h-screen pt-24 pb-28 text-foreground bg-background"
+      className="relative min-h-screen pt-24 pb-28 text-foreground"
     >
       <Helmet>
         <title>Cart — Neo Dervish</title>
@@ -75,14 +75,12 @@ const CartPage = () => {
 
       {/* Blobs */}
       <motion.div
-        animate={{ y: [0, 25, 0] }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -top-24 -left-20 h-64 w-64 rounded-full blur-3xl bg-accent/20"
+
+        className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
       />
       <motion.div
-        animate={{ y: [0, -25, 0] }}
-        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute -bottom-28 -right-16 h-80 w-80 rounded-full blur-3xl bg-primary/30"
+
+        className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
       />
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">

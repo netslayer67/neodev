@@ -111,11 +111,16 @@ const ProfilePage = () => {
 
     // layout: mobile-first with bottom navigation
     return (
-        <motion.div className="relative min-h-screen pt-20 pb-24 px-4 bg-background text-foreground font-sans">
-            {/* decorative blobs */}
-            <motion.div className="absolute -top-16 -left-12 w-64 h-64 rounded-full blur-3xl bg-accent/14" animate={{ scale: [1, 1.06, 1] }} transition={{ duration: 10, repeat: Infinity }} aria-hidden />
-            <motion.div className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl bg-primary/18" animate={{ scale: [1, 1.05, 1] }} transition={{ duration: 12, repeat: Infinity }} aria-hidden />
+        <motion.div className="relative min-h-screen pt-20 pb-24 px-4 text-foreground font-sans">
+            {/* Blobs */}
+            <motion.div
 
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+            />
+            <motion.div
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+            />
             <div className="max-w-3xl mx-auto">
                 <header className="flex items-center justify-between mb-6">
                     <div>

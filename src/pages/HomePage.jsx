@@ -91,23 +91,18 @@ const HomePage = () => {
         <meta name="description" content="Luxury streetwear infused with soul and movement." />
       </Helmet>
 
-      {/* Decorative blobs: token-driven colors only */}
-      <motion.div
-        className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-accent/20 blur-3xl"
-        animate={{ scale: [1, 1.18, 1] }}
-        transition={{ duration: 9, repeat: Infinity }}
-        aria-hidden
-      />
-
-      <motion.div
-        className="absolute bottom-8 right-8 w-72 h-72 rounded-full bg-secondary/10 blur-3xl"
-        animate={{ scale: [1, 1.08, 1] }}
-        transition={{ duration: 7, repeat: Infinity }}
-        aria-hidden
-      />
 
       {/* HERO */}
       <section className="relative w-full min-h-[56vh] md:min-h-[88vh] flex items-center justify-center bg-background text-foreground">
+        {/* Blobs */}
+        <motion.div
+
+          className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+        />
+        <motion.div
+
+          className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+        />
         {/* lightweight ambient video (poster fallback via CSS/video attributes) */}
         <video
           src={vid}
@@ -210,7 +205,16 @@ const HomePage = () => {
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section className="py-16 px-4 md:px-16 backdrop-blur-xl border-t border-border/10 bg-background text-foreground">
+      <section className="py-16 px-4 md:px-16 backdrop-blur-xl border-t border-border/10 text-foreground">
+        {/* Blobs */}
+        <motion.div
+
+          className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+        />
+        <motion.div
+
+          className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+        />
         <motion.div
           className="text-center mb-10"
           initial={{ opacity: 0, y: 24 }}

@@ -92,7 +92,16 @@ const MagneticButton = ({ children }) => {
 /** Manifesto Section */
 const ManifestoSection = () => {
     return (
-        <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden px-6 py-24 bg-background">
+        <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden px-6 py-24 ">
+            {/* Blobs */}
+            <motion.div
+
+                className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+            />
+            <motion.div
+
+                className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+            />
             {/* 🎥 Video Background */}
             <div className="absolute inset-0 z-0">
                 <video
@@ -105,18 +114,6 @@ const ManifestoSection = () => {
                 />
                 <div className="absolute inset-0 bg-overlay backdrop-blur-sm z-10" />
             </div>
-
-            {/* 🎨 Decorative Blobs */}
-            <motion.div
-                className="absolute top-20 -left-20 w-72 h-72 bg-primary/25 rounded-full blur-3xl"
-                animate={{ y: [0, 40, 0], opacity: [0.6, 0.9, 0.6] }}
-                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-                className="absolute bottom-10 -right-20 w-80 h-80 bg-secondary/30 rounded-full blur-3xl"
-                animate={{ y: [0, -35, 0], opacity: [0.5, 0.8, 0.5] }}
-                transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-            />
 
             {/* ✨ Manifesto Content */}
             <div className="relative z-20 max-w-3xl mx-auto space-y-10">
