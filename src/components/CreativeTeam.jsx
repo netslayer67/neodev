@@ -28,16 +28,16 @@ const CreativeTeam = () => {
     return (
         <section
             ref={sectionRef}
-            className="relative px-6 py-24 md:py-32 bg-[#0F0F1A] text-white overflow-hidden"
+            className="relative px-6 py-24 md:py-32 bg-background text-foreground overflow-hidden"
         >
-            {/* Blobs */}
+            {/* Decorative Blobs */}
             <motion.div
                 style={{ y: orb1 }}
-                className="absolute top-[-80px] left-[-60px] w-72 h-72 rounded-full bg-[#8A5CF6]/20 blur-3xl"
+                className="absolute top-[-80px] left-[-60px] w-72 h-72 rounded-full bg-accent/20 blur-3xl"
             />
             <motion.div
                 style={{ y: orb2 }}
-                className="absolute bottom-[-80px] right-[-60px] w-72 h-72 rounded-full bg-[#1E2A47]/40 blur-3xl"
+                className="absolute bottom-[-80px] right-[-60px] w-72 h-72 rounded-full bg-primary/30 blur-3xl"
             />
 
             <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center space-y-16">
@@ -49,54 +49,56 @@ const CreativeTeam = () => {
                     viewport={{ once: true }}
                     className="text-center max-w-2xl"
                 >
-                    <h2 className="text-3xl md:text-4xl font-serif font-semibold mb-4">
+                    <h2 className="font-heading text-3xl md:text-4xl font-semibold mb-4">
                         Meet the Team
                     </h2>
-                    <p className="text-white/70 text-lg">
-                        The people shaping vision into wearable experiences.
+                    <p className="text-muted-foreground text-lg">
+                        The minds shaping vision into wearable experiences.
                     </p>
                 </motion.div>
 
-                {/* Team Cards */}
-                <div className="grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+                {/* Team Grid */}
+                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 w-full">
                     {teamMembers.map((member, i) => (
                         <motion.div
                             key={member.name}
-                            className="group relative rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg hover:shadow-2xl transition-all duration-500"
+                            className="group relative rounded-3xl border border-border bg-card/60 backdrop-blur-xl shadow-lg hover:shadow-2xl hover:border-accent/50 transition-all duration-320"
                             initial={{ opacity: 0, y: 50, scale: 0.95 }}
                             whileInView={{ opacity: 1, y: 0, scale: 1 }}
                             transition={{ delay: i * 0.15, duration: 0.8 }}
                             viewport={{ once: true }}
                         >
-                            {/* Glow */}
-                            <div className="absolute inset-0 bg-gradient-to-tr from-[#8A5CF6]/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition duration-500" />
+                            {/* Glow effect */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-accent/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 blur-2xl transition duration-320" />
 
                             {/* Content */}
                             <div className="relative z-10 flex flex-col items-center px-6 py-10 space-y-6 text-center">
                                 {loading ? (
-                                    <div className="w-20 h-20 rounded-full bg-[#1E2A47]/50 animate-pulse" />
+                                    <div className="w-20 h-20 rounded-full bg-muted animate-pulse" />
                                 ) : (
-                                    <div className="w-20 h-20 rounded-full bg-[#1E2A47]/60 border border-white/10 flex items-center justify-center">
-                                        <UserCircle2 className="w-10 h-10 text-white/80" />
+                                    <div className="w-20 h-20 rounded-full bg-card border border-border flex items-center justify-center">
+                                        <UserCircle2 className="w-10 h-10 text-muted-foreground" />
                                     </div>
                                 )}
 
                                 <div className="space-y-1">
                                     {loading ? (
-                                        <div className="w-24 h-4 bg-white/20 rounded-full animate-pulse mx-auto" />
+                                        <div className="w-24 h-4 bg-muted/40 rounded-full animate-pulse mx-auto" />
                                     ) : (
                                         <h3 className="text-lg font-semibold">{member.name}</h3>
                                     )}
                                     {loading ? (
-                                        <div className="w-16 h-3 bg-white/10 rounded-full animate-pulse mx-auto" />
+                                        <div className="w-16 h-3 bg-muted/20 rounded-full animate-pulse mx-auto" />
                                     ) : (
-                                        <p className="text-sm text-white/60">{member.role}</p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {member.role}
+                                        </p>
                                     )}
                                 </div>
 
                                 {!loading && (
-                                    <div className="opacity-0 group-hover:opacity-100 transition duration-500">
-                                        <button className="flex items-center gap-1 text-sm text-[#8A5CF6] hover:text-white transition">
+                                    <div className="opacity-0 group-hover:opacity-100 transition duration-320">
+                                        <button className="flex items-center gap-1 text-sm text-accent hover:text-foreground transition-colors duration-320">
                                             View Profile
                                             <ArrowRight className="w-4 h-4" />
                                         </button>

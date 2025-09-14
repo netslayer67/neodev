@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const shimmer =
-  "animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent";
+  "animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-foreground/10 to-transparent";
 
 const ProductCard = ({ product, loading = false, index = null }) => {
   const cardRef = useRef(null);
@@ -19,7 +19,7 @@ const ProductCard = ({ product, loading = false, index = null }) => {
     return () => clearInterval(interval);
   }, [product?.images]);
 
-  // Tilt effect on desktop only
+  // Tilt effect (desktop only)
   const handleMouseMove = (e) => {
     const card = cardRef.current;
     if (!card || window.innerWidth < 768) return;
@@ -32,9 +32,7 @@ const ProductCard = ({ product, loading = false, index = null }) => {
   };
 
   const handleMouseLeave = () => {
-    const card = cardRef.current;
-    if (!card) return;
-    card.style.transform = "rotateX(0deg) rotateY(0deg)";
+    if (cardRef.current) cardRef.current.style.transform = "rotateX(0deg) rotateY(0deg)";
   };
 
   return (
@@ -49,10 +47,13 @@ const ProductCard = ({ product, loading = false, index = null }) => {
     >
       <Link
         to={loading ? "#" : `/product/${product?.slug}`}
-        className="block overflow-hidden rounded-2xl border border-white/10 bg-[#1E2A47]/30 backdrop-blur-lg shadow-lg transition-all duration-500 hover:shadow-2xl hover:border-[#8A5CF6]/50"
+        className="block overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-lg transition-all duration-320 hover:shadow-xl hover:border-accent/60"
       >
-        {/* 🔮 Blob effect */}
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-[#8A5CF6]/20 rounded-full blur-3xl group-hover:opacity-70 opacity-40 transition" />
+        {/* Decorative subtle blob */}
+        <motion.div
+          aria-hidden
+          className="absolute -top-12 -right-12 w-32 h-32 rounded-full bg-accent/20 blur-3xl opacity-40 group-hover:opacity-70 transition"
+        />
 
         {/* Image Section */}
         <div className="relative aspect-[3/4] overflow-hidden rounded-t-2xl">
@@ -72,33 +73,33 @@ const ProductCard = ({ product, loading = false, index = null }) => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.6 }}
-                className="h-full w-full object-cover absolute inset-0 transition-transform duration-700 group-hover:scale-105"
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               />
             </AnimatePresence>
           )}
 
           {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0F0F1A]/90 via-[#0F0F1A]/40 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent z-10" />
 
-          {/* Badge */}
+          {/* Badge (fresh drop) */}
           {!loading && index === 0 && (
-            <span className="absolute top-2 left-2 z-20 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-md shadow-sm animate-pulse">
+            <span className="absolute top-2 left-2 z-20 rounded-full border border-border/40 bg-card/60 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-md shadow-sm animate-pulse">
               Fresh Drop
             </span>
           )}
 
           {/* Hover Icons */}
           {!loading && (
-            <div className="absolute top-2 right-2 z-30 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute top-2 right-2 z-30 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-320">
               <button
                 aria-label="Add to wishlist"
-                className="rounded-full border border-white/20 bg-white/10 p-2 text-white backdrop-blur-md hover:bg-[#8A5CF6]/40 transition"
+                className="rounded-full border border-border bg-card/70 p-2 text-foreground backdrop-blur-md hover:bg-accent/30 transition-all duration-320"
               >
                 <Heart size={16} />
               </button>
               <button
                 aria-label="Quick view"
-                className="rounded-full border border-white/20 bg-white/10 p-2 text-white backdrop-blur-md hover:bg-[#8A5CF6]/40 transition"
+                className="rounded-full border border-border bg-card/70 p-2 text-foreground backdrop-blur-md hover:bg-accent/30 transition-all duration-320"
               >
                 <Eye size={16} />
               </button>
@@ -118,12 +119,14 @@ const ProductCard = ({ product, loading = false, index = null }) => {
             </>
           ) : (
             <>
-              <h3 className="font-serif text-base font-semibold text-white leading-snug line-clamp-2">
+              <h3 className="font-heading text-lg leading-snug line-clamp-2">
                 {product.name}
               </h3>
-              <p className="text-xs text-neutral-400">{product.category}</p>
+              <p className="text-xs font-sans text-muted-foreground">
+                {product.category}
+              </p>
               <div className="mt-2 flex items-center justify-between">
-                <span className="text-sm font-semibold text-[#8A5CF6]">
+                <span className="text-sm font-semibold text-accent">
                   Rp {product.price.toLocaleString("id-ID")}
                 </span>
               </div>

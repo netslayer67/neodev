@@ -19,7 +19,7 @@ const faqs = [
 
 // Skeleton Loader
 const Skeleton = ({ className }) => (
-    <div className={`animate-pulse bg-white/10 rounded ${className}`} />
+    <div className={`animate-pulse bg-muted/30 rounded ${className}`} />
 );
 
 const ContactPage = () => {
@@ -30,20 +30,24 @@ const ContactPage = () => {
         return () => clearTimeout(timer);
     }, []);
 
+    // Basic sanitasi input (prevent script injection & URL spam)
+    const sanitizeInput = (value) =>
+        value.replace(/(<([^>]+)>)/gi, "").replace(/(https?:\/\/[^\s]+)/g, "");
+
     return (
-        <div className="relative min-h-screen px-6 py-20 text-white overflow-hidden bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47] to-[#0F0F1A]">
-            {/* Background Blobs */}
+        <div className="relative min-h-screen px-6 py-20 text-foreground overflow-hidden bg-background">
+            {/* Decorative Blobs */}
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 0.4, scale: 1 }}
                 transition={{ duration: 2 }}
-                className="absolute top-[-120px] left-[-100px] w-96 h-96 rounded-full bg-[#8A5CF6]/30 blur-3xl"
+                className="absolute top-[-120px] left-[-100px] w-96 h-96 rounded-full bg-accent/25 blur-3xl"
             />
             <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 0.4, scale: 1 }}
                 transition={{ duration: 2, delay: 0.5 }}
-                className="absolute bottom-[-120px] right-[-100px] w-96 h-96 rounded-full bg-[#1E2A47]/40 blur-3xl"
+                className="absolute bottom-[-120px] right-[-100px] w-96 h-96 rounded-full bg-primary/30 blur-3xl"
             />
 
             {/* Header */}
@@ -53,11 +57,11 @@ const ContactPage = () => {
                 transition={{ duration: 0.8 }}
                 className="relative z-10 text-center max-w-2xl mx-auto mb-16"
             >
-                <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-white via-gray-200 to-white bg-clip-text text-transparent">
+                <h1 className="text-4xl md:text-5xl font-heading font-bold bg-gradient-to-r from-foreground via-secondary to-foreground bg-clip-text text-transparent">
                     Hubungi Kami
                 </h1>
-                <p className="mt-3 text-white/70 text-lg">
-                    Butuh bantuan atau info lebih lanjut? Kirim pesan aja.
+                <p className="mt-3 text-muted-foreground text-lg">
+                    Ada pertanyaan? Tinggalkan pesan, tim kami siap bantu.
                 </p>
             </motion.header>
 
@@ -69,25 +73,31 @@ const ContactPage = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
                     viewport={{ once: true }}
-                    className="p-8 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg"
+                    className="glass-card p-8 shadow-lg"
                 >
                     <h2 className="text-2xl font-semibold mb-6">Kirim Pesan</h2>
                     <form className="space-y-6">
                         {["Nama Lengkap", "Email", "Pesan"].map((label, i) =>
                             loaded ? (
                                 <div key={i} className="space-y-2">
-                                    <label className="block text-sm text-white/70">{label}</label>
+                                    <label className="block text-sm text-muted-foreground">
+                                        {label}
+                                    </label>
                                     {label === "Pesan" ? (
                                         <textarea
                                             rows={4}
+                                            required
                                             placeholder={`Tulis ${label.toLowerCase()}...`}
-                                            className="w-full rounded-xl bg-white/10 px-4 py-3 text-white placeholder-white/40 border border-white/10 focus:ring-2 focus:ring-[#8A5CF6] transition"
+                                            onChange={(e) => (e.target.value = sanitizeInput(e.target.value))}
+                                            className="w-full rounded-xl bg-input px-4 py-3 text-foreground placeholder-muted-foreground border border-border focus:ring-2 focus:ring-accent transition-all duration-320"
                                         />
                                     ) : (
                                         <input
                                             type={label === "Email" ? "email" : "text"}
+                                            required
                                             placeholder={`Masukkan ${label.toLowerCase()}`}
-                                            className="w-full rounded-xl bg-white/10 px-4 py-3 text-white placeholder-white/40 border border-white/10 focus:ring-2 focus:ring-[#8A5CF6] transition"
+                                            onChange={(e) => (e.target.value = sanitizeInput(e.target.value))}
+                                            className="w-full rounded-xl bg-input px-4 py-3 text-foreground placeholder-muted-foreground border border-border focus:ring-2 focus:ring-accent transition-all duration-320"
                                         />
                                     )}
                                 </div>
@@ -97,7 +107,7 @@ const ContactPage = () => {
                         )}
                         <button
                             type="submit"
-                            className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-[#8A5CF6] to-[#1E2A47] font-semibold hover:scale-105 transition-transform duration-300"
+                            className="w-full mt-4 flex items-center justify-center gap-2 px-6 py-4 rounded-xl btn-primary hover:scale-105 transition-transform duration-320"
                         >
                             <SendHorizonal className="h-5 w-5" />
                             Kirim
@@ -114,12 +124,12 @@ const ContactPage = () => {
                     className="space-y-10"
                 >
                     {/* Info */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+                    <div className="glass-card p-6 shadow-lg">
                         <h3 className="text-xl font-semibold mb-4">Info Kontak</h3>
-                        <div className="space-y-3 text-white/70">
+                        <div className="space-y-3 text-muted-foreground">
                             <a
                                 href="mailto:hello@luxury.com"
-                                className="flex items-center gap-3 hover:text-white transition"
+                                className="flex items-center gap-3 hover:text-foreground transition-colors duration-320"
                             >
                                 <Mail className="h-5 w-5" />
                                 hello@luxury.com
@@ -130,19 +140,19 @@ const ContactPage = () => {
                             </div>
                         </div>
                         <div className="flex gap-4 mt-6">
-                            <a className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition">
+                            <a className="p-2 rounded-full bg-muted/20 hover:bg-accent/20 transition duration-320">
                                 <Twitter className="h-5 w-5" />
                             </a>
-                            <a className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition">
+                            <a className="p-2 rounded-full bg-muted/20 hover:bg-accent/20 transition duration-320">
                                 <Instagram className="h-5 w-5" />
                             </a>
                         </div>
                     </div>
 
                     {/* FAQ */}
-                    <div className="p-6 rounded-3xl border border-white/10 bg-white/5 backdrop-blur-xl shadow-lg">
+                    <div className="glass-card p-6 shadow-lg">
                         <h3 className="text-xl font-semibold mb-4">FAQ</h3>
-                        <div className="divide-y divide-white/10">
+                        <div className="divide-y divide-border">
                             {faqs.map((faq, i) => (
                                 <Disclosure key={i} faq={faq} />
                             ))}
@@ -153,15 +163,18 @@ const ContactPage = () => {
 
             {/* Floating Dock */}
             <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3">
-                <button className="p-4 rounded-full shadow-lg bg-gradient-to-tr from-[#8A5CF6] to-[#1E2A47] hover:scale-110 transition">
-                    <PhoneCall className="text-white w-5 h-5" />
-                </button>
-                <button className="p-4 rounded-full shadow-lg bg-gradient-to-tr from-[#1E2A47] to-[#0F0F1A] hover:scale-110 transition">
-                    <Mail className="text-white w-5 h-5" />
-                </button>
-                <button className="p-4 rounded-full shadow-lg bg-gradient-to-tr from-[#8A5CF6] to-pink-500 hover:scale-110 transition">
-                    <MessageCircle className="text-white w-5 h-5" />
-                </button>
+                {[
+                    { Icon: PhoneCall, bg: "btn-accent" },
+                    { Icon: Mail, bg: "glass-card" },
+                    { Icon: MessageCircle, bg: "btn-primary" },
+                ].map(({ Icon, bg }, i) => (
+                    <button
+                        key={i}
+                        className={`p-4 rounded-full shadow-lg ${bg} hover:scale-110 transition-transform duration-320`}
+                    >
+                        <Icon className="text-foreground w-5 h-5" />
+                    </button>
+                ))}
             </div>
         </div>
     );
@@ -174,11 +187,11 @@ const Disclosure = ({ faq }) => {
         <div className="py-3">
             <button
                 onClick={() => setOpen(!open)}
-                className="flex justify-between items-center w-full text-left text-white/90 font-medium"
+                className="flex justify-between items-center w-full text-left text-foreground/90 font-medium"
             >
                 <span>{faq.question}</span>
                 <motion.div animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                    <ChevronDown className="w-5 h-5 text-white/60" />
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
                 </motion.div>
             </button>
             {open && (
@@ -186,7 +199,7 @@ const Disclosure = ({ faq }) => {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="mt-2 text-sm text-white/60 leading-relaxed"
+                    className="mt-2 text-sm text-muted-foreground leading-relaxed"
                 >
                     {faq.answer}
                 </motion.div>

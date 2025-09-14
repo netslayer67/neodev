@@ -48,13 +48,13 @@ const Header = () => {
 
   return (
     <>
-      {/* Navbar */}
+      {/* 🌐 Navbar */}
       <motion.header
         variants={navVariants}
         initial="hidden"
         animate="visible"
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
-          ? "bg-[#0F0F1A]/70 backdrop-blur-2xl border-b border-white/10"
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-320 ${isScrolled
+          ? "bg-card/70 backdrop-blur-2xl border-b border-border"
           : "bg-transparent"
           }`}
       >
@@ -62,7 +62,7 @@ const Header = () => {
           {/* Logo */}
           <Link
             to="/"
-            className="text-lg font-semibold tracking-widest text-white uppercase"
+            className="text-xl font-heading tracking-widest uppercase text-foreground hover:text-accent transition-colors duration-320"
           >
             NEO DERVISH
           </Link>
@@ -73,10 +73,10 @@ const Header = () => {
               <NavLink
                 key={link.name}
                 to={link.href}
-                className="relative text-sm font-medium text-neutral-300 hover:text-white transition-colors group"
+                className="relative text-sm font-medium text-foreground/80 hover:text-accent transition-colors duration-320 group"
               >
                 {link.name}
-                <span className="absolute bottom-[-6px] left-0 w-0 h-[2px] bg-[#8A5CF6] group-hover:w-full transition-all"></span>
+                <span className="absolute bottom-[-6px] left-0 w-0 h-[2px] bg-accent group-hover:w-full transition-all duration-320"></span>
               </NavLink>
             ))}
           </nav>
@@ -86,11 +86,11 @@ const Header = () => {
             {/* Cart */}
             <Link
               to="/cart"
-              className="text-neutral-200 hover:text-white relative"
+              className="text-foreground/80 hover:text-accent relative transition-colors duration-320"
             >
               <ShoppingBag size={22} strokeWidth={1.6} />
               {totalCartItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-[#8A5CF6] text-white w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold">
+                <span className="absolute -top-2 -right-2 bg-accent text-accent-foreground w-4 h-4 flex items-center justify-center rounded-full text-[10px] font-bold">
                   {totalCartItems}
                 </span>
               )}
@@ -101,14 +101,14 @@ const Header = () => {
               {user ? (
                 <Link
                   to="/profile"
-                  className="text-neutral-200 hover:text-white transition-colors"
+                  className="text-foreground/80 hover:text-accent transition-colors duration-320"
                 >
                   <User size={22} strokeWidth={1.6} />
                 </Link>
               ) : (
                 <Link
                   to="/login"
-                  className="text-neutral-200 hover:text-white transition-colors"
+                  className="text-foreground/80 hover:text-accent transition-colors duration-320"
                 >
                   <LogIn size={22} strokeWidth={1.6} />
                 </Link>
@@ -118,7 +118,7 @@ const Header = () => {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="md:hidden text-white"
+              className="md:hidden text-foreground hover:text-accent transition-colors duration-320"
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -126,7 +126,7 @@ const Header = () => {
         </div>
       </motion.header>
 
-      {/* Mobile nav */}
+      {/* 📱 Mobile nav */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -134,14 +134,14 @@ const Header = () => {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="fixed inset-0 z-40 bg-[#0F0F1A]/95 backdrop-blur-2xl flex flex-col items-center justify-center gap-10"
+            className="fixed inset-0 z-40 bg-card/95 backdrop-blur-2xl flex flex-col items-center justify-center gap-10"
           >
             {navLinks.map((link) => (
               <motion.div key={link.name} variants={mobileLinkVariants}>
                 <NavLink
                   to={link.href}
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-2xl font-medium text-neutral-300 hover:text-white transition-colors"
+                  className="text-2xl font-heading text-foreground/90 hover:text-accent transition-colors duration-320"
                 >
                   {link.name}
                 </NavLink>
@@ -154,15 +154,15 @@ const Header = () => {
                 <Link
                   to="/profile"
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-2xl font-medium text-neutral-300 hover:text-white transition-colors flex items-center gap-2"
+                  className="text-xl font-sans text-foreground/90 hover:text-accent transition-colors duration-320 flex items-center gap-2"
                 >
-                  Profile
+                  <User size={24} /> Profile
                 </Link>
               ) : (
                 <Link
                   to="/login"
                   onClick={() => setIsMenuOpen(false)}
-                  className="text-2xl font-medium text-neutral-300 hover:text-white transition-colors flex items-center gap-2"
+                  className="text-xl font-sans text-foreground/90 hover:text-accent transition-colors duration-320 flex items-center gap-2"
                 >
                   <LogIn size={24} /> Login
                 </Link>

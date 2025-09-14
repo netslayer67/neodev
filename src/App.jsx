@@ -1,39 +1,58 @@
-import React, { Suspense, lazy, useMemo } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
-import ScrollToTop from './ScrollToTop';
+import React, { Suspense, lazy, useMemo } from "react";
+import { Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
+import ScrollToTop from "./ScrollToTop";
 
 // --- UI Components ---
-import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import PageLoader from '@/components/PageLoader';
-import ProtectedRoute from './components/ProtectedRoute'; // Asumsi komponen ini akan dibuat/
+import { Toaster } from "@/components/ui/toaster";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageLoader from "@/components/PageLoader";
+import ProtectedRoute from "./components/ProtectedRoute";
 
-// --- Page Imports (Lazy Loaded) ---
-const HomePage = lazy(() => import('@/pages/HomePage'));
-const ShopPage = lazy(() => import('@/pages/ShopPage'));
-const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
-const CartPage = lazy(() => import('@/pages/CartPage'));
-const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
-const LoginPage = lazy(() => import('@/pages/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
+// --- Pages (Lazy Loaded for performance) ---
+const HomePage = lazy(() => import("@/pages/HomePage"));
+const ShopPage = lazy(() => import("@/pages/ShopPage"));
+const ProductDetailPage = lazy(() => import("@/pages/ProductDetailPage"));
+const CartPage = lazy(() => import("@/pages/CartPage"));
+const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
+const LoginPage = lazy(() => import("@/pages/LoginPage"));
+const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
+const AboutPage = lazy(() => import("@/pages/AboutPage"));
+const ContactPage = lazy(() => import("@/pages/ContactPage"));
 
-// --- Admin Page Imports (Lazy Loaded) ---
-const AdminLayout = lazy(() => import('@/pages/admin/AdminLayout'));
-const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage'));
-const AdminProductsPage = lazy(() => import('@/pages/admin/ProductsPage'));
-const AdminOrdersPage = lazy(() => import('@/pages/admin/OrdersPage'));
+// --- Admin Pages ---
+const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
+const DashboardPage = lazy(() => import("@/pages/admin/DashboardPage"));
+const AdminProductsPage = lazy(() => import("@/pages/admin/ProductsPage"));
+const AdminOrdersPage = lazy(() => import("@/pages/admin/OrdersPage"));
 
-
-// --- Helper Component untuk Layout ---
+// --- Layout Wrapper ---
 const MainLayout = ({ children }) => (
-  <div className="flex flex-col min-h-screen bg-gradient-to-br from-black via-gray-800 to-black text-foreground">
+  <div className="relative flex flex-col min-h-screen overflow-hidden">
+    {/* Background Layers */}
+    <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 bg-gradient-to-br from-background via-card/80 to-background opacity-95 transition-all duration-[320ms]" />
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
+
+      {/* Decorative Animated Blobs */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: [1, 1.15, 1], rotate: [0, 30, 0] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -top-20 -right-20 w-80 h-80 bg-accent/25 rounded-full blur-3xl"
+      />
+      <motion.div
+        animate={{ y: [0, 40, 0], opacity: [0.5, 0.85, 0.5] }}
+        transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute -bottom-24 -left-16 w-72 h-72 bg-secondary/30 rounded-full blur-3xl"
+      />
+    </div>
+
+    {/* Content */}
     <Header />
-    <main className="flex-grow">{children}</main>
+    <main className="flex-grow transition-all duration-[320ms]">{children}</main>
     <Footer />
   </div>
 );
@@ -41,63 +60,60 @@ const MainLayout = ({ children }) => (
 function App() {
   const location = useLocation();
 
-  // Memoize route definitions untuk menghindari kalkulasi ulang yang tidak perlu
-  const routeElements = useMemo(() => (
-    <Routes location={location} key={location.pathname}>
-      {/* Rute Publik dengan Layout Utama */}
-      <Route
-        path="/"
-        element={<MainLayout><HomePage /></MainLayout>}
-      />
-      <Route
-        path="/shop"
-        element={<MainLayout><ShopPage /></MainLayout>}
-      />
-      <Route
-        path="/product/:slug" // Menggunakan slug untuk SEO-friendly URL
-        element={<MainLayout><ProductDetailPage /></MainLayout>}
-      />
-      <Route
-        path="/cart"
-        element={<MainLayout><CartPage /></MainLayout>}
-      />
-      <Route
-        path="/about"
-        element={<MainLayout><AboutPage /></MainLayout>}
-      />
-      <Route
-        path="/contact"
-        element={<MainLayout><ContactPage /></MainLayout>}
-      />
+  // Optimized route definitions
+  const routeElements = useMemo(
+    () => (
+      <Routes location={location} key={location.pathname}>
+        {/* Public */}
+        <Route path="/" element={<MainLayout><HomePage /></MainLayout>} />
+        <Route path="/shop" element={<MainLayout><ShopPage /></MainLayout>} />
+        <Route path="/product/:slug" element={<MainLayout><ProductDetailPage /></MainLayout>} />
+        <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
+        <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
+        <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
 
-      {/* Rute Autentikasi (tanpa Header/Footer utama) */}
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+        {/* Auth */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
 
-      {/* Rute yang Dilindungi (Memerlukan Login) */}
-      <Route
-        path="/profile"
-        element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>}
-      />
-      <Route
-        path="/checkout"
-        element={<ProtectedRoute><MainLayout><CheckoutPage /></MainLayout></ProtectedRoute>}
-      />
+        {/* Protected */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <MainLayout><ProfilePage /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <MainLayout><CheckoutPage /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Rute Admin */}
-      <Route
-        path="/admin"
-        element={<ProtectedRoute adminOnly={true}><AdminLayout /></ProtectedRoute>}
-      >
-        <Route index element={<DashboardPage />} />
-        <Route path="products" element={<AdminProductsPage />} />
-        <Route path="orders" element={<AdminOrdersPage />} />
-      </Route>
+        {/* Admin */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute adminOnly>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="orders" element={<AdminOrdersPage />} />
+        </Route>
 
-      {/* Tambahkan rute Not Found di sini jika perlu */}
-      {/* <Route path="*" element={<NotFoundPage />} /> */}
-    </Routes>
-  ), [location]);
+        {/* Optional: 404 */}
+        {/* <Route path="*" element={<NotFoundPage />} /> */}
+      </Routes>
+    ),
+    [location]
+  );
 
   return (
     <>

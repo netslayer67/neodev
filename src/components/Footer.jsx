@@ -18,42 +18,42 @@ const Footer = () => {
 
   const handleNewsletterSubmit = (e) => {
     e.preventDefault();
-    const email = e.target.email.value;
-    if (email) {
+    const email = e.target.email.value.trim();
+
+    // Basic sanitization
+    if (!email || /<script|http:|https:|.php|.exe/i.test(email)) {
       toast({
-        title: "🎉 Subscribed!",
-        description: "Welcome aboard. Stay tuned.",
-      });
-      e.target.reset();
-    } else {
-      toast({
-        title: "⚠️ Oops!",
-        description: "Please enter a valid email.",
+        title: "⚠️ Invalid Input",
+        description: "Please enter a valid email address only.",
         variant: "destructive",
       });
+      return;
     }
+
+    toast({
+      title: "🎉 Subscribed!",
+      description: "Welcome aboard. Stay tuned.",
+    });
+    e.target.reset();
   };
 
   return (
-    <footer className="relative bg-[#0F0F1A] text-white overflow-hidden">
+    <footer className="relative overflow-hidden bg-background text-foreground">
       {/* Decorative Background */}
       <div className="absolute inset-0 z-0">
-        {/* Gradient base */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47] to-[#0F0F1A]" />
-        {/* Grain texture */}
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04]" />
+
         {/* Blobs */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.6, 0.4] }}
+          animate={{ y: [0, 30, 0], opacity: [0.4, 0.7, 0.4] }}
           transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -top-28 -left-20 w-96 h-96 bg-[#8A5CF6]/30 rounded-full blur-3xl"
+          className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
         />
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+          animate={{ y: [0, -35, 0], opacity: [0.3, 0.6, 0.3] }}
           transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-[-120px] right-[-120px] w-[450px] h-[450px] bg-[#1E2A47]/40 rounded-full blur-3xl"
+          className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
         />
       </div>
 
@@ -68,17 +68,17 @@ const Footer = () => {
         >
           {/* Brand */}
           <div className="lg:col-span-2 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-[#8A5CF6] to-white">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-accent to-secondary">
               NEO DERVISH
             </h2>
-            <p className="text-sm text-white/70 max-w-md">
+            <p className="text-sm text-muted-foreground max-w-md">
               Bold pieces, clean spirit. Designed to last.
             </p>
           </div>
 
           {/* Explore */}
           <div>
-            <h4 className="text-white/80 font-semibold text-sm uppercase tracking-widest mb-5">
+            <h4 className="text-sm font-semibold uppercase tracking-widest text-foreground/80 mb-5">
               Explore
             </h4>
             <ul className="space-y-3 text-sm">
@@ -91,10 +91,10 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link
                     to={link.to}
-                    className="group flex items-center text-white/60 hover:text-white transition-all"
+                    className="group flex items-center text-muted-foreground hover:text-foreground transition-colors duration-320"
                   >
                     {link.name}
-                    <span className="ml-2 group-hover:opacity-100 opacity-0 transition-opacity">
+                    <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-320">
                       →
                     </span>
                   </Link>
@@ -105,7 +105,7 @@ const Footer = () => {
 
           {/* Support */}
           <div>
-            <h4 className="text-white/80 font-semibold text-sm uppercase tracking-widest mb-5">
+            <h4 className="text-sm font-semibold uppercase tracking-widest text-foreground/80 mb-5">
               Support
             </h4>
             <ul className="space-y-3 text-sm">
@@ -118,10 +118,10 @@ const Footer = () => {
                 <li key={link.name}>
                   <Link
                     to={link.to}
-                    className="group flex items-center text-white/60 hover:text-white transition-all"
+                    className="group flex items-center text-muted-foreground hover:text-foreground transition-colors duration-320"
                   >
                     {link.name}
-                    <span className="ml-2 group-hover:opacity-100 opacity-0 transition-opacity">
+                    <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-320">
                       →
                     </span>
                   </Link>
@@ -137,13 +137,13 @@ const Footer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-16 rounded-3xl bg-white/5 backdrop-blur-xl p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6 border border-white/10"
+          className="mt-16 rounded-3xl bg-card/50 backdrop-blur-2xl border border-border p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6"
         >
           <div>
-            <h4 className="text-lg md:text-xl font-semibold text-white">
+            <h4 className="text-lg md:text-xl font-semibold text-foreground">
               Stay in the Loop
             </h4>
-            <p className="text-sm text-white/60 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               Early access to drops & updates.
             </p>
           </div>
@@ -155,21 +155,21 @@ const Footer = () => {
               name="email"
               type="email"
               placeholder="Your email"
-              className="w-full lg:w-80 h-12 bg-white/10 border border-white/20 text-white placeholder-white/40"
+              className="w-full lg:w-80 h-12 bg-card/40 border border-border text-foreground placeholder-muted-foreground"
             />
             <Button
               type="submit"
               size="icon"
-              className="h-10 w-12 bg-[#8A5CF6] hover:bg-[#7A4BE0] transition text-white rounded-full"
+              className="h-12 w-12 rounded-full bg-accent text-accent-foreground hover:bg-secondary hover:text-secondary-foreground transition-colors duration-320"
             >
-              <Send size={16} />
+              <Send size={18} />
             </Button>
           </form>
         </motion.div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-xs text-white/40">
+        <div className="mt-12 pt-6 border-t border-border flex flex-col md:flex-row justify-between items-center gap-6">
+          <p className="text-xs text-muted-foreground">
             &copy; {new Date().getFullYear()} Neo Dervish. All rights reserved.
           </p>
           <div className="flex gap-4">
@@ -180,7 +180,7 @@ const Footer = () => {
                   onClick={() => handleSocialClick(Icon.name)}
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-[#8A5CF6] text-white/70 hover:text-white rounded-full transition-all duration-300"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-card/40 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-320"
                 >
                   <Icon size={18} />
                 </motion.button>

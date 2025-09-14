@@ -7,39 +7,43 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-const StarRating = ({ rating, setRating }) => {
-    return (
-        <div className="flex gap-3">
-            {[1, 2, 3, 4, 5].map((star) => (
-                <motion.div
-                    key={star}
-                    whileHover={{ scale: 1.2 }}
-                    whileTap={{ scale: 0.9 }}
-                >
-                    <Star
-                        size={28}
-                        onClick={() => setRating(star)}
-                        className={`cursor-pointer transition-colors duration-300 ${star <= rating
-                                ? "text-yellow-400 fill-yellow-400"
-                                : "text-white/30"
-                            }`}
-                    />
-                </motion.div>
-            ))}
-        </div>
-    );
-};
+// simple sanitize biar aman
+const sanitizeInput = (val) =>
+    val.replace(/(<([^>]+)>)/gi, "").replace(/(https?:\/\/[^\s]+)/g, "");
+
+const StarRating = ({ rating, setRating }) => (
+    <div className="flex gap-2 sm:gap-3">
+        {[1, 2, 3, 4, 5].map((star) => (
+            <motion.button
+                key={star}
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.9 }}
+                transition={{ duration: 0.32 }}
+                type="button"
+                onClick={() => setRating(star)}
+            >
+                <Star
+                    size={28}
+                    className={`cursor-pointer transition-colors duration-320 ${star <= rating
+                            ? "text-secondary fill-secondary"
+                            : "text-muted-foreground"
+                        }`}
+                />
+            </motion.button>
+        ))}
+    </div>
+);
 
 const ReviewManager = ({ products, onSubmit }) => {
-    const { user } = useSelector((state) => state.auth);
+    const { user } = useSelector((s) => s.auth);
     const [productId, setProductId] = useState(products?.[0]?._id || "");
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState("");
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!productId || rating === 0 || !comment) return;
-        onSubmit({ productId, rating, comment });
+        if (!productId || rating === 0 || !comment.trim()) return;
+        onSubmit({ productId, rating, comment: sanitizeInput(comment) });
         setRating(0);
         setComment("");
     };
@@ -49,46 +53,60 @@ const ReviewManager = ({ products, onSubmit }) => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47] to-[#0F0F1A] rounded-3xl p-6 sm:p-10 text-white shadow-xl border border-white/10 backdrop-blur-2xl"
+            className="relative glass-card p-6 sm:p-10 shadow-xl overflow-hidden"
         >
             {/* Decorative Blobs */}
-            <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#8A5CF6]/30 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-0 right-0 w-56 h-56 bg-[#8A5CF6]/20 rounded-full blur-3xl animate-pulse" />
+            <motion.div
+                animate={{ y: [0, 25, 0] }}
+                transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-10 -left-10 w-40 h-40 bg-accent/20 rounded-full blur-3xl"
+            />
+            <motion.div
+                animate={{ y: [0, -30, 0] }}
+                transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute bottom-0 right-0 w-56 h-56 bg-primary/30 rounded-full blur-3xl"
+            />
 
             <div className="relative space-y-6">
+                {/* Header */}
                 <div>
-                    <h2 className="text-2xl sm:text-3xl font-semibold flex items-center gap-2">
-                        <MessageSquare className="text-[#8A5CF6]" size={26} />
-                        Leave a Review
+                    <h2 className="text-2xl sm:text-3xl font-heading font-bold flex items-center gap-2 bg-gradient-to-r from-foreground via-secondary to-accent bg-clip-text text-transparent">
+                        <MessageSquare size={26} />
+                        Review Product
                     </h2>
-                    <p className="text-white/60 text-sm mt-1">
-                        Quick feedback helps us grow better 🚀
+                    <p className="text-muted-foreground text-sm mt-1">
+                        Your feedback makes us better 🚀
                     </p>
                 </div>
 
+                {/* Form */}
                 <form onSubmit={handleSubmit} className="space-y-5">
                     {/* Name */}
                     <div>
-                        <Label className="text-white/70 mb-1 block text-sm">Your Name</Label>
+                        <Label className="text-sm text-muted-foreground">Your Name</Label>
                         <Input
                             value={user?.name || ""}
                             readOnly
-                            className="bg-white/10 text-white/90 border border-white/10 rounded-xl backdrop-blur-sm"
+                            className="bg-input text-foreground border border-border rounded-xl backdrop-blur-sm"
                         />
                     </div>
 
-                    {/* Product Select */}
+                    {/* Product */}
                     <div>
-                        <Label className="text-white/70 mb-1 block text-sm flex items-center gap-2">
-                            <ShoppingBag size={16} className="text-[#8A5CF6]" /> Product
+                        <Label className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <ShoppingBag size={16} className="text-accent" /> Product
                         </Label>
                         <select
                             value={productId}
                             onChange={(e) => setProductId(e.target.value)}
-                            className="w-full p-3 rounded-xl bg-white/10 text-white/90 border border-white/10 backdrop-blur-sm focus:outline-none"
+                            className="w-full p-3 rounded-xl bg-input text-foreground border border-border backdrop-blur-sm focus:ring-2 focus:ring-accent transition duration-320"
                         >
                             {products.map((p) => (
-                                <option key={p._id} value={p._id} className="bg-[#0F0F1A]">
+                                <option
+                                    key={p._id}
+                                    value={p._id}
+                                    className="bg-background text-foreground"
+                                >
                                     {p.name}
                                 </option>
                             ))}
@@ -97,19 +115,19 @@ const ReviewManager = ({ products, onSubmit }) => {
 
                     {/* Rating */}
                     <div>
-                        <Label className="text-white/70 mb-1 block text-sm">Rating</Label>
+                        <Label className="text-sm text-muted-foreground">Rating</Label>
                         <StarRating rating={rating} setRating={setRating} />
                     </div>
 
                     {/* Comment */}
                     <div>
-                        <Label className="text-white/70 mb-1 block text-sm">Comment</Label>
+                        <Label className="text-sm text-muted-foreground">Comment</Label>
                         <Textarea
                             rows={4}
-                            placeholder="Share a quick thought..."
+                            placeholder="Share your experience..."
                             value={comment}
-                            onChange={(e) => setComment(e.target.value)}
-                            className="bg-white/10 text-white/90 border border-white/10 rounded-xl backdrop-blur-md"
+                            onChange={(e) => setComment(sanitizeInput(e.target.value))}
+                            className="bg-input text-foreground border border-border rounded-xl backdrop-blur-md focus:ring-2 focus:ring-secondary transition duration-320"
                             required
                         />
                     </div>
@@ -118,7 +136,7 @@ const ReviewManager = ({ products, onSubmit }) => {
                     <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                         <Button
                             type="submit"
-                            className="w-full py-3 text-lg font-semibold rounded-xl bg-[#8A5CF6] text-white hover:bg-[#7a4ee3] transition-colors"
+                            className="w-full py-3 text-lg font-semibold rounded-xl btn-primary hover:opacity-90 transition duration-320"
                         >
                             Submit Review
                         </Button>

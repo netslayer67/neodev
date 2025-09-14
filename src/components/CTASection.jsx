@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const shimmer =
-    "bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer bg-[length:200%_100%]";
+    "bg-gradient-to-r from-transparent via-foreground/10 to-transparent animate-shimmer bg-[length:200%_100%]";
 
 const CTASection = () => {
     const [isLoaded, setIsLoaded] = useState(false);
@@ -16,38 +16,43 @@ const CTASection = () => {
     }, []);
 
     return (
-        <section className="relative py-24 px-6 md:px-12 overflow-hidden bg-[#0F0F1A] text-white">
-            {/* Decorative Background */}
+        <section className="relative py-20 md:py-28 px-6 md:px-12 overflow-hidden bg-background text-foreground">
+            {/* Background Layers */}
             <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-[#0F0F1A] via-[#1E2A47]/80 to-[#0F0F1A] opacity-95" />
+                <div className="absolute inset-0 bg-gradient-to-br from-background via-card/80 to-background opacity-95" />
                 <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
 
-                {/* Animated Blob */}
+                {/* Animated Blobs */}
                 <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: [1, 1.2, 1], rotate: [0, 45, 0] }}
+                    transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-20 -right-20 w-80 h-80 bg-accent/25 rounded-full blur-3xl"
+                />
+                <motion.div
+                    animate={{ y: [0, 40, 0], opacity: [0.6, 0.9, 0.6] }}
                     transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute -top-20 -right-20 w-80 h-80 bg-[#8A5CF6]/30 rounded-full blur-3xl"
+                    className="absolute -bottom-24 -left-16 w-72 h-72 bg-secondary/30 rounded-full blur-3xl"
                 />
             </div>
 
+            {/* Content */}
             <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
-                transition={{ duration: 1, ease: "easeOut" }}
-                className="relative z-10 mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 items-center gap-14"
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="relative z-10 mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 items-center gap-12"
             >
-                {/* Left Content */}
+                {/* Left Text */}
                 <div className="space-y-6 text-center md:text-left">
                     {isLoaded ? (
                         <>
-                            <h2 className="text-4xl md:text-5xl font-semibold tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-white via-[#8A5CF6] to-white">
+                            <h2 className="text-4xl md:text-5xl font-heading tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-accent to-secondary drop-shadow">
                                 Step Into the Next Level
                             </h2>
-                            <p className="text-white/70 text-lg md:text-xl font-light max-w-lg mx-auto md:mx-0">
-                                Gear up with pieces that define your style and elevate your
-                                presence.
+                            <p className="text-muted-foreground text-base md:text-lg font-light max-w-lg mx-auto md:mx-0">
+                                Gear up with pieces that define your style and elevate your presence.
                             </p>
                         </>
                     ) : (
@@ -57,21 +62,21 @@ const CTASection = () => {
                         </>
                     )}
 
-                    {/* Button */}
+                    {/* CTA Button */}
                     <div className="pt-4">
                         {isLoaded ? (
                             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Button
                                     asChild
                                     size="lg"
-                                    className="group px-8 py-4 rounded-full bg-white/10 text-white border border-white/20 backdrop-blur-xl hover:bg-[#8A5CF6] hover:text-white transition-all duration-300 shadow-lg"
+                                    className="group px-8 py-4 rounded-full bg-card/40 backdrop-blur-xl border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-320 shadow-lg"
                                 >
                                     <Link
                                         to="/shop"
                                         className="flex items-center gap-3 font-medium tracking-wide"
                                     >
                                         Explore Collection
-                                        <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                                        <ArrowRight className="h-5 w-5 transition-transform duration-320 group-hover:translate-x-1" />
                                     </Link>
                                 </Button>
                             </motion.div>
@@ -85,14 +90,14 @@ const CTASection = () => {
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="relative aspect-square w-full max-w-md mx-auto rounded-3xl overflow-hidden border border-white/10 bg-white/5 backdrop-blur-2xl shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="relative aspect-square w-full max-w-md mx-auto rounded-3xl overflow-hidden border border-border bg-card/40 backdrop-blur-2xl shadow-[0_20px_40px_rgba(0,0,0,0.35)]"
                 >
                     {isLoaded ? (
                         <img
                             src="https://images.unsplash.com/photo-1600185365673-43f63fe17826?auto=format&fit=crop&w=600&q=80"
                             alt="Collection Preview"
-                            className="w-full h-full object-cover"
+                            className="w-full h-full object-cover transition-transform duration-700 ease-[cubic-bezier(0.19,1,0.22,1)] hover:scale-105"
                             loading="lazy"
                         />
                     ) : (
