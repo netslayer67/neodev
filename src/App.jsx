@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useMemo, useState, useEffect } from "react";
+import React, { Suspense, lazy, useMemo } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import ScrollToTop from "./ScrollToTop";
@@ -37,9 +37,11 @@ const MainLayout = ({ children }) => (
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
       {/* Blobs */}
       <motion.div
+
         className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
       />
       <motion.div
+
         className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
       />
     </div>
@@ -53,15 +55,6 @@ const MainLayout = ({ children }) => (
 
 function App() {
   const location = useLocation();
-  const [loading, setLoading] = useState(true);
-
-  // Simulasi page fully rendered (lo bisa ganti trigger sesuai kebutuhan, misalnya fetch selesai, assets ready, dsb)
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1500); // delay biar cinematic, bukan langsung ilang
-    return () => clearTimeout(timer);
-  }, [location]);
 
   // Optimized route definitions
   const routeElements = useMemo(
@@ -120,16 +113,12 @@ function App() {
 
   return (
     <>
-      {/* Loader cinematic */}
-      <PageLoader loading={loading} />
-
-      <Suspense fallback={null}>
+      <Suspense fallback={<PageLoader />}>
         <AnimatePresence mode="wait">
           <ScrollToTop />
-          {!loading && routeElements}
+          {routeElements}
         </AnimatePresence>
       </Suspense>
-
       <Toaster />
     </>
   );
