@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { createOrder, clearOrderState } from '../store/slices/orderSlice';
 import { clearCart } from '../store/slices/cartSlice';
+import { useMidtransSnap } from "@/hooks/useMidtransSnap";
+
 
 // motion presets
 const fadeIn = {
@@ -41,6 +43,7 @@ const FormField = ({ id, label, tooltip, ...props }) => (
 );
 
 const CheckoutPage = () => {
+    const { isLoaded } = useMidtransSnap(); // <- pakai hook
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { toast } = useToast();
@@ -73,8 +76,13 @@ const CheckoutPage = () => {
 
     const handlePlaceOrder = async (e) => {
         e.preventDefault();
+
         const orderData = {
-            items: cartItems.map((i) => ({ product: i._id, quantity: i.quantity, size: i.size })),
+            items: cartItems.map((i) => ({
+                product: i._id,
+                quantity: i.quantity,
+                size: i.size
+            })),
             shippingAddress: { ...shippingAddress, fullName: user.name },
             paymentMethod,
             itemsPrice: subtotal,
@@ -84,12 +92,38 @@ const CheckoutPage = () => {
 
         try {
             const result = await dispatch(createOrder(orderData)).unwrap();
-            toast({ title: 'Order Confirmed 🎉', description: `#${result.order.orderId}` });
-            dispatch(clearCart());
-            dispatch(clearOrderState());
-            navigate('/profile', { state: { activeView: 'orders' } });
+
+            if (paymentMethod === "online") {
+                if (isLoaded && window.snap && result.midtransSnapToken) {
+                    window.snap.pay(result.midtransSnapToken, {
+                        onSuccess: () => {
+                            toast({ title: "Payment Success 🎉", description: `#${result.order.orderId}` });
+                            dispatch(clearCart());
+                            dispatch(clearOrderState());
+                            navigate("/profile", { state: { activeView: "orders" } });
+                        },
+                        onPending: () => {
+                            toast({ title: "Payment Pending ⏳", description: `#${result.order.orderId}` });
+                            navigate("/profile", { state: { activeView: "orders" } });
+                        },
+                        onError: (err) => {
+                            toast({ variant: "destructive", title: "Payment Failed", description: err.message });
+                        },
+                        onClose: () => {
+                            toast({ title: "Payment Cancelled", description: "You closed the payment popup." });
+                        },
+                    });
+                } else {
+                    toast({ variant: "destructive", title: "Snap not loaded", description: "Midtrans Snap.js not ready" });
+                }
+            } else {
+                toast({ title: "Order Confirmed 🎉", description: `#${result.order.orderId}` });
+                dispatch(clearCart());
+                dispatch(clearOrderState());
+                navigate("/profile", { state: { activeView: "orders" } });
+            }
         } catch (err) {
-            toast({ variant: 'destructive', title: 'Failed', description: err.message });
+            toast({ variant: "destructive", title: "Failed", description: err.message });
         }
     };
 
