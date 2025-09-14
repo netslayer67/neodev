@@ -103,7 +103,7 @@ const ProfilePage = () => {
 
                 <div className="flex flex-col items-end">
                     <p className="font-bold text-secondary">Rp {order.totalAmount.toLocaleString('id-ID')}</p>
-                    <span className={`text-xs px-3 py-1 rounded-full mt-2 ${statusColor}`}>{order.status}</span>
+                    <span className={`text-[0.563rem] px-3 py-1 rounded-full mt-2 ${statusColor}`}>{order.status}</span>
                 </div>
             </motion.button>
         );
