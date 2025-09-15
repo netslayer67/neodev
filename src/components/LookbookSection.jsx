@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Eye } from "lucide-react";
 
-// Fake loading hook with shimmer
-const useFakeLoad = (delay = 1800) => {
+// ✅ Fake shimmer loader
+const useFakeLoad = (delay = 1500) => {
     const [loaded, setLoaded] = useState(false);
     useEffect(() => {
         const timer = setTimeout(() => setLoaded(true), delay);
@@ -12,7 +12,12 @@ const useFakeLoad = (delay = 1800) => {
     return loaded;
 };
 
-// Gallery Data
+// ✅ Basic sanitizer untuk cegah input script/link aneh
+const sanitizeInput = (value) => {
+    return value.replace(/<[^>]*>?/gm, "").replace(/(https?:\/\/[^\s]+)/g, "");
+};
+
+// ✅ Gallery Data
 const galleryItems = [
     {
         id: 1,
@@ -41,17 +46,17 @@ const galleryItems = [
     },
 ];
 
-// Gallery Card Component
+// ✅ Gallery Card
 const GalleryCard = ({ item, index, loaded }) => (
     <motion.div
-        className="relative rounded-3xl overflow-hidden backdrop-blur-xl bg-card/20 border border-border shadow-lg group snap-center w-[85vw] sm:w-[55vw] lg:w-[30vw] h-[60vh] md:h-[75vh] flex-shrink-0 transition-transform hover:scale-[1.02]"
+        className="relative rounded-3xl overflow-hidden glass-card shadow-lg group snap-center w-[85vw] sm:w-[55vw] lg:w-[30vw] h-[55vh] md:h-[75vh] flex-shrink-0 transition-transform duration-300 ease-out hover:scale-[1.02]"
         initial={{ opacity: 0, y: 60 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.15, duration: 0.8, ease: "easeOut" }}
         viewport={{ once: true }}
     >
         {!loaded ? (
-            <div className="absolute inset-0 bg-card/80 animate-pulse" />
+            <div className="absolute inset-0 bg-card/70 animate-pulse" />
         ) : (
             <>
                 <motion.img
@@ -60,12 +65,12 @@ const GalleryCard = ({ item, index, loaded }) => (
                     loading="lazy"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-[cubic-bezier(0.19,1,0.22,1)] group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/40 to-transparent z-10" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-background/40 to-transparent z-10" />
                 <div className="relative z-20 p-6 h-full flex flex-col justify-end">
-                    <h3 className="text-2xl font-serif text-foreground mb-2 tracking-tight">
-                        {item.category}
+                    <h3 className="text-2xl md:text-3xl font-heading text-foreground mb-2 tracking-tight">
+                        {sanitizeInput(item.category)}
                     </h3>
-                    <button className="inline-flex items-center gap-2 text-sm text-accent font-semibold tracking-wide transition-colors duration-300 hover:text-accent-foreground">
+                    <button className="inline-flex items-center gap-2 text-sm font-semibold tracking-wide text-accent transition-all duration-300 hover:text-accent-foreground">
                         Shop The Look
                         <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </button>
@@ -79,7 +84,7 @@ const LookbookSection = () => {
     const loaded = useFakeLoad();
 
     return (
-        <section className="relative overflow-hidden py-20 md:py-32">
+        <section className="relative overflow-hidden py-16 md:py-28">
             {/* Blobs */}
             <motion.div
 
@@ -89,6 +94,7 @@ const LookbookSection = () => {
 
                 className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
             />
+
             <div className="relative z-10 max-w-7xl mx-auto px-6">
                 {/* Section Heading */}
                 <motion.div
@@ -98,16 +104,16 @@ const LookbookSection = () => {
                     viewport={{ once: true }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
-                    <h2 className="text-4xl md:text-6xl font-serif font-bold text-foreground tracking-tight mb-4">
+                    <h2 className="text-4xl md:text-6xl font-heading text-foreground tracking-tight mb-4 drop-shadow">
                         Lookbook 2025
                     </h2>
                     <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-                        A glimpse into our world — movement, shapes, and street elegance.
+                        Movement, shape, and street elegance — a vision of tomorrow.
                     </p>
                 </motion.div>
 
                 {/* Scroll Cue */}
-                <div className="mb-4 flex justify-center">
+                <div className="mb-6 flex justify-center">
                     <motion.div
                         className="text-muted-foreground/70 text-sm tracking-wide flex items-center gap-2"
                         initial={{ opacity: 0 }}
@@ -127,12 +133,7 @@ const LookbookSection = () => {
                     viewport={{ once: true }}
                 >
                     {galleryItems.map((item, index) => (
-                        <GalleryCard
-                            key={item.id}
-                            item={item}
-                            index={index}
-                            loaded={loaded}
-                        />
+                        <GalleryCard key={item.id} item={item} index={index} loaded={loaded} />
                     ))}
                 </motion.div>
             </div>

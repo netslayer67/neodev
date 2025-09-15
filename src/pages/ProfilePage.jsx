@@ -68,14 +68,17 @@ const ProfilePage = () => {
 
     const filteredOrders = useMemo(() => {
         const q = sanitizeInput(searchQuery).toLowerCase();
-        if (!q) return myOrders;
-        return myOrders.filter((o) => {
-            return (
-                o.orderId.toLowerCase().includes(q) ||
-                o.items.some((i) => (i.name || "").toLowerCase().includes(q))
-            );
-        });
+        return myOrders
+            .filter((o) => o.status !== "Cancelled") // ⬅️ filter di sini
+            .filter((o) => {
+                if (!q) return true;
+                return (
+                    o.orderId.toLowerCase().includes(q) ||
+                    o.items.some((i) => (i.name || "").toLowerCase().includes(q))
+                );
+            });
     }, [myOrders, searchQuery]);
+
 
     // compact card for order list (mobile-first)
     const OrderRow = ({ order }) => {
@@ -147,17 +150,6 @@ const ProfilePage = () => {
                             className="pl-10 bg-card/60 border border-border rounded-xl focus:ring-2 focus:ring-accent/30 transition duration-[320ms]"
                         />
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        <div className="text-center">
-                            <p className="text-sm text-muted-foreground">Orders</p>
-                            <p className="font-bold">{myOrders.length}</p>
-                        </div>
-                        <div className="text-center">
-                            <p className="text-sm text-muted-foreground">Spent</p>
-                            <p className="font-bold">Rp {myOrders.reduce((s, o) => s + (o.totalAmount || 0), 0).toLocaleString('id-ID')}</p>
-                        </div>
                     </div>
                 </div>
 
@@ -244,11 +236,10 @@ const ProfilePage = () => {
                                 ))}
                             </div>
 
-                            <div className="mt-4 border-t border-border pt-4 flex gap-3">
+                            <div className="mt-4 border-t border-border pt-4 flex">
                                 {['Diproses', 'Pending Payment'].includes(selectedOrder.status) && (
                                     <Button variant="destructive" className="flex-1" onClick={handleCancelOrder}>Cancel</Button>
                                 )}
-                                <Button className="flex-1" onClick={() => navigate(`/order/${selectedOrder.orderId}`)}>Details</Button>
                             </div>
                         </motion.div>
                     </motion.div>

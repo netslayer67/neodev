@@ -11,13 +11,12 @@ const CTASection = () => {
     const [isLoaded, setIsLoaded] = useState(false);
 
     useEffect(() => {
-        const timer = setTimeout(() => setIsLoaded(true), 1000);
+        const timer = setTimeout(() => setIsLoaded(true), 800);
         return () => clearTimeout(timer);
     }, []);
 
     return (
-        <section className="relative py-20 md:py-28 px-6 md:px-12 overflow-hidden text-foreground">
-            {/* Background Layers */}
+        <section className="relative py-16 md:py-28 px-6 md:px-12 overflow-hidden text-foreground">
             {/* Blobs */}
             <motion.div
 
@@ -27,10 +26,11 @@ const CTASection = () => {
 
                 className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
             />
-            {/* <div className="absolute inset-0 z-0">
-                <div className="absolute inset-0 bg-gradient-to-br from-background via-card/80 to-background opacity-95" />
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
-            </div> */}
+            {/* Noise + Gradient Overlay */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-gradient-to-br from-background/15 via-card/80 to-background/15 opacity-95" />
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04]" />
+            </div>
 
             {/* Content */}
             <motion.div
@@ -38,22 +38,23 @@ const CTASection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="relative z-10 mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 items-center gap-12"
+                className="relative z-10 mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 items-center gap-10 md:gap-16"
             >
-                {/* Left Text */}
+                {/* Text Section */}
                 <div className="space-y-6 text-center md:text-left">
                     {isLoaded ? (
                         <>
-                            <h2 className="text-4xl md:text-5xl font-heading tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-accent to-secondary drop-shadow">
-                                Step Into the Next Level
+                            <h2 className="text-4xl md:text-6xl font-heading tracking-tight leading-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground via-accent to-secondary drop-shadow">
+                                Elevate Your Presence
                             </h2>
-                            <p className="text-muted-foreground text-base md:text-lg font-light max-w-lg mx-auto md:mx-0">
-                                Gear up with pieces that define your style and elevate your presence.
+                            <p className="text-muted-foreground text-base md:text-lg font-light max-w-md mx-auto md:mx-0">
+                                Discover exclusive pieces crafted to refine your style with
+                                premium detail and timeless confidence.
                             </p>
                         </>
                     ) : (
                         <>
-                            <div className={`h-[44px] md:h-[60px] w-3/4 rounded ${shimmer}`} />
+                            <div className={`h-[44px] md:h-[64px] w-3/4 rounded ${shimmer}`} />
                             <div className={`h-[20px] md:h-[28px] w-2/3 rounded ${shimmer}`} />
                         </>
                     )}
@@ -61,18 +62,18 @@ const CTASection = () => {
                     {/* CTA Button */}
                     <div className="pt-4">
                         {isLoaded ? (
-                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}>
                                 <Button
                                     asChild
                                     size="lg"
-                                    className="group px-8 py-4 rounded-full bg-card/40 backdrop-blur-xl border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-320 shadow-lg"
+                                    className="group px-8 py-4 rounded-full bg-card/40 backdrop-blur-xl border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300 shadow-[0_8px_24px_rgba(0,0,0,0.25)]"
                                 >
                                     <Link
                                         to="/shop"
                                         className="flex items-center gap-3 font-medium tracking-wide"
                                     >
                                         Explore Collection
-                                        <ArrowRight className="h-5 w-5 transition-transform duration-320 group-hover:translate-x-1" />
+                                        <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
                                     </Link>
                                 </Button>
                             </motion.div>
@@ -82,7 +83,7 @@ const CTASection = () => {
                     </div>
                 </div>
 
-                {/* Right Visual */}
+                {/* Image Section */}
                 <motion.div
                     initial={{ scale: 0.95, opacity: 0 }}
                     whileInView={{ scale: 1, opacity: 1 }}

@@ -21,6 +21,7 @@ const RegisterPage = lazy(() => import("@/pages/RegisterPage"));
 const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const ContactPage = lazy(() => import("@/pages/ContactPage"));
+const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
 
 // --- Admin Pages ---
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
@@ -71,6 +72,7 @@ function App() {
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/galeri" element={<GalleryPage />} />
 
         {/* Protected */}
         <Route
