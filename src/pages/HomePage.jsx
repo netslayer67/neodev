@@ -140,7 +140,7 @@ const HomePage = () => {
                   size={compact ? "xs" : "md"}
                   className="px-5 py-2 rounded-full transition-all duration-[320ms] hover:bg-accent/20"
                 >
-                  <Link to="/lookbook" className="flex items-center gap-2">
+                  <Link to="/galeri" className="flex items-center gap-2">
                     Lookbook
                     <ArrowRight className="w-4 h-4 text-accent-foreground" />
                   </Link>
