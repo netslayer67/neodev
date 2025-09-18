@@ -22,6 +22,8 @@ const ProfilePage = lazy(() => import("@/pages/ProfilePage"));
 const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const ContactPage = lazy(() => import("@/pages/ContactPage"));
 const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
+const PreorderPage = lazy(() => import("@/pages/PreorderPage"));
+const UpcomingPage = lazy(() => import("@/pages/UpcomingPage"));
 
 // --- Admin Pages ---
 const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
@@ -68,6 +70,8 @@ function App() {
         <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
         <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+        <Route path="/pre" element={<MainLayout><PreorderPage /></MainLayout>} />
+        <Route path="/coming" element={<MainLayout><UpcomingPage /></MainLayout>} />
 
         {/* Auth */}
         <Route path="/login" element={<LoginPage />} />

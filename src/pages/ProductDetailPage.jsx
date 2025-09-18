@@ -13,25 +13,23 @@ import { Plus, Minus, ShoppingBag, ArrowLeft, Info, Truck } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
 import PageLoader from "@/components/PageLoader";
 
-// sanitize small text inputs
+// sanitize inputs
 const sanitize = (v = "", max = 60) =>
   String(v)
     .slice(0, max)
     .replace(/<[^>]*>?/g, "")
     .replace(/https?:\/\//gi, "")
     .replace(/mailto:/gi, "")
-    .replace(/[<>"'`\\]/g, "")
+    .replace(/[<>"]|'`\\/g, "")
     .trim();
 
-/* AccordionItem → versi super ringan */
 const AccordionItem = ({ title, icon: Icon, children, defaultOpen = false }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-
   return (
-    <div className="border-b border-border">
+    <div className="border-b border-border transition-colors">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center py-4 text-foreground hover:text-secondary transition-colors"
+        className="w-full flex justify-between items-center py-4 text-foreground hover:text-secondary transition-colors duration-300"
         aria-expanded={isOpen}
       >
         <span className="flex items-center gap-2 text-base font-semibold">
@@ -39,7 +37,6 @@ const AccordionItem = ({ title, icon: Icon, children, defaultOpen = false }) => 
         </span>
         <span className="text-muted-foreground">{isOpen ? "-" : "+"}</span>
       </button>
-
       {isOpen && <div className="text-sm text-muted-foreground pb-4">{children}</div>}
     </div>
   );
@@ -50,7 +47,6 @@ const ProductDetailPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { toast } = useToast();
-
   const { selectedProduct: product, status, items: allProducts } = useSelector(
     (s) => s.products || {}
   );
@@ -59,7 +55,6 @@ const ProductDetailPage = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [imageIndex, setImageIndex] = useState(0);
 
-  // swipe refs
   const [dragX, setDragX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const startX = useRef(0);
@@ -77,11 +72,9 @@ const ProductDetailPage = () => {
     }
   }, [product]);
 
-  // keep quantity within stock
   useEffect(() => {
-    if (!product || !product.sizes || !selectedSize) return;
-    const stock =
-      product.sizes.find((s) => s.size === selectedSize)?.quantity ?? 0;
+    if (!product || !selectedSize) return;
+    const stock = product.sizes.find((s) => s.size === selectedSize)?.quantity ?? 0;
     setQuantity((q) => (q > stock ? Math.max(1, stock) : q));
   }, [selectedSize, product]);
 
@@ -95,8 +88,7 @@ const ProductDetailPage = () => {
       });
       return;
     }
-    const stock =
-      product.sizes.find((s) => s.size === selectedSize)?.quantity ?? 0;
+    const stock = product.sizes.find((s) => s.size === selectedSize)?.quantity ?? 0;
     if (quantity < 1 || quantity > stock) {
       toast({
         title: "Jumlah tidak valid",
@@ -114,19 +106,16 @@ const ProductDetailPage = () => {
     });
   }, [product, selectedSize, quantity, dispatch, toast]);
 
-  // 🌀 Native Swipe Handlers
   const handleTouchStart = (e) => {
     startX.current = e.touches[0].clientX;
     setIsDragging(true);
     setDragX(0);
   };
-
   const handleTouchMove = (e) => {
     if (!isDragging) return;
     const currentX = e.touches[0].clientX;
     setDragX(currentX - startX.current);
   };
-
   const handleTouchEnd = () => {
     if (!isDragging) return;
     const threshold = 80;
@@ -162,93 +151,74 @@ const ProductDetailPage = () => {
     .slice(0, 4);
 
   return (
-    <div className="min-h-screen pt-20 pb-32 font-sans relative text-foreground">
+    <div className="min-h-screen pt-20 pb-32 font-sans relative text-foreground overflow-hidden">
+      {/* decorative blobs */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-0 right-0 w-80 h-80 bg-secondary/10 rounded-full blur-3xl animate-pulse" />
+
       <Helmet>
         <title>{product.name} — Neo Dervish</title>
-        <meta
-          name="description"
-          content={
-            product.description?.slice(0, 150) || "Premium streetwear."
-          }
-        />
+        <meta name="description" content={product.description?.slice(0, 150) || "Premium streetwear."} />
       </Helmet>
 
       <div className="container mx-auto px-4 relative z-10">
         <Link
           to="/shop"
-          className="flex items-center mb-6 text-sm text-muted-foreground hover:text-foreground transition"
+          className="flex items-center mb-6 text-sm text-muted-foreground hover:text-foreground transition-colors duration-300"
         >
           <ArrowLeft className="mr-2" size={16} /> Back to Collection
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* 🖼 Gallery */}
+          {/* gallery */}
           <div className="space-y-4">
-            <div className="glass-card rounded-2xl overflow-hidden shadow-xl">
+            <div className="glass-card rounded-2xl overflow-hidden shadow-xl transition-transform duration-500 hover:scale-[1.01]">
               <div
-                className="relative w-full h-[520px] md:h-[640px] max-h-[75vh] overflow-hidden"
-                aria-roledescription="carousel"
+                className="relative w-full h-[520px] md:h-[640px] max-h-[75vh]"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
               >
                 <div
                   className="flex w-full h-full transition-transform duration-300 ease-out"
-                  style={{
-                    transform: `translateX(calc(${-imageIndex * 100}% + ${dragX}px))`,
-                  }}
+                  style={{ transform: `translateX(calc(${-imageIndex * 100}% + ${dragX}px))` }}
                 >
                   {product.images?.map((img, idx) => (
                     <img
                       key={idx}
                       src={img.url}
                       alt={`${product.name} image ${idx + 1}`}
-                      className="object-contain w-full h-full flex-shrink-0 select-none touch-none"
+                      className="object-contain w-full h-full flex-shrink-0 select-none"
                       draggable={false}
                     />
                   ))}
                 </div>
-
-                {/* dots */}
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-4 flex gap-2">
                   {product.images.map((_, idx) => (
                     <button
                       key={idx}
                       onClick={() => setImageIndex(idx)}
                       aria-label={`Go to image ${idx + 1}`}
-                      className={`w-2 h-2 rounded-full transition-all ${idx === imageIndex
-                          ? "bg-foreground"
-                          : "bg-foreground/20 hover:bg-foreground/60"
-                        }`}
+                      className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === imageIndex ? "bg-accent" : "bg-foreground/20 hover:bg-foreground/60"}`}
                     />
                   ))}
                 </div>
               </div>
             </div>
-
-            {/* thumbnails */}
             <div className="flex gap-2 overflow-x-auto scrollbar-hide py-2">
               {product.images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => setImageIndex(idx)}
-                  className={`w-20 h-20 rounded-xl border transition overflow-hidden ${imageIndex === idx
-                      ? "border-accent"
-                      : "border-border hover:border-muted-foreground"
-                    }`}
+                  className={`w-20 h-20 rounded-xl border transition-all duration-300 overflow-hidden ${imageIndex === idx ? "border-accent scale-105" : "border-border hover:border-muted-foreground"}`}
                 >
-                  <img
-                    src={img.url}
-                    alt={`thumb-${idx}`}
-                    className="object-cover w-full h-full"
-                    draggable={false}
-                  />
+                  <img src={img.url} alt={`thumb-${idx}`} className="object-cover w-full h-full" draggable={false} />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* 📦 Info */}
+          {/* info */}
           <div className="flex flex-col gap-6">
             <div>
               <p className="uppercase text-xs tracking-widest text-secondary mb-1 font-semibold">
@@ -257,12 +227,11 @@ const ProductDetailPage = () => {
               <h1 className="text-3xl lg:text-5xl font-heading font-bold leading-tight">
                 {product.name}
               </h1>
-              <p className="text-xl font-semibold mt-2">
-                Rp {product.price?.toLocaleString("id-ID")}
-              </p>
+              <p className="text-xl font-semibold mt-2">Rp {product.price?.toLocaleString("id-ID")}</p>
             </div>
 
-            <div className="glass-card p-6 flex flex-col gap-5 shadow-lg">
+            <div className="glass-card p-6 flex flex-col gap-5 shadow-lg transition-colors duration-300">
+              {/* size */}
               <div>
                 <span className="font-medium">Size</span>
                 <div className="flex flex-wrap gap-2 mt-2">
@@ -271,12 +240,11 @@ const ProductDetailPage = () => {
                       key={size}
                       disabled={quantity === 0}
                       onClick={() => setSelectedSize(size)}
-                      className={`px-4 py-2 text-sm font-medium rounded-full border transition ${selectedSize === size
-                          ? "bg-secondary text-secondary-foreground border-secondary"
-                          : quantity === 0
-                            ? "bg-muted text-muted-foreground border-border cursor-not-allowed"
-                            : "bg-card text-foreground border-border hover:bg-muted"
-                        }`}
+                      className={`px-4 py-2 text-sm font-medium rounded-full border transition-all duration-300 ${selectedSize === size
+                        ? "bg-secondary text-secondary-foreground border-secondary"
+                        : quantity === 0
+                          ? "bg-muted text-muted-foreground border-border cursor-not-allowed"
+                          : "bg-card text-foreground border-border hover:bg-muted"}`}
                       aria-pressed={selectedSize === size}
                     >
                       {size}
@@ -285,64 +253,45 @@ const ProductDetailPage = () => {
                 </div>
               </div>
 
+              {/* quantity */}
               <div className="flex justify-between items-center">
                 <span className="font-medium">Quantity</span>
                 <div className="flex items-center gap-3 border border-border rounded-full px-3 py-1 bg-background/60">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    aria-label="Decrease quantity"
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => setQuantity((q) => Math.max(1, q - 1))}>
                     <Minus size={16} />
                   </Button>
-                  <span
-                    className="font-semibold w-6 text-center"
-                    aria-live="polite"
-                  >
-                    {quantity}
-                  </span>
+                  <span className="font-semibold w-6 text-center">{quantity}</span>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => {
-                      const stock =
-                        product?.sizes?.find((s) => s.size === selectedSize)
-                          ?.quantity || 1;
+                      const stock = product?.sizes?.find((s) => s.size === selectedSize)?.quantity || 1;
                       setQuantity((q) => Math.min(q + 1, stock));
                     }}
-                    aria-label="Increase quantity"
                   >
                     <Plus size={16} />
                   </Button>
                 </div>
               </div>
 
+              {/* add to cart */}
               <Button
                 onClick={handleAddToCart}
-                disabled={
-                  !selectedSize ||
-                  (product?.sizes?.find((s) => s.size === selectedSize)
-                    ?.quantity || 0) === 0
-                }
-                className={`w-full py-3 font-bold rounded-full transition flex items-center justify-center gap-2 ${!selectedSize ||
-                    (product?.sizes?.find((s) => s.size === selectedSize)
-                      ?.quantity || 0) === 0
-                    ? "bg-muted text-muted-foreground cursor-not-allowed"
-                    : "btn-primary hover:opacity-90"
-                  }`}
+                disabled={!selectedSize || (product?.sizes?.find((s) => s.size === selectedSize)?.quantity || 0) === 0}
+                className={`w-full py-3 font-bold rounded-full transition-all duration-300 flex items-center justify-center gap-2 ${!selectedSize || (product?.sizes?.find((s) => s.size === selectedSize)?.quantity || 0) === 0
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : "btn-primary hover:opacity-90"}`}
               >
                 <ShoppingBag size={20} />
                 {!selectedSize
                   ? "Pilih Size"
-                  : (product?.sizes?.find((s) => s.size === selectedSize)
-                    ?.quantity || 0) === 0
+                  : (product?.sizes?.find((s) => s.size === selectedSize)?.quantity || 0) === 0
                     ? "Habis"
                     : "Tambahkan ke Keranjang"}
               </Button>
             </div>
 
-            {/* Accordions */}
+            {/* accordions */}
             <div className="divide-y divide-border">
               <AccordionItem title="Description" icon={Info} defaultOpen>
                 <p>{product.description}</p>
@@ -361,7 +310,7 @@ const ProductDetailPage = () => {
           </div>
         </div>
 
-        {/* Related */}
+        {/* related */}
         {relatedProducts.length > 0 && (
           <div className="mt-24">
             <h2 className="text-2xl font-heading font-semibold text-center mb-10">
