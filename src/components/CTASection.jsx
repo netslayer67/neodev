@@ -1,489 +1,364 @@
-"use client"
-
-import { useEffect, useState, useRef, useCallback } from "react"
-import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion"
+import { useEffect, useState, useRef, useCallback, memo } from "react"
 import {
-    ArrowRight,
-    Sparkles,
-    Crown,
-    Star,
-    Heart,
-    Zap,
-    Shield,
-    TrendingUp,
-    Award,
-    Lock,
-    Mail,
-    CheckCircle,
+    ArrowRight, Sparkles, Crown, Star, Heart, Zap, Shield, CheckCircle,
+    TrendingUp, Users, Clock, Award
 } from "lucide-react"
 
-const sanitizeInput = (input) => {
-    if (typeof input !== "string") return ""
-    return input
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-        .replace(/<[^>]+>/g, "")
-        .replace(/javascript:/gi, "")
-        .replace(/on\w+\s*=\s*"[^"]*"/gi, "")
-        .replace(/on\w+\s*=\s*'[^']*'/gi, "")
-        .replace(/data:/gi, "")
-        .replace(/vbscript:/gi, "")
-        .replace(/file:/gi, "")
-        .replace(/ftp:/gi, "")
-        .replace(/mailto:/gi, "")
-        .replace(/tel:/gi, "")
-        .replace(/[<>{}]/g, "")
-        .trim()
-        .slice(0, 100)
-}
-
-const validateEmail = (email) => {
-    const sanitized = sanitizeInput(email)
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
-    const suspiciousPatterns = /script|javascript|vbscript|onload|onerror|eval|alert|confirm|prompt/i
-    return emailRegex.test(sanitized) && !suspiciousPatterns.test(sanitized) && sanitized.length >= 5
-}
-
-const GlassButton = ({
-    children,
-    onClick,
-    variant = "primary",
-    size = "lg",
-    className = "",
-    disabled = false,
-    ...props
-}) => {
-    const variants = {
-        primary:
-            "bg-gradient-to-br from-accent/20 via-accent/30 to-secondary/20 text-accent-foreground border-accent/30 hover:border-accent/50 shadow-[0_8px_32px_rgba(0,200,255,0.15)] hover:shadow-[0_20px_60px_rgba(0,200,255,0.3)] hover:bg-gradient-to-br hover:from-accent/30 hover:via-accent/40 hover:to-secondary/30",
-        secondary:
-            "bg-card/40 text-foreground border-border/30 hover:border-secondary/50 hover:bg-secondary/10 shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_16px_40px_rgba(0,0,0,0.2)]",
-        outline:
-            "bg-background/50 text-foreground border-border/40 hover:border-accent/60 hover:bg-accent/10 shadow-[0_4px_16px_rgba(0,0,0,0.1)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.15)]",
-    }
-
-    const sizes = {
-        sm: "px-4 py-2.5 text-sm",
-        md: "px-6 py-3.5 text-base",
-        lg: "px-8 py-4 text-lg",
-        xl: "px-12 py-5 text-xl",
-    }
-
-    return (
-        <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className={`group relative overflow-hidden font-semibold tracking-wide transition-all duration-[320ms] rounded-2xl border backdrop-blur-3xl ${variants[variant]} ${sizes[size]} ${className} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
-            onClick={disabled ? undefined : onClick}
-            disabled={disabled}
-            {...props}
-        >
-            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:translate-x-full transition-transform duration-[800ms] ease-out" />
-
-            <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-[320ms]" />
-
-            <div className="relative flex items-center justify-center gap-3">{children}</div>
-        </motion.button>
-    )
-}
-
-const EmailSignup = ({ isMobile }) => {
-    const [email, setEmail] = useState("")
-    const [isValid, setIsValid] = useState(true)
-    const [isSubmitted, setIsSubmitted] = useState(false)
-    const [isLoading, setIsLoading] = useState(false)
-
-    const handleSubmit = useCallback(async () => {
-        if (validateEmail(email)) {
-            setIsLoading(true)
-            // Simulate API call
-            await new Promise((resolve) => setTimeout(resolve, 1200))
-            setIsSubmitted(true)
-            setEmail("")
-            setIsLoading(false)
-            setTimeout(() => setIsSubmitted(false), 5000)
-        } else {
-            setIsValid(false)
-            setTimeout(() => setIsValid(true), 3000)
-        }
-    }, [email])
-
-    const handleEmailChange = useCallback(
-        (e) => {
-            const sanitized = sanitizeInput(e.target.value)
-            setEmail(sanitized)
-            if (!isValid) setIsValid(true)
-        },
-        [isValid],
-    )
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6, duration: 0.6 }}
-            className="relative mt-8"
-        >
-            <div className={`flex ${isMobile ? "flex-col" : "flex-col sm:flex-row"} gap-3`}>
-                <div className="relative flex-1">
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={handleEmailChange}
-                        placeholder="Enter your email for exclusive access"
-                        className={`w-full px-4 py-4 bg-card/50 backdrop-blur-3xl border rounded-2xl text-foreground placeholder-muted-foreground/60 transition-all duration-[320ms] focus:outline-none focus:ring-2 ${isValid
-                                ? "border-border/30 focus:border-accent/60 focus:ring-accent/20 hover:border-border/50"
-                                : "border-error/50 focus:border-error focus:ring-error/20"
-                            }`}
-                        maxLength={100}
-                        disabled={isLoading || isSubmitted}
-                    />
-                    {isSubmitted ? (
-                        <CheckCircle className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-success animate-pulse" />
-                    ) : (
-                        <Lock className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-success/60" />
-                    )}
-                </div>
-
-                <GlassButton
-                    onClick={handleSubmit}
-                    variant="primary"
-                    size={isMobile ? "lg" : "lg"}
-                    disabled={isSubmitted || isLoading}
-                    className="min-w-[140px]"
-                >
-                    {isLoading ? (
-                        <motion.div
-                            animate={{ rotate: 360 }}
-                            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                        >
-                            <Mail className="h-4 w-4" />
-                        </motion.div>
-                    ) : isSubmitted ? (
-                        <>
-                            <CheckCircle className="h-4 w-4" />
-                            <span>Welcome!</span>
-                        </>
-                    ) : (
-                        <>
-                            <Heart className="h-4 w-4" />
-                            <span>Join Elite</span>
-                        </>
-                    )}
-                </GlassButton>
-            </div>
-
-            <AnimatePresence>
-                {!isValid && (
-                    <motion.p
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 10 }}
-                        className="text-error text-sm mt-3 font-medium flex items-center gap-2"
-                    >
-                        <Shield className="h-4 w-4" />
-                        Please enter a valid email address
-                    </motion.p>
-                )}
-            </AnimatePresence>
-        </motion.div>
-    )
-}
-
-const FloatingProof = ({ isMobile }) => {
-    const proofs = [
-        { icon: Crown, label: "15K+ Elite", position: isMobile ? "top-4 left-4" : "top-8 left-8" },
-        { icon: Star, label: "4.9★", position: isMobile ? "top-4 right-4" : "top-16 right-12" },
-        { icon: TrendingUp, label: "+300%", position: isMobile ? "bottom-16 left-4" : "bottom-20 left-12" },
-        { icon: Award, label: "Premium", position: isMobile ? "bottom-16 right-4" : "bottom-8 right-8" },
-    ]
-
-    return (
-        <>
-            {proofs.map((proof, idx) => (
-                <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 1 + idx * 0.15, duration: 0.5, type: "spring" }}
-                    className={`absolute ${proof.position} bg-card/60 backdrop-blur-3xl border border-border/30 rounded-xl px-3 py-2 shadow-lg hover:shadow-xl transition-all duration-[320ms] hover:scale-105`}
-                >
-                    <div className="flex items-center gap-2">
-                        <proof.icon
-                            className={`h-4 w-4 ${idx === 0 ? "text-accent" : idx === 1 ? "text-warning" : idx === 2 ? "text-success" : "text-secondary"}`}
-                        />
-                        <span className={`${isMobile ? "text-xs" : "text-xs"} font-medium text-foreground/90`}>{proof.label}</span>
-                    </div>
-                </motion.div>
-            ))}
-        </>
-    )
-}
-
-const CTASection = () => {
+// Optimized mobile detection with matchMedia API
+const useMobileDetection = () => {
     const [isMobile, setIsMobile] = useState(false)
-    const [isLoaded, setIsLoaded] = useState(false)
-    const sectionRef = useRef(null)
-
-    const { scrollYProgress } = useScroll({
-        target: sectionRef,
-        offset: ["start end", "end start"],
-    })
-
-    const y1 = useTransform(scrollYProgress, [0, 1], [0, -120])
-    const y2 = useTransform(scrollYProgress, [0, 1], [0, 120])
-    const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0])
 
     useEffect(() => {
-        const checkMobile = () => setIsMobile(window.innerWidth < 768)
-        const timer = setTimeout(() => setIsLoaded(true), 300)
+        if (typeof window === "undefined") return
 
-        checkMobile()
-        window.addEventListener("resize", checkMobile)
+        const mediaQuery = window.matchMedia("(max-width: 768px)")
+        const handleChange = (e) => setIsMobile(e.matches)
 
-        return () => {
-            window.removeEventListener("resize", checkMobile)
-            clearTimeout(timer)
-        }
+        setIsMobile(mediaQuery.matches)
+        mediaQuery.addEventListener("change", handleChange)
+
+        return () => mediaQuery.removeEventListener("change", handleChange)
     }, [])
 
-    const handleShopClick = useCallback(() => {
-        // Analytics tracking would go here
-        window.scrollTo({ top: 0, behavior: "smooth" })
+    return isMobile
+}
+
+// Progressive image loading with blur-up effect
+const ProgressiveImage = memo(({ src, alt, className }) => {
+    const [isLoaded, setIsLoaded] = useState(false)
+    const [isInView, setIsInView] = useState(false)
+    const imgRef = useRef(null)
+
+    useEffect(() => {
+        if (!imgRef.current) return
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsInView(true)
+                    observer.disconnect()
+                }
+            },
+            { threshold: 0.1, rootMargin: '50px' }
+        )
+
+        observer.observe(imgRef.current)
+        return () => observer.disconnect()
     }, [])
 
     return (
-        <section ref={sectionRef} className="relative py-16 md:py-32 overflow-hidden">
-            <motion.div
-                style={{ y: y1 }}
-                animate={{
-                    x: [0, 100, -60, 0],
-                    scale: [1, 1.3, 0.8, 1],
-                    rotate: [0, 120, 240, 360],
-                }}
-                transition={{
-                    duration: 40,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                }}
-                className="absolute -top-48 -left-40 w-96 h-96 bg-accent/8 rounded-full blur-3xl"
-            />
-            <motion.div
-                style={{ y: y2 }}
-                animate={{
-                    x: [0, -80, 40, 0],
-                    scale: [1, 0.7, 1.4, 1],
-                    rotate: [360, 240, 120, 0],
-                }}
-                transition={{
-                    duration: 35,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                }}
-                className="absolute -bottom-56 -right-48 w-[600px] h-[600px] bg-secondary/10 rounded-full blur-3xl"
-            />
-            <motion.div
-                animate={{
-                    x: [0, 60, -30, 0],
-                    y: [0, -40, 20, 0],
-                    scale: [1, 1.2, 0.9, 1],
-                }}
-                transition={{
-                    duration: 30,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                }}
-                className="absolute top-1/4 left-1/4 w-80 h-80 bg-warning/6 rounded-full blur-3xl"
-            />
-            <motion.div
-                animate={{
-                    x: [0, -35, 70, 0],
-                    y: [0, 50, -15, 0],
-                }}
-                transition={{
-                    duration: 32,
-                    repeat: Number.POSITIVE_INFINITY,
-                    ease: "easeInOut",
-                }}
-                className="absolute top-2/3 right-1/3 w-96 h-96 bg-info/8 rounded-full blur-3xl"
-            />
+        <div ref={imgRef} className={`relative overflow-hidden ${className}`}>
+            {/* Blur placeholder using theme colors */}
+            <div className={`
+        absolute inset-0 bg-gradient-to-br from-muted via-card to-muted
+        transition-opacity duration-500 ${isLoaded ? 'opacity-0' : 'opacity-100'}
+      `} />
 
-            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
-                <motion.div
-                    style={{ opacity }}
-                    className={`grid ${isMobile ? "grid-cols-1 gap-8 text-center" : "grid-cols-1 lg:grid-cols-5 gap-20 items-center"}`}
-                >
-                    <div className={`space-y-6 ${isMobile ? "" : "lg:col-span-3"}`}>
-                        {/* Premium Badge */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0, rotate: -180 }}
-                            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                            className="inline-flex items-center gap-2 px-4 py-2.5 bg-accent/15 border border-accent/30 rounded-full backdrop-blur-3xl hover:bg-accent/20 transition-all duration-[320ms]"
-                        >
-                            <Crown className="h-4 w-4 text-accent animate-pulse" />
-                            <span className="text-accent font-bold text-sm tracking-widest">ULTRA PREMIUM</span>
-                        </motion.div>
+            {/* Main image */}
+            {isInView && (
+                <img
+                    src={src}
+                    alt={alt}
+                    className={`
+            w-full h-full object-cover transition-all duration-700 transform-gpu
+            ${isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
+          `}
+                    onLoad={() => setIsLoaded(true)}
+                    loading="lazy"
+                    decoding="async"
+                />
+            )}
+        </div>
+    )
+})
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 40 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3, duration: 0.8 }}
-                        >
-                            <h2
-                                className={`font-heading tracking-tight leading-[0.85] ${isMobile ? "text-4xl" : "text-6xl lg:text-7xl xl:text-8xl"}`}
-                            >
-                                <motion.span
-                                    className="block bg-gradient-to-br from-foreground via-accent/80 to-secondary bg-clip-text text-transparent"
-                                    animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-                                    transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                                >
-                                    Elevate
-                                </motion.span>
-                                <motion.span
-                                    className="block bg-gradient-to-br from-secondary via-warning to-accent bg-clip-text text-transparent"
-                                    animate={{ backgroundPosition: ["100% 50%", "0% 50%", "100% 50%"] }}
-                                    transition={{ duration: 10, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                                >
-                                    Your Style
-                                </motion.span>
-                            </h2>
-                        </motion.div>
+// Social proof counter with count-up animation
+const SocialProofCounter = memo(({ targetNumber, label, icon: Icon, color = "text-success" }) => {
+    const [count, setCount] = useState(0)
+    const [isVisible, setIsVisible] = useState(false)
+    const counterRef = useRef(null)
 
-                        <motion.p
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5, duration: 0.6 }}
-                            className={`text-muted-foreground font-light leading-relaxed ${isMobile ? "text-base max-w-xs mx-auto" : "text-lg max-w-xl"}`}
-                        >
-                            Crafted for those who demand excellence. Every piece tells a story of premium quality and bold expression.
-                        </motion.p>
+    useEffect(() => {
+        if (!counterRef.current) return
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.7, duration: 0.6 }}
-                            className={`flex ${isMobile ? "flex-col" : "flex-row"} gap-4`}
-                        >
-                            <GlassButton
-                                variant="primary"
-                                size={isMobile ? "lg" : "xl"}
-                                onClick={handleShopClick}
-                                className="group relative overflow-hidden"
-                            >
-                                <Sparkles className="h-5 w-5 animate-spin" style={{ animationDuration: "4s" }} />
-                                <span>Shop Collection</span>
-                                <ArrowRight className="h-5 w-5 transition-all duration-[320ms] group-hover:translate-x-1 group-hover:scale-110" />
-                            </GlassButton>
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setIsVisible(true)
+                    observer.disconnect()
+                }
+            },
+            { threshold: 0.3 }
+        )
 
-                            <GlassButton variant="outline" size={isMobile ? "md" : "lg"} className="group">
-                                <Zap className="h-5 w-5 text-warning transition-transform duration-[320ms] group-hover:scale-110" />
-                                <span>View Lookbook</span>
-                            </GlassButton>
-                        </motion.div>
+        observer.observe(counterRef.current)
+        return () => observer.disconnect()
+    }, [])
 
-                        {/* Email Signup */}
-                        <EmailSignup isMobile={isMobile} />
+    useEffect(() => {
+        if (!isVisible) return
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 1, duration: 0.6 }}
-                            className={`flex ${isMobile ? "flex-col gap-3" : "justify-start items-center gap-8"} pt-6 border-t border-border/20`}
-                        >
-                            {[
-                                { icon: Shield, text: "Secure Payment", color: "text-success" },
-                                { icon: Star, text: "4.9★ Rated", color: "text-warning" },
-                                { icon: Zap, text: "Fast Delivery", color: "text-accent" },
-                            ].map((item, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    whileHover={{ scale: 1.05 }}
-                                    className={`flex items-center gap-2 ${isMobile ? "justify-center" : ""}`}
-                                >
-                                    <item.icon className={`h-4 w-4 ${item.color}`} />
-                                    <span className="text-sm font-medium text-foreground/80">{item.text}</span>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
+        let startTime = null
+        const duration = 2000
 
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.8, rotateY: 45 }}
-                        animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                        transition={{ delay: 0.5, duration: 1, ease: [0.25, 0.4, 0.25, 1] }}
-                        className={`relative ${isMobile ? "mt-8" : "lg:col-span-2"}`}
-                    >
-                        {/* Main Product Container */}
-                        <div className="relative group">
-                            <motion.div
-                                animate={{
-                                    scale: [1, 1.15, 1],
-                                    opacity: [0.2, 0.4, 0.2],
-                                }}
-                                transition={{ duration: 5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
-                                className="absolute inset-0 bg-gradient-to-br from-accent/15 via-secondary/10 to-primary/15 rounded-3xl blur-3xl"
-                            />
+        const animateCount = (currentTime) => {
+            if (startTime === null) startTime = currentTime
+            const progress = Math.min((currentTime - startTime) / duration, 1)
 
-                            <motion.div
-                                whileHover={{
-                                    rotateY: isMobile ? 0 : -6,
-                                    rotateX: isMobile ? 0 : 3,
-                                    scale: 1.02,
-                                    transition: { duration: 0.32, ease: "easeOut" },
-                                }}
-                                className={`relative bg-card/40 backdrop-blur-3xl border border-border/30 rounded-3xl overflow-hidden shadow-2xl hover:shadow-3xl transition-all duration-[320ms] ${isMobile ? "aspect-square max-w-sm mx-auto" : "aspect-[3/4] max-w-md"
-                                    }`}
-                                style={{ transformStyle: "preserve-3d" }}
-                            >
-                                <AnimatePresence>
-                                    {isLoaded ? (
-                                        <motion.img
-                                            initial={{ opacity: 0, scale: 1.2 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            transition={{ duration: 1, ease: "easeOut" }}
-                                            src="https://images.unsplash.com/photo-1600185365673-43f63fe17826?auto=format&fit=crop&w=600&q=80"
-                                            alt="Premium Fashion Collection"
-                                            className="w-full h-full object-cover transition-transform duration-[800ms] group-hover:scale-110"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <motion.div
-                                            animate={{ opacity: [0.3, 0.6, 0.3] }}
-                                            transition={{ duration: 2, repeat: Number.POSITIVE_INFINITY }}
-                                            className="w-full h-full bg-gradient-to-br from-card via-muted/20 to-card"
-                                        />
-                                    )}
-                                </AnimatePresence>
+            // Easing function for smooth animation
+            const easeOutCubic = 1 - Math.pow(1 - progress, 3)
+            setCount(Math.floor(easeOutCubic * targetNumber))
 
-                                <motion.div
-                                    initial={{ opacity: 0, y: 100 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 1.2, duration: 0.8 }}
-                                    className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background/95 via-background/80 to-transparent backdrop-blur-2xl"
-                                >
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-foreground font-bold text-lg mb-1">Elite Collection</p>
-                                            <p className="text-secondary font-semibold text-lg">From $129</p>
-                                        </div>
-                                        <motion.div
-                                            whileHover={{ scale: 1.1, rotate: 15 }}
-                                            className="w-12 h-12 bg-gradient-to-br from-accent/30 to-secondary/30 backdrop-blur-3xl rounded-full flex items-center justify-center border border-accent/30 shadow-lg"
-                                        >
-                                            <Crown className="h-6 w-6 text-accent" />
-                                        </motion.div>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
+            if (progress < 1) {
+                requestAnimationFrame(animateCount)
+            }
+        }
 
-                            {/* Floating Social Proof */}
-                            <FloatingProof isMobile={isMobile} />
-                        </div>
-                    </motion.div>
-                </motion.div>
+        requestAnimationFrame(animateCount)
+    }, [isVisible, targetNumber])
+
+    return (
+        <div ref={counterRef} className="flex items-center gap-2">
+            <Icon className={`w-4 h-4 ${color}`} />
+            <span className="text-sm font-semibold text-foreground">
+                {count.toLocaleString()}{targetNumber > 10 ? '+' : ''} {label}
+            </span>
+        </div>
+    )
+})
+
+// Trust badge component using theme system
+const TrustBadge = memo(({ icon: Icon, text, color }) => (
+    <div className="flex items-center gap-2">
+        <Icon className={`h-4 w-4 ${color}`} />
+        <span className="text-sm font-medium text-muted-foreground">
+            {text}
+        </span>
+    </div>
+))
+
+const CTASection = () => {
+    const isMobile = useMobileDetection()
+    const sectionRef = useRef(null)
+
+    // Enhanced CTA handlers with analytics
+    const handleShopClick = useCallback(() => {
+        // Analytics tracking
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'cta_click', {
+                event_category: 'engagement',
+                event_label: 'shop_collection_cta'
+            })
+        }
+
+        const shopSection = document.getElementById('shop-section')
+        if (shopSection) {
+            shopSection.scrollIntoView({ behavior: "smooth", block: "start" })
+        } else {
+            window.scrollTo({ top: 0, behavior: "smooth" })
+        }
+    }, [])
+
+    const handleLookbookClick = useCallback(() => {
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'cta_click', {
+                event_category: 'engagement',
+                event_label: 'view_lookbook_cta'
+            })
+        }
+        // Navigate to lookbook section or page
+        const lookbookSection = document.getElementById('lookbook-section')
+        if (lookbookSection) {
+            lookbookSection.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+    }, [])
+
+    return (
+        <section
+            ref={sectionRef}
+            className="relative py-16 md:py-32 overflow-hidden bg-background"
+        >
+            {/* Optimized background effects using theme colors */}
+            <div className="absolute inset-0 pointer-events-none">
+                {/* Primary blob */}
+                <div
+                    className="absolute -top-40 -left-40 w-80 h-80 bg-accent/10 rounded-full blur-3xl opacity-60"
+                    style={{
+                        animation: 'blob 20s ease-in-out infinite',
+                        willChange: 'transform'
+                    }}
+                />
+
+                {/* Secondary blob */}
+                <div
+                    className="absolute -bottom-48 -right-32 w-96 h-96 bg-secondary/10 rounded-full blur-3xl opacity-40"
+                    style={{
+                        animation: 'blob 25s ease-in-out infinite reverse',
+                        animationDelay: '10s',
+                        willChange: 'transform'
+                    }}
+                />
             </div>
 
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background via-background/50 to-transparent pointer-events-none" />
+            <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-12 lg:gap-20 items-center">
+
+                    {/* Left Content - CTV Enhanced */}
+                    <div className="lg:col-span-3 space-y-6 text-center lg:text-left">
+
+                        {/* Social Proof Counters */}
+                        <div className="flex justify-center lg:justify-start gap-6 mb-6">
+                            <SocialProofCounter
+                                targetNumber={2847}
+                                label="Happy Customers"
+                                icon={Heart}
+                                color="text-success"
+                            />
+                            <SocialProofCounter
+                                targetNumber={4.9}
+                                label="★ Rating"
+                                icon={Star}
+                                color="text-warning"
+                            />
+                        </div>
+
+                        {/* Premium Badge with urgency using theme colors */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2.5 glass-card border border-accent/30">
+                            <Crown className="h-4 w-4 text-accent animate-pulse" />
+                            <span className="text-accent font-bold text-sm tracking-widest">
+                                ULTRA PREMIUM • LIMITED STOCK
+                            </span>
+                        </div>
+
+                        {/* Enhanced Title using theme typography */}
+                        <h2 className="font-heading tracking-tight leading-[0.9] text-4xl md:text-6xl lg:text-7xl xl:text-8xl">
+                            <span className="block text-transparent bg-clip-text animated-gradient drop-shadow">
+                                Elevate
+                            </span>
+                            <span className="block text-foreground drop-shadow-sm">
+                                Your Style
+                            </span>
+                        </h2>
+
+                        {/* Value proposition with theme colors */}
+                        <p className="text-muted-foreground font-light leading-relaxed text-lg max-w-xl mx-auto lg:mx-0">
+                            Crafted for those who demand excellence.
+                            <span className="text-accent font-semibold"> Premium quality</span> meets
+                            <span className="text-secondary font-semibold"> bold expression</span> in every piece.
+                        </p>
+
+                        {/* CTA Buttons using theme system */}
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                            <button
+                                onClick={handleShopClick}
+                                className="group px-8 py-4 rounded-2xl btn-primary font-semibold flex items-center justify-center gap-3 hover:scale-105 hover:shadow-xl transition-all duration-300 shadow-lg shadow-accent/25"
+                            >
+                                <Sparkles className="h-5 w-5" style={{ animation: 'spin 3s linear infinite' }} />
+                                <span>Shop Collection Now</span>
+                                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                            </button>
+
+                            <button
+                                onClick={handleLookbookClick}
+                                className="px-8 py-4 rounded-2xl glass-card border border-border font-semibold flex items-center justify-center gap-3 hover:scale-105 hover:bg-card/80 transition-all duration-300 text-foreground"
+                            >
+                                <Zap className="h-5 w-5 text-warning" />
+                                <span>View Lookbook</span>
+                            </button>
+                        </div>
+
+                        {/* Trust Badges using theme colors */}
+                        <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-8 border-t border-border">
+                            <TrustBadge icon={Shield} text="Secure Payment" color="text-success" />
+                            <TrustBadge icon={TrendingUp} text="Free Shipping $100+" color="text-info" />
+                            <TrustBadge icon={Clock} text="30-Day Returns" color="text-warning" />
+                            <TrustBadge icon={Award} text="Lifetime Warranty" color="text-secondary" />
+                        </div>
+
+                        {/* Urgency indicator using theme system */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 glass-card border border-error/40 bg-error/5">
+                            <Clock className="h-4 w-4 text-error animate-pulse" />
+                            <span className="text-error font-medium text-sm">
+                                Sale ends in 24 hours • 67% claimed
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Right Image - Enhanced product showcase */}
+                    <div className="lg:col-span-2">
+                        <div className="relative glass-card border border-border/30 rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] max-w-md mx-auto group hover:shadow-accent/20 transition-shadow duration-500">
+
+                            <ProgressiveImage
+                                src="https://images.unsplash.com/photo-1600185365673-43f63fe17826?auto=format&fit=crop&w=600&q=80"
+                                alt="Premium Fashion Collection"
+                                className="w-full h-full transform group-hover:scale-105 transition-transform duration-700"
+                            />
+
+                            {/* Enhanced overlay with pricing using theme colors */}
+                            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background/95 via-background/80 to-transparent">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-foreground font-bold text-lg mb-1">
+                                            Elite Collection
+                                        </p>
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <span className="text-muted-foreground line-through text-sm">$199</span>
+                                            <span className="text-secondary font-bold text-xl">$129</span>
+                                            <span className="px-2 py-1 bg-error text-error-foreground text-xs font-bold rounded">35% OFF</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <Star key={star} className="w-3 h-3 fill-warning text-warning" />
+                                            ))}
+                                            <span className="text-xs text-muted-foreground ml-1">(2,847 reviews)</span>
+                                        </div>
+                                    </div>
+                                    <div className="w-12 h-12 bg-accent/20 rounded-full flex items-center justify-center border border-accent/30">
+                                        <Crown className="h-6 w-6 text-accent" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Limited stock indicator using theme colors */}
+                            <div className="absolute top-4 right-4 px-3 py-1 bg-error/90 text-error-foreground text-xs font-bold rounded-full animate-pulse">
+                                Only 12 left!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Inline styles for blob animation - optimized */}
+            <style jsx>{`
+        @keyframes blob {
+          0%, 100% { 
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+          33% { 
+            transform: translate3d(20px, -20px, 0) scale(1.1);
+          }
+          66% { 
+            transform: translate3d(-15px, 15px, 0) scale(0.9);
+          }
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+          [style*="blob"] {
+            animation-duration: 15s !important;
+            opacity: 0.3 !important;
+          }
+        }
+        
+        /* Reduced motion support */
+        @media (prefers-reduced-motion: reduce) {
+          [style*="blob"],
+          .animate-pulse,
+          .animated-gradient {
+            animation: none !important;
+          }
+        }
+      `}</style>
         </section>
     )
 }
