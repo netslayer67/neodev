@@ -15,7 +15,6 @@ import { createOrder, clearOrderState } from "../store/slices/orderSlice"
 import { clearCart } from "../store/slices/cartSlice"
 import { useMidtransSnap } from "@/hooks/useMidtransSnap"
 
-// const PaymentSection = lazy(() => import("./PaymentSection"))
 
 const fadeIn = {
     hidden: { opacity: 0, y: 20 },

@@ -20,7 +20,7 @@ const Footer = () => {
     e.preventDefault();
     const email = e.target.email.value.trim();
 
-    // Basic sanitization
+    // Sanitize input
     if (!email || /<script|http:|https:|.php|.exe/i.test(email)) {
       toast({
         title: "⚠️ Invalid Input",
@@ -39,19 +39,15 @@ const Footer = () => {
 
   return (
     <footer className="relative overflow-hidden bg-background text-foreground">
-      {/* Decorative Background */}
+      {/* Decorative Background & Blobs */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-card to-background" />
-        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.04]" />
-
-        {/* Blobs */}
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03]" />
         <motion.div
-
-          className="absolute -top-24 -left-20 w-72 h-72 bg-accent/25 rounded-full blur-3xl"
+          className="absolute -top-28 -left-24 w-80 h-80 rounded-full blur-3xl bg-accent/20 animate-[blob_25s_linear_infinite]"
         />
         <motion.div
-
-          className="absolute -bottom-28 -right-20 w-96 h-96 bg-secondary/30 rounded-full blur-3xl"
+          className="absolute -bottom-32 -right-24 w-96 h-96 rounded-full blur-3xl bg-secondary/25 animate-[blob_30s_linear_infinite]"
         />
       </div>
 
@@ -62,7 +58,7 @@ const Footer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
           viewport={{ once: true }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-12"
         >
           {/* Brand */}
           <div className="lg:col-span-2 space-y-4">
@@ -135,7 +131,7 @@ const Footer = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
           viewport={{ once: true }}
-          className="mt-16 rounded-3xl bg-card/50 backdrop-blur-2xl border border-border p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6"
+          className="mt-16 rounded-3xl bg-card/50 backdrop-blur-glass border border-border p-6 md:p-8 flex flex-col lg:flex-row justify-between items-center gap-6"
         >
           <div>
             <h4 className="text-lg md:text-xl font-semibold text-foreground">

@@ -1,8 +1,3 @@
-/* HomePage.jsx (refactored)
-   - Fokus: performance: memoization, debounce search, reduce framer-motion usage,
-     replace continuous framer-motion with CSS animated blobs, optimize video load.
-*/
-
 "use client";
 
 import React, { useEffect, useState, useMemo, useCallback, Suspense, lazy, useRef } from "react";

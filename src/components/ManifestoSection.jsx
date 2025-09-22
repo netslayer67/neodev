@@ -24,7 +24,7 @@ const manifestoData = [
 /* Micro components */
 /* ========================= */
 const Badge = memo(({ children }) => (
-    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border border-accent/30 text-accent text-sm font-medium">
+    <div className="liquid-glass-card inline-flex items-center gap-2 px-4 py-2 rounded-full border border-accent/30 text-accent text-sm font-medium transition-colors duration-300 hover:text-accent-foreground hover:bg-accent/20">
         <Sparkles className="w-4 h-4" />
         {children}
     </div>
@@ -37,7 +37,7 @@ const AnimatedBlob = memo(({ className = "", motionProps = {} }) => {
         <motion.div
             {...motionProps}
             animate={{ x: [0, 30, -30, 0], y: [0, -20, 20, 0], scale: [1, 1.18, 0.98, 1] }}
-            transition={{ duration: 28, repeat: Infinity, ease: "easeInOut" }}
+            transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
             className={`${className} rounded-full blur-3xl pointer-events-none`}
         />
     )
@@ -71,9 +71,10 @@ const PremiumMagneticButton = ({ children, variant = "primary", onClick }) => {
             onMouseLeave={() => { x.set(0); y.set(0) }}
             onClick={onClick}
             style={{ x: springX, y: springY }}
-            className={`relative z-10 group rounded-2xl font-medium tracking-wide px-6 py-3 transition-all duration-300 ${variant === "primary"
-                    ? "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground border border-accent/25 hover:from-primary/90 hover:to-primary/70"
-                    : "glass-card border border-accent/40 text-accent hover:bg-accent/10"
+            className={`relative z-10 group rounded-xl font-medium tracking-wide px-6 py-3 transition-all duration-300 
+        ${variant === "primary"
+                    ? "liquid-glass-strong text-primary-foreground border border-accent/40 hover:bg-primary/20"
+                    : "liquid-glass-card text-accent hover:text-accent-foreground hover:bg-accent/20"
                 }`}
             whileTap={{ scale: 0.985 }}
         >
@@ -90,12 +91,12 @@ const ValueCard = memo(({ icon: Icon, title, description, tone = "accent", delay
         initial={{ opacity: 0, y: 24 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
-        transition={{ delay, duration: 0.5 }}
-        className={`group ${compact ? "p-4" : "p-6"}`}
+        transition={{ delay, duration: 0.6 }}
+        className={`group ${compact ? "p-3" : "p-6"}`}
     >
-        <div className="glass-card rounded-2xl border border-border/30 transition-all overflow-hidden">
+        <div className="liquid-glass-card transition-all hover:scale-[1.02] hover:shadow-glass duration-300 rounded-2xl overflow-hidden">
             <div className={`p-4 ${compact ? "space-y-2" : "space-y-4"} text-center`}>
-                <div className={`inline-flex items-center justify-center ${compact ? "w-10 h-10" : "w-14 h-14"} rounded-2xl glass-card border border-${tone}/30`}>
+                <div className={`inline-flex items-center justify-center ${compact ? "w-10 h-10" : "w-14 h-14"} rounded-2xl liquid-glass border border-${tone}/30`}>
                     <Icon className={`${compact ? "w-5 h-5" : "w-7 h-7"} text-${tone}`} />
                 </div>
                 <h3 className={`font-heading font-semibold text-${tone} ${compact ? "text-lg" : "text-xl"}`}>{title}</h3>
@@ -123,17 +124,17 @@ const ManifestoSection = ({ disableVideo = false }) => {
 
     return (
         <section ref={ref} className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-            {/* Animated Blobs */}
+            {/* Decorative Animated Blobs */}
             <div className="absolute inset-0 pointer-events-none">
                 {!isMobile && (
                     <>
-                        <AnimatedBlob className="absolute -top-28 -left-28 w-80 h-80 bg-gradient-to-br from-accent/20 via-info/10 to-transparent" />
-                        <AnimatedBlob className="absolute top-28 -right-24 w-64 h-64 bg-gradient-to-bl from-secondary/20 via-warning/10 to-transparent" />
+                        <AnimatedBlob className="absolute -top-28 -left-28 w-80 h-80 bg-gradient-to-br from-accent/25 via-info/15 to-transparent" />
+                        <AnimatedBlob className="absolute top-28 -right-24 w-64 h-64 bg-gradient-to-bl from-secondary/25 via-warning/15 to-transparent" />
                     </>
                 )}
             </div>
 
-            {/* Video */}
+            {/* Background Video */}
             {!disableVideo && !isMobile && (
                 <div className="absolute inset-0 z-0">
                     <video
@@ -144,16 +145,16 @@ const ManifestoSection = ({ disableVideo = false }) => {
                         playsInline
                         preload="metadata"
                         poster="/assets/vid-poster.jpg"
-                        className="w-full h-full object-cover brightness-[.28] contrast-[1.1] saturate-[1.05]"
+                        className="w-full h-full object-cover brightness-[.25] contrast-[1.1] saturate-[1.05]"
                         loading="lazy"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/96 via-background/75 to-background/96 backdrop-blur-[1px]" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/70 to-background/95 backdrop-blur-[2px]" />
                 </div>
             )}
 
             {/* Content */}
             <motion.div style={{ opacity, y }} className="relative z-50 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 mt-10">
-                <div className={`flex flex-col items-center ${isMobile ? "gap-6" : "gap-8"} text-center`}>
+                <div className={`flex flex-col items-center ${isMobile ? "gap-6" : "gap-10"} text-center`}>
                     <Badge>Our Philosophy</Badge>
 
                     <h1 className={`font-heading font-bold tracking-tight leading-tight ${isMobile ? "text-3xl px-2" : "text-6xl"}`}>
@@ -173,11 +174,11 @@ const ManifestoSection = ({ disableVideo = false }) => {
                     <div className={`max-w-3xl ${isMobile ? "px-4" : ""}`}>
                         <h2 className={`font-heading font-semibold ${isMobile ? "text-xl" : "text-3xl"}`}>Every stitch tells a story</h2>
                         <p className={`text-muted-foreground ${isMobile ? "text-xs" : "text-base"} mt-2`}>
-                            We craft experiences — garments that feel considered, light, and built to last. Simple language, clear purpose.
+                            We craft experiences — garments that feel considered, light, and built to last.
                         </p>
                     </div>
 
-                    <div className={`flex ${isMobile ? "flex-col gap-3 w-full max-w-xs items-center" : "flex-row gap-4"} mt-2`}>
+                    <div className={`flex ${isMobile ? "flex-col gap-3 w-full max-w-xs items-center" : "flex-row gap-4"} mt-4`}>
                         <PremiumMagneticButton variant="primary" onClick={handleCTA}>
                             <Play className="w-4 h-4" />
                             Experience the Story

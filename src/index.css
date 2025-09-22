@@ -12,9 +12,7 @@
   :root {
     /* 🌑 Neutral / Background */
     --background: 220 50% 3%;
-    /* deep navy-black */
     --foreground: 45 30% 96%;
-    /* off-white, not pure white */
 
     --card: 220 40% 6%;
     --card-foreground: 45 30% 96%;
@@ -25,36 +23,28 @@
     --border: 220 15% 18%;
     --input: 220 15% 18%;
     --ring: 210 95% 65%;
-    /* neon blue highlight */
 
     /* 🎨 Brand Core */
     --primary: 220 70% 12%;
-    /* navy */
     --primary-foreground: 45 30% 96%;
 
     --secondary: 46 75% 52%;
-    /* gold */
     --secondary-foreground: 220 30% 10%;
 
     --accent: 200 100% 60%;
-    /* neon blue */
     --accent-foreground: 0 0% 100%;
 
     /* 🛡️ Functional */
     --success: 160 65% 42%;
-    /* emerald */
     --success-foreground: 0 0% 100%;
 
     --warning: 38 85% 52%;
-    /* amber-gold */
     --warning-foreground: 30 20% 10%;
 
     --error: 355 70% 45%;
-    /* wine crimson */
     --error-foreground: 0 0% 100%;
 
     --info: 200 85% 65%;
-    /* ice blue */
     --info-foreground: 0 0% 100%;
 
     /* ✨ Extras */
@@ -69,13 +59,10 @@
 
     --radius: 0.75rem;
     --text-subtle: 210 8% 70%;
-    /* for helper hints */
     --text-secondary: 210 15% 88%;
-    /* for subtitles under headings */
   }
 }
 
-/* hero text readability tweak */
 .drop-shadow {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
@@ -129,10 +116,26 @@
 }
 
 @layer components {
+
+  /* 🟦 Liquid Glass Effect */
+  .liquid-glass {
+    @apply bg-glass-gradient backdrop-blur-glass border border-white/10 rounded-glass shadow-glass;
+  }
+
+  .liquid-glass-strong {
+    @apply bg-white/10 backdrop-blur-xl border border-white/20 rounded-glass shadow-glass;
+  }
+
+  .liquid-glass-card {
+    @apply bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-lg;
+  }
+
+  /* Default Card (still available) */
   .glass-card {
     @apply bg-card/60 backdrop-blur-md border border-border rounded-2xl;
   }
 
+  /* Buttons */
   .btn-primary {
     background: var(--gradient-primary);
     color: hsl(var(--primary-foreground));
@@ -144,11 +147,13 @@
   }
 }
 
+/* Text outline */
 .text-outline {
   -webkit-text-stroke: 1px hsl(var(--foreground));
   color: transparent;
 }
 
+/* Hide scrollbar */
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -158,6 +163,7 @@
   display: none;
 }
 
+/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 0px;
   height: 0px;

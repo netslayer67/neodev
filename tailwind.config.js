@@ -68,10 +68,20 @@ module.exports = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        glass: "1.5rem", // buat liquid glass
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
         heading: ['Bebas Neue', 'sans-serif'],
+      },
+      backgroundImage: {
+        "glass-gradient": "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.05))",
+      },
+      backdropBlur: {
+        glass: "20px",
+      },
+      boxShadow: {
+        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.15)",
       },
     },
   },

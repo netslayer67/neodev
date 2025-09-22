@@ -19,10 +19,14 @@ import {
     MessageSquare,
     Headphones,
     Award,
-    Zap
+    Zap,
+    ArrowRight,
+    Globe,
+    Heart,
+    Crown
 } from "lucide-react";
 
-// Enhanced input sanitization for security
+// Enhanced security with stricter validation
 const sanitizeInput = (input, type = 'text') => {
     if (typeof input !== 'string') return '';
 
@@ -31,34 +35,29 @@ const sanitizeInput = (input, type = 'text') => {
         .replace(/javascript:/gi, '')
         .replace(/vbscript:/gi, '')
         .replace(/data:/gi, '')
+        .replace(/blob:/gi, '')
         .replace(/on\w+\s*=/gi, '')
         .replace(/style\s*=/gi, '')
-        .replace(/[<>]/g, '')
+        .replace(/[<>{}]/g, '')
+        .replace(/[^\w\s@.-]/g, '')
         .trim();
 
-    // Type-specific validation
     switch (type) {
         case 'email':
-            sanitized = sanitized.toLowerCase().slice(0, 100);
-            break;
+            return sanitized.toLowerCase().slice(0, 100);
         case 'name':
-            sanitized = sanitized.replace(/[^\w\s\-']/g, '').slice(0, 50);
-            break;
+            return sanitized.replace(/[^\w\s\-']/g, '').slice(0, 50);
         case 'message':
-            sanitized = sanitized.replace(/[<>{}]/g, '').slice(0, 1000);
-            break;
+            return sanitized.slice(0, 1000);
         default:
-            sanitized = sanitized.slice(0, 200);
+            return sanitized.slice(0, 200);
     }
-
-    return sanitized;
 };
 
-// Validation patterns
 const validateInput = (value, type) => {
     switch (type) {
         case 'email':
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+            return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
         case 'name':
             return value.length >= 2 && value.length <= 50;
         case 'message':
@@ -68,109 +67,8 @@ const validateInput = (value, type) => {
     }
 };
 
-// FAQ Data - Premium focused
-const faqs = [
-    {
-        question: "How fast is luxury delivery?",
-        answer: "Express delivery in 2-3 business days with premium packaging and white-glove service.",
-        icon: Zap
-    },
-    {
-        question: "Can I modify my exclusive order?",
-        answer: "Yes, you can modify orders within 1 hour. Our concierge team handles all changes personally.",
-        icon: Headphones
-    },
-    {
-        question: "What's your authenticity guarantee?",
-        answer: "Every piece comes with authenticity certification and lifetime quality assurance.",
-        icon: Award
-    },
-    {
-        question: "Do you offer private styling consultation?",
-        answer: "Yes, complimentary styling sessions available for VIP members and orders above $500.",
-        icon: Star
-    }
-];
-
-// Contact methods with premium positioning
-const contactMethods = [
-    {
-        icon: Phone,
-        title: "VIP Hotline",
-        subtitle: "Immediate assistance",
-        value: "+62 812 3456 7890",
-        action: "tel:+6281234567890",
-        gradient: "from-accent to-info",
-        available: "24/7 Premium Support"
-    },
-    {
-        icon: Mail,
-        title: "Concierge Email",
-        subtitle: "Personal service",
-        value: "concierge@atelier.luxury",
-        action: "mailto:concierge@atelier.luxury",
-        gradient: "from-secondary to-warning",
-        available: "Response within 1 hour"
-    },
-    {
-        icon: MessageCircle,
-        title: "Live Chat",
-        subtitle: "Instant connection",
-        value: "Chat with specialist",
-        action: "#",
-        gradient: "from-success to-accent",
-        available: "Online now"
-    }
-];
-
-// Animation variants
-const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-            delayChildren: 0.2
-        }
-    }
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
-    show: {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: {
-            duration: 0.6,
-            ease: [0.25, 0.46, 0.45, 0.94]
-        }
-    }
-};
-
-const floatVariants = {
-    animate: {
-        y: [-10, 10, -10],
-        transition: {
-            duration: 6,
-            repeat: Infinity,
-            ease: "easeInOut"
-        }
-    }
-};
-
-// Premium form field component
-const LuxuryFormField = ({
-    id,
-    label,
-    icon: Icon,
-    type = 'text',
-    as = 'input',
-    validation,
-    error,
-    success,
-    ...props
-}) => {
+// Luxury form field component with enhanced liquid glass
+const LuxuryFormField = ({ id, label, icon: Icon, type = 'text', as = 'input', validation, error, success, ...props }) => {
     const [focused, setFocused] = useState(false);
     const [value, setValue] = useState('');
 
@@ -186,11 +84,14 @@ const LuxuryFormField = ({
     const isValid = value && validateInput(value, type);
 
     return (
-        <motion.div variants={itemVariants} className="relative group">
-            <label
-                htmlFor={id}
-                className="flex items-center gap-2 text-sm font-medium text-foreground/90 mb-3"
-            >
+        <motion.div
+            variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+            }}
+            className="relative group"
+        >
+            <label htmlFor={id} className="flex items-center gap-2 text-sm font-semibold text-foreground/90 mb-3">
                 {Icon && <Icon className="w-4 h-4 text-accent" />}
                 {label}
                 {validation?.required && <span className="text-error">*</span>}
@@ -206,17 +107,16 @@ const LuxuryFormField = ({
                         onBlur={() => setFocused(false)}
                         {...props}
                         className={`
-                            w-full px-4 py-4 bg-gradient-to-br from-card/70 to-card/40 backdrop-blur-xl 
-                            border-2 rounded-2xl transition-all duration-320 font-medium resize-none
-                            placeholder:text-muted-foreground/60 placeholder:font-normal
-                            focus:outline-none focus:ring-0
+                            w-full px-5 py-4 liquid-glass-strong text-foreground font-medium resize-none
+                            border-2 transition-all duration-320 placeholder:text-muted-foreground/50
+                            focus:outline-none focus:ring-0 focus:scale-[1.01] focus:shadow-2xl
                             ${error
-                                ? 'border-error/50 focus:border-error shadow-lg shadow-error/10'
+                                ? 'border-error/60 focus:border-error shadow-xl shadow-error/20 bg-error/5'
                                 : isValid
-                                    ? 'border-success/50 focus:border-success shadow-lg shadow-success/10'
+                                    ? 'border-success/60 focus:border-success shadow-xl shadow-success/20 bg-success/5'
                                     : focused
-                                        ? 'border-accent/60 focus:border-accent shadow-xl shadow-accent/20'
-                                        : 'border-border/50 hover:border-border focus:border-accent'
+                                        ? 'border-accent/80 focus:border-accent shadow-2xl shadow-accent/30 bg-accent/5'
+                                        : 'border-border/40 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10'
                             }
                         `}
                     />
@@ -230,60 +130,64 @@ const LuxuryFormField = ({
                         onBlur={() => setFocused(false)}
                         {...props}
                         className={`
-                            w-full px-4 py-4 bg-gradient-to-br from-card/70 to-card/40 backdrop-blur-xl 
-                            border-2 rounded-2xl transition-all duration-320 font-medium
-                            placeholder:text-muted-foreground/60 placeholder:font-normal
-                            focus:outline-none focus:ring-0
+                            w-full px-5 py-4 liquid-glass-strong text-foreground font-medium
+                            border-2 transition-all duration-320 placeholder:text-muted-foreground/50
+                            focus:outline-none focus:ring-0 focus:scale-[1.01] focus:shadow-2xl
                             ${error
-                                ? 'border-error/50 focus:border-error shadow-lg shadow-error/10'
+                                ? 'border-error/60 focus:border-error shadow-xl shadow-error/20 bg-error/5'
                                 : isValid
-                                    ? 'border-success/50 focus:border-success shadow-lg shadow-success/10'
+                                    ? 'border-success/60 focus:border-success shadow-xl shadow-success/20 bg-success/5'
                                     : focused
-                                        ? 'border-accent/60 focus:border-accent shadow-xl shadow-accent/20'
-                                        : 'border-border/50 hover:border-border focus:border-accent'
+                                        ? 'border-accent/80 focus:border-accent shadow-2xl shadow-accent/30 bg-accent/5'
+                                        : 'border-border/40 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/10'
                             }
                         `}
                     />
                 )}
 
-                {/* Status indicators */}
+                {/* Enhanced status indicators */}
                 <AnimatePresence>
                     {error && (
                         <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, rotate: 180 }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2"
                         >
-                            <AlertCircle className="w-5 h-5 text-error" />
+                            <div className="w-6 h-6 bg-error/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <AlertCircle className="w-4 h-4 text-error" />
+                            </div>
                         </motion.div>
                     )}
                     {isValid && !error && (
                         <motion.div
-                            initial={{ scale: 0, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            exit={{ scale: 0, opacity: 0 }}
-                            className="absolute right-3 top-1/2 -translate-y-1/2"
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            exit={{ scale: 0, rotate: 180 }}
+                            className="absolute right-4 top-1/2 -translate-y-1/2"
                         >
-                            <Check className="w-5 h-5 text-success" />
+                            <div className="w-6 h-6 bg-success/20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                                <Check className="w-4 h-4 text-success" />
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
 
-                {/* Character count for message */}
+                {/* Character count */}
                 {type === 'message' && (
-                    <div className="absolute -bottom-6 right-2 text-xs text-muted-foreground">
-                        {value.length}/1000
+                    <div className="absolute -bottom-6 right-2 text-xs text-muted-foreground/70">
+                        <span className={value.length > 900 ? 'text-warning' : ''}>{value.length}</span>/1000
                     </div>
                 )}
 
-                {/* Glow effect */}
-                <motion.div
-                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-320 pointer-events-none"
+                {/* Luxury glow effect */}
+                <div
+                    className={`absolute inset-0 rounded-glass opacity-0 group-hover:opacity-100 transition-opacity duration-320 pointer-events-none ${focused ? 'opacity-100' : ''
+                        }`}
                     style={{
                         background: focused
-                            ? 'linear-gradient(135deg, hsl(var(--accent)/0.1), transparent)'
-                            : 'linear-gradient(135deg, hsl(var(--accent)/0.05), transparent)',
+                            ? 'linear-gradient(135deg, hsl(var(--accent)/0.15), transparent)'
+                            : 'linear-gradient(135deg, hsl(var(--accent)/0.08), transparent)',
                     }}
                 />
             </div>
@@ -292,8 +196,9 @@ const LuxuryFormField = ({
                 <motion.p
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="mt-2 text-xs text-error font-medium"
+                    className="mt-2 text-xs text-error font-medium flex items-center gap-1"
                 >
+                    <AlertCircle className="w-3 h-3" />
                     {error}
                 </motion.p>
             )}
@@ -301,40 +206,35 @@ const LuxuryFormField = ({
     );
 };
 
-// FAQ Accordion Component
+// Enhanced FAQ component
 const LuxuryFAQ = ({ faq, index }) => {
     const [isOpen, setIsOpen] = useState(false);
 
     return (
         <motion.div
-            variants={itemVariants}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: index * 0.1 }}
             className="relative group"
         >
-            <div className="glass-card border border-border/30 hover:border-accent/30 transition-all duration-320 overflow-hidden">
-                {/* Background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-card/60 to-card/20 backdrop-blur-xl" />
+            <div className="liquid-glass-card border border-border/30 hover:border-accent/40 transition-all duration-320 overflow-hidden">
+                <div className="relative p-6">
+                    {/* Shimmer effect */}
+                    <motion.div
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/10 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
+                        animate={{ x: ["-100%", "200%"] }}
+                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                    />
 
-                {/* Shimmer effect */}
-                <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/5 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
-                    animate={{ x: ["-100%", "200%"] }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatDelay: 4,
-                    }}
-                />
-
-                <div className="relative z-10 p-6">
                     <button
                         onClick={() => setIsOpen(!isOpen)}
                         className="flex items-center justify-between w-full text-left group/button"
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent/20 to-info/20 flex items-center justify-center">
-                                <faq.icon className="w-4 h-4 text-accent" />
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent/20 to-info/10 backdrop-blur-sm flex items-center justify-center">
+                                <faq.icon className="w-5 h-5 text-accent" />
                             </div>
-                            <h3 className="font-semibold text-foreground group-hover/button:text-accent transition-colors duration-320">
+                            <h3 className="font-bold text-foreground group-hover/button:text-accent transition-colors duration-320">
                                 {faq.question}
                             </h3>
                         </div>
@@ -342,7 +242,7 @@ const LuxuryFAQ = ({ faq, index }) => {
                         <motion.div
                             animate={{ rotate: isOpen ? 180 : 0 }}
                             transition={{ duration: 0.32 }}
-                            className="w-6 h-6 rounded-full bg-muted/20 group-hover/button:bg-accent/20 flex items-center justify-center transition-colors duration-320"
+                            className="w-8 h-8 rounded-full bg-muted/10 group-hover/button:bg-accent/20 flex items-center justify-center transition-colors duration-320"
                         >
                             <ChevronDown className="w-4 h-4 text-muted-foreground group-hover/button:text-accent" />
                         </motion.div>
@@ -357,9 +257,9 @@ const LuxuryFAQ = ({ faq, index }) => {
                                 transition={{ duration: 0.32 }}
                                 className="overflow-hidden"
                             >
-                                <p className="mt-4 ml-11 text-sm text-muted-foreground leading-relaxed">
+                                <div className="mt-4 ml-13 text-sm text-muted-foreground/90 leading-relaxed">
                                     {faq.answer}
-                                </p>
+                                </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -369,56 +269,72 @@ const LuxuryFAQ = ({ faq, index }) => {
     );
 };
 
-// Contact method card
+// Premium contact method card
 const ContactMethodCard = ({ method, index }) => (
     <motion.div
-        variants={itemVariants}
-        whileHover={{
-            y: -8,
-            transition: { duration: 0.32, ease: "easeOut" }
-        }}
-        className="relative group cursor-pointer"
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        whileHover={{ y: -12, transition: { duration: 0.32 } }}
+        className="relative group cursor-pointer h-full"
     >
-        <a href={method.action} className="block">
-            <div className="glass-card p-6 border-2 border-border/30 hover:border-accent/40 transition-all duration-320 overflow-hidden h-full">
-                {/* Background gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-card/70 to-card/30 backdrop-blur-xl" />
+        <a href={method.action} className="block h-full">
+            <div className="liquid-glass-card p-6 border-2 border-border/20 hover:border-accent/50 transition-all duration-320 overflow-hidden h-full">
+                {/* Animated background */}
+                <motion.div
+                    className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-320"
+                    animate={{
+                        background: [
+                            "linear-gradient(135deg, hsl(var(--accent)/0.05), transparent)",
+                            "linear-gradient(225deg, hsl(var(--accent)/0.08), transparent)",
+                            "linear-gradient(135deg, hsl(var(--accent)/0.05), transparent)",
+                        ]
+                    }}
+                    transition={{ duration: 4, repeat: Infinity }}
+                />
 
                 {/* Luxury shimmer */}
                 <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/8 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/15 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
                     animate={{ x: ["-100%", "200%"] }}
-                    transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatDelay: 3 + index,
-                    }}
+                    transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
                 />
 
-                <div className="relative z-10">
+                <div className="relative z-10 h-full flex flex-col">
                     <div className="flex items-start justify-between mb-4">
-                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-lg`}>
-                            <method.icon className="w-6 h-6 text-white" />
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${method.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-320`}>
+                            <method.icon className="w-7 h-7 text-white" />
                         </div>
 
-                        <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                        <div className="flex items-center gap-1">
+                            <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+                            <span className="text-xs text-success font-medium">Online</span>
+                        </div>
                     </div>
 
-                    <h3 className="font-bold text-lg text-foreground mb-1">
+                    <h3 className="font-bold text-xl text-foreground mb-2 group-hover:text-accent transition-colors duration-320">
                         {method.title}
                     </h3>
 
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-muted-foreground/80 mb-4 flex-grow">
                         {method.subtitle}
                     </p>
 
-                    <p className="font-medium text-accent mb-2">
-                        {method.value}
-                    </p>
+                    <div className="space-y-2">
+                        <p className="font-semibold text-accent">
+                            {method.value}
+                        </p>
 
-                    <p className="text-xs text-success font-medium">
-                        {method.available}
-                    </p>
+                        <div className="flex items-center gap-2 text-xs text-success font-medium">
+                            <Clock className="w-3 h-3" />
+                            {method.available}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-4 pt-3 border-t border-border/20">
+                        <ArrowRight className="w-4 h-4 text-accent group-hover:translate-x-1 transition-transform duration-320" />
+                        <span className="text-xs text-accent font-medium">Connect Now</span>
+                    </div>
                 </div>
             </div>
         </a>
@@ -427,16 +343,12 @@ const ContactMethodCard = ({ method, index }) => (
 
 const ContactPage = () => {
     const [isMobile, setIsMobile] = useState(false);
-    const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        message: ''
-    });
+    const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
-    // Detect mobile
+    // Enhanced mobile detection
     useEffect(() => {
         const checkMobile = () => setIsMobile(window.innerWidth < 768);
         checkMobile();
@@ -448,7 +360,6 @@ const ContactPage = () => {
         const sanitized = sanitizeInput(value, type);
         setFormData(prev => ({ ...prev, [field]: sanitized }));
 
-        // Validate
         if (sanitized && !validateInput(sanitized, type)) {
             setErrors(prev => ({ ...prev, [field]: getErrorMessage(field, type) }));
         } else {
@@ -457,18 +368,17 @@ const ContactPage = () => {
     };
 
     const getErrorMessage = (field, type) => {
-        switch (type) {
-            case 'email': return 'Please enter a valid email address';
-            case 'name': return 'Name must be 2-50 characters';
-            case 'message': return 'Message must be 10-1000 characters';
-            default: return 'This field is required';
-        }
+        const messages = {
+            email: 'Please enter a valid email address',
+            name: 'Name must be 2-50 characters',
+            message: 'Message must be 10-1000 characters'
+        };
+        return messages[type] || 'This field is required';
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Validate all fields
         const newErrors = {};
         Object.keys(formData).forEach(field => {
             const type = field === 'email' ? 'email' : field === 'name' ? 'name' : 'message';
@@ -483,151 +393,206 @@ const ContactPage = () => {
         }
 
         setIsSubmitting(true);
-
-        // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 2000));
-
         setIsSubmitting(false);
         setIsSubmitted(true);
         setFormData({ name: '', email: '', message: '' });
 
-        // Reset after 5 seconds
         setTimeout(() => setIsSubmitted(false), 5000);
     };
 
+    // Data
+    const faqs = [
+        {
+            question: "How fast is luxury delivery?",
+            answer: "Express delivery in 2-3 business days with premium packaging and white-glove service.",
+            icon: Zap
+        },
+        {
+            question: "Can I modify my exclusive order?",
+            answer: "Yes, you can modify orders within 1 hour. Our concierge team handles all changes personally.",
+            icon: Headphones
+        },
+        {
+            question: "What's your authenticity guarantee?",
+            answer: "Every piece comes with authenticity certification and lifetime quality assurance.",
+            icon: Award
+        },
+        {
+            question: "Do you offer private styling consultation?",
+            answer: "Yes, complimentary styling sessions available for VIP members and orders above $500.",
+            icon: Star
+        }
+    ];
+
+    const contactMethods = [
+        {
+            icon: Phone,
+            title: "VIP Hotline",
+            subtitle: "Immediate luxury assistance",
+            value: "+62 812 3456 7890",
+            action: "tel:+6281234567890",
+            gradient: "from-accent to-info",
+            available: "24/7 Premium Support"
+        },
+        {
+            icon: Mail,
+            title: "Concierge Email",
+            subtitle: "Personal service specialist",
+            value: "concierge@atelier.luxury",
+            action: "mailto:concierge@atelier.luxury",
+            gradient: "from-secondary to-warning",
+            available: "Response within 1 hour"
+        },
+        {
+            icon: MessageCircle,
+            title: "Live Chat",
+            subtitle: "Instant connection",
+            value: "Chat with specialist",
+            action: "#",
+            gradient: "from-success to-accent",
+            available: "Online now"
+        }
+    ];
+
     return (
-        <div className="relative min-h-screen bg-gradient-to-br from-background via-background to-card/10 text-foreground overflow-hidden">
-            {/* Animated Background Blobs */}
+        <div className="relative min-h-screen  text-foreground overflow-hidden">
+            {/* Enhanced animated background blobs */}
             <motion.div
                 animate={{
-                    x: [0, 120, 0],
-                    y: [0, -60, 0],
-                    scale: [1, 1.2, 1],
+                    x: [0, 150, -80, 0],
+                    y: [0, -100, 60, 0],
+                    scale: [1, 1.3, 0.8, 1],
                 }}
-                transition={{
-                    duration: 28,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                }}
-                className="absolute -top-48 -left-48 w-96 h-96 bg-gradient-to-br from-accent/25 to-info/20 rounded-full blur-3xl"
+                transition={{ duration: 32, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -top-64 -left-64 w-128 h-128 bg-gradient-to-br from-accent/20 to-info/15 rounded-full blur-3xl"
             />
             <motion.div
                 animate={{
-                    x: [0, -90, 0],
-                    y: [0, 80, 0],
-                    scale: [1, 0.8, 1],
+                    x: [0, -120, 90, 0],
+                    y: [0, 100, -70, 0],
+                    scale: [1, 0.7, 1.4, 1],
                 }}
-                transition={{
-                    duration: 35,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 10
-                }}
-                className="absolute top-1/3 -right-40 w-80 h-80 bg-gradient-to-br from-secondary/30 to-warning/20 rounded-full blur-3xl"
+                transition={{ duration: 38, repeat: Infinity, ease: "easeInOut", delay: 12 }}
+                className="absolute top-1/4 -right-48 w-96 h-96 bg-gradient-to-br from-secondary/25 to-warning/15 rounded-full blur-3xl"
             />
             <motion.div
                 animate={{
-                    x: [0, 70, 0],
-                    y: [0, -40, 0],
-                    scale: [1, 1.1, 1],
+                    x: [0, 80, -60, 0],
+                    y: [0, -50, 80, 0],
+                    scale: [1, 1.2, 0.9, 1],
                 }}
-                transition={{
-                    duration: 32,
-                    repeat: Infinity,
-                    ease: "easeInOut",
-                    delay: 15
-                }}
-                className="absolute -bottom-32 left-1/4 w-72 h-72 bg-gradient-to-br from-success/25 to-accent/20 rounded-full blur-3xl"
+                transition={{ duration: 40, repeat: Infinity, ease: "easeInOut", delay: 20 }}
+                className="absolute -bottom-48 left-1/3 w-80 h-80 bg-gradient-to-br from-success/20 to-accent/15 rounded-full blur-3xl"
             />
 
-            <div className="relative z-10 min-h-screen pt-20 pb-20 px-4 sm:px-6 lg:px-8">
+            <div className="relative z-10 min-h-screen pt-24 pb-24 px-4 sm:px-6 lg:px-8">
                 <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="show"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.8 }}
                     className="max-w-7xl mx-auto"
                 >
-                    {/* Header */}
-                    <motion.div variants={itemVariants} className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-gradient-to-r from-accent/10 to-info/10 border border-accent/20 backdrop-blur-xl">
-                            <Shield className="w-4 h-4 text-accent" />
-                            <span className="text-xs font-medium text-accent uppercase tracking-wider">
+                    {/* Premium Header */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                        className="text-center mb-20"
+                    >
+                        <div className="inline-flex items-center gap-3 mb-8 px-6 py-3 liquid-glass-strong border border-accent/30">
+                            <Crown className="w-5 h-5 text-accent" />
+                            <span className="text-sm font-bold text-accent uppercase tracking-wider">
                                 Premium Support
                             </span>
+                            <Sparkles className="w-4 h-4 text-accent" />
                         </div>
 
-                        <h1 className="text-4xl sm:text-5xl lg:text-7xl font-heading font-bold mb-6">
+                        <h1 className="text-5xl sm:text-6xl lg:text-8xl font-heading font-bold mb-8 leading-tight">
                             <span className="bg-gradient-to-r from-foreground via-accent to-secondary bg-clip-text text-transparent">
                                 Let's Connect
                             </span>
                         </h1>
 
-                        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                            Experience white-glove customer service. Our luxury specialists are here to assist you.
+                        <p className="text-lg sm:text-xl text-muted-foreground/90 max-w-3xl mx-auto leading-relaxed mb-12">
+                            Experience white-glove customer service. Our luxury specialists are here to elevate your experience.
                         </p>
 
-                        {/* Trust indicators */}
-                        <div className="flex items-center justify-center gap-6 mt-8">
+                        {/* Enhanced trust indicators */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.4 }}
+                            className="flex items-center justify-center gap-8 flex-wrap"
+                        >
                             {[
-                                { icon: Star, label: "5-Star Service", count: "24/7" },
-                                { icon: Clock, label: "Response Time", count: "< 1hr" },
-                                { icon: Award, label: "Satisfaction", count: "99%" }
+                                { icon: Star, label: "5-Star Service", count: "24/7", color: "text-warning" },
+                                { icon: Clock, label: "Response Time", count: "< 1hr", color: "text-accent" },
+                                { icon: Heart, label: "Satisfaction", count: "99%", color: "text-success" }
                             ].map((stat, i) => (
                                 <motion.div
                                     key={i}
-                                    variants={itemVariants}
-                                    className="text-center"
+                                    initial={{ scale: 0 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.6 + i * 0.1, type: "spring" }}
+                                    className="text-center px-4"
                                 >
-                                    <div className="flex items-center gap-1 justify-center mb-1">
-                                        <stat.icon className="w-4 h-4 text-accent" />
-                                        <span className="font-bold text-accent">{stat.count}</span>
+                                    <div className="flex items-center gap-2 justify-center mb-2">
+                                        <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                                        <span className={`font-bold text-lg ${stat.color}`}>{stat.count}</span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                                    <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
                                 </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </motion.div>
 
-                    {/* Contact Methods */}
-                    <motion.div
-                        variants={itemVariants}
-                        className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16"
-                    >
+                    {/* Contact Methods Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
                         {contactMethods.map((method, index) => (
                             <ContactMethodCard key={index} method={method} index={index} />
                         ))}
-                    </motion.div>
+                    </div>
 
                     {/* Main Content Grid */}
-                    <div className="grid lg:grid-cols-5 gap-12">
+                    <div className="grid lg:grid-cols-3 gap-12 items-start">
                         {/* Contact Form */}
                         <motion.div
-                            variants={itemVariants}
-                            className="lg:col-span-3 relative group"
+                            initial={{ opacity: 0, x: -30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, delay: 0.3 }}
+                            className="lg:col-span-2 relative group"
                         >
-                            <div className="glass-card p-8 sm:p-10 border-2 border-border/30 hover:border-accent/30 transition-all duration-320 overflow-hidden">
-                                {/* Background effects */}
-                                <div className="absolute inset-0 bg-gradient-to-br from-card/70 to-card/30 backdrop-blur-2xl" />
-
-                                {/* Shimmer */}
+                            <div className="liquid-glass-card p-8 sm:p-12 border-2 border-border/20 hover:border-accent/40 transition-all duration-320 overflow-hidden">
+                                {/* Enhanced background effects */}
                                 <motion.div
-                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/8 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
-                                    animate={{ x: ["-100%", "200%"] }}
-                                    transition={{
-                                        duration: 2.5,
-                                        repeat: Infinity,
-                                        repeatDelay: 4,
+                                    className="absolute inset-0 bg-gradient-to-br from-accent/5 via-transparent to-info/5 opacity-0 group-hover:opacity-100 transition-opacity duration-320"
+                                    animate={{
+                                        background: [
+                                            "linear-gradient(135deg, hsl(var(--accent)/0.05), transparent, hsl(var(--info)/0.05))",
+                                            "linear-gradient(225deg, hsl(var(--info)/0.05), transparent, hsl(var(--accent)/0.05))",
+                                            "linear-gradient(135deg, hsl(var(--accent)/0.05), transparent, hsl(var(--info)/0.05))",
+                                        ]
                                     }}
+                                    transition={{ duration: 6, repeat: Infinity }}
+                                />
+
+                                <motion.div
+                                    className="absolute inset-0 bg-gradient-to-r from-transparent via-accent/12 to-transparent -skew-x-12 opacity-0 group-hover:opacity-100"
+                                    animate={{ x: ["-100%", "200%"] }}
+                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 5 }}
                                 />
 
                                 <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-8">
-                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent/20 to-info/20 flex items-center justify-center">
-                                            <MessageSquare className="w-6 h-6 text-accent" />
+                                    <div className="flex items-center gap-4 mb-10">
+                                        <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-accent/20 to-info/10 backdrop-blur-sm flex items-center justify-center">
+                                            <MessageSquare className="w-7 h-7 text-accent" />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-heading font-bold">Send Message</h2>
-                                            <p className="text-sm text-muted-foreground">Get personal assistance from our specialists</p>
+                                            <h2 className="text-3xl font-heading font-bold bg-gradient-to-r from-foreground to-accent bg-clip-text text-transparent">
+                                                Send Message
+                                            </h2>
+                                            <p className="text-muted-foreground/80">Get personal assistance from our specialists</p>
                                         </div>
                                     </div>
 
@@ -640,95 +605,131 @@ const ContactPage = () => {
                                                 onSubmit={handleSubmit}
                                                 className="space-y-8"
                                             >
-                                                <LuxuryFormField
-                                                    id="name"
-                                                    label="Full Name"
-                                                    icon={User}
-                                                    type="name"
-                                                    placeholder="Your name..."
-                                                    value={formData.name}
-                                                    onChange={(e) => handleInputChange('name', e.target.value, 'name')}
-                                                    error={errors.name}
-                                                    validation={{ required: true }}
-                                                />
+                                                <motion.div
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    className="space-y-8"
+                                                >
+                                                    <LuxuryFormField
+                                                        id="name"
+                                                        label="Full Name"
+                                                        icon={User}
+                                                        type="name"
+                                                        placeholder="Your name..."
+                                                        value={formData.name}
+                                                        onChange={(e) => handleInputChange('name', e.target.value, 'name')}
+                                                        error={errors.name}
+                                                        validation={{ required: true }}
+                                                    />
 
-                                                <LuxuryFormField
-                                                    id="email"
-                                                    label="Email Address"
-                                                    icon={Mail}
-                                                    type="email"
-                                                    placeholder="your@email.com"
-                                                    value={formData.email}
-                                                    onChange={(e) => handleInputChange('email', e.target.value, 'email')}
-                                                    error={errors.email}
-                                                    validation={{ required: true }}
-                                                />
+                                                    <LuxuryFormField
+                                                        id="email"
+                                                        label="Email Address"
+                                                        icon={Mail}
+                                                        type="email"
+                                                        placeholder="your@email.com"
+                                                        value={formData.email}
+                                                        onChange={(e) => handleInputChange('email', e.target.value, 'email')}
+                                                        error={errors.email}
+                                                        validation={{ required: true }}
+                                                    />
 
-                                                <LuxuryFormField
-                                                    id="message"
-                                                    label="Your Message"
-                                                    icon={MessageCircle}
-                                                    as="textarea"
-                                                    type="message"
-                                                    rows={6}
-                                                    placeholder="Tell us how we can help you..."
-                                                    value={formData.message}
-                                                    onChange={(e) => handleInputChange('message', e.target.value, 'message')}
-                                                    error={errors.message}
-                                                    validation={{ required: true }}
-                                                />
+                                                    <LuxuryFormField
+                                                        id="message"
+                                                        label="Your Message"
+                                                        icon={MessageCircle}
+                                                        as="textarea"
+                                                        type="message"
+                                                        rows={6}
+                                                        placeholder="Tell us how we can help you..."
+                                                        value={formData.message}
+                                                        onChange={(e) => handleInputChange('message', e.target.value, 'message')}
+                                                        error={errors.message}
+                                                        validation={{ required: true }}
+                                                    />
+                                                </motion.div>
 
                                                 <motion.button
                                                     type="submit"
                                                     disabled={isSubmitting || Object.keys(errors).some(key => errors[key])}
-                                                    whileHover={{ scale: 1.02 }}
+                                                    whileHover={{ scale: 1.02, y: -2 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="w-full py-4 px-6 rounded-2xl font-bold text-base bg-gradient-to-r from-accent to-info hover:shadow-2xl hover:shadow-accent/30 transition-all duration-320 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                                    className="w-full py-5 px-8 rounded-glass font-bold text-lg bg-gradient-to-r from-accent to-info text-white shadow-2xl hover:shadow-accent/40 transition-all duration-320 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-3 relative overflow-hidden group/btn"
                                                 >
-                                                    {isSubmitting ? (
-                                                        <>
-                                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                                            Sending...
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Send className="w-5 h-5" />
-                                                            Send Message
-                                                            <motion.div
-                                                                animate={{ x: [0, 3, 0] }}
-                                                                transition={{ duration: 1.5, repeat: Infinity }}
-                                                            >
-                                                                →
-                                                            </motion.div>
-                                                        </>
-                                                    )}
+                                                    <motion.div
+                                                        className="absolute inset-0 bg-gradient-to-r from-info to-accent opacity-0 group-hover/btn:opacity-100 transition-opacity duration-320"
+                                                    />
+
+                                                    <div className="relative z-10 flex items-center gap-3">
+                                                        {isSubmitting ? (
+                                                            <>
+                                                                <motion.div
+                                                                    className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full"
+                                                                    animate={{ rotate: 360 }}
+                                                                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                                                />
+                                                                Sending Message...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Send className="w-6 h-6" />
+                                                                Send Message
+                                                                <motion.div
+                                                                    animate={{ x: [0, 4, 0] }}
+                                                                    transition={{ duration: 2, repeat: Infinity }}
+                                                                >
+                                                                    <ArrowRight className="w-5 h-5" />
+                                                                </motion.div>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </motion.button>
                                             </motion.form>
                                         ) : (
                                             <motion.div
                                                 key="success"
-                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                className="text-center py-12"
+                                                transition={{ type: "spring", duration: 0.6 }}
+                                                className="text-center py-16"
                                             >
                                                 <motion.div
-                                                    initial={{ scale: 0 }}
-                                                    animate={{ scale: 1 }}
+                                                    initial={{ scale: 0, rotate: -180 }}
+                                                    animate={{ scale: 1, rotate: 0 }}
                                                     transition={{ delay: 0.2, type: "spring" }}
-                                                    className="w-20 h-20 bg-gradient-to-br from-success to-accent rounded-full flex items-center justify-center mx-auto mb-6"
+                                                    className="w-24 h-24 bg-gradient-to-br from-success to-accent rounded-full flex items-center justify-center mx-auto mb-8 shadow-2xl shadow-success/30"
                                                 >
-                                                    <Check className="w-10 h-10 text-white" />
+                                                    <Check className="w-12 h-12 text-white" />
                                                 </motion.div>
 
-                                                <h3 className="text-2xl font-bold text-success mb-2">Message Sent!</h3>
-                                                <p className="text-muted-foreground mb-6">
-                                                    Our luxury specialists will respond within 1 hour.
-                                                </p>
+                                                <motion.h3
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.4 }}
+                                                    className="text-3xl font-heading font-bold text-success mb-4"
+                                                >
+                                                    Message Sent Successfully!
+                                                </motion.h3>
 
-                                                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                                                    <Sparkles className="w-4 h-4 text-accent" />
-                                                    <span>Premium support experience activated</span>
-                                                </div>
+                                                <motion.p
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.5 }}
+                                                    className="text-muted-foreground/90 mb-8 text-lg"
+                                                >
+                                                    Our luxury specialists will respond within 1 hour.
+                                                </motion.p>
+
+                                                <motion.div
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: 0.6 }}
+                                                    className="inline-flex items-center gap-3 px-6 py-3 liquid-glass-strong border border-accent/30"
+                                                >
+                                                    <Sparkles className="w-5 h-5 text-accent" />
+                                                    <span className="text-accent font-medium">Premium support experience activated</span>
+                                                    <Crown className="w-4 h-4 text-accent" />
+                                                </motion.div>
                                             </motion.div>
                                         )}
                                     </AnimatePresence>
@@ -736,82 +737,128 @@ const ContactPage = () => {
                             </div>
                         </motion.div>
 
-                        {/* FAQ Section */}
+                        {/* Right Sidebar - FAQ & Info */}
                         <motion.div
-                            variants={itemVariants}
-                            className="lg:col-span-2 space-y-6"
+                            initial={{ opacity: 0, x: 30 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.8, delay: 0.4 }}
+                            className="space-y-8"
                         >
-                            <div className="text-center lg:text-left mb-8">
-                                <div className="flex items-center gap-3 justify-center lg:justify-start mb-4">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-warning/20 flex items-center justify-center">
-                                        <MessageCircle className="w-5 h-5 text-secondary" />
+                            {/* FAQ Section */}
+                            <div>
+                                <div className="text-center lg:text-left mb-8">
+                                    <div className="flex items-center gap-3 justify-center lg:justify-start mb-4">
+                                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-secondary/20 to-warning/10 backdrop-blur-sm flex items-center justify-center">
+                                            <MessageCircle className="w-6 h-6 text-secondary" />
+                                        </div>
+                                        <div>
+                                            <h2 className="text-2xl font-heading font-bold">Frequently Asked</h2>
+                                            <p className="text-sm text-muted-foreground/80">Quick answers to luxury service questions</p>
+                                        </div>
                                     </div>
-                                    <h2 className="text-2xl font-heading font-bold">Frequently Asked</h2>
                                 </div>
-                                <p className="text-muted-foreground">Quick answers to common luxury service questions</p>
+
+                                <div className="space-y-4">
+                                    {faqs.map((faq, index) => (
+                                        <LuxuryFAQ key={index} faq={faq} index={index} />
+                                    ))}
+                                </div>
                             </div>
 
-                            <div className="space-y-4">
-                                {faqs.map((faq, index) => (
-                                    <LuxuryFAQ key={index} faq={faq} index={index} />
-                                ))}
-                            </div>
-
-                            {/* Additional Info Card */}
+                            {/* Location Info Card */}
                             <motion.div
-                                variants={itemVariants}
-                                className="relative group mt-8"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.7 }}
+                                className="relative group"
                             >
-                                <div className="glass-card p-6 border border-border/30 hover:border-accent/30 transition-all duration-320 overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-card/60 to-card/20 backdrop-blur-xl" />
+                                <div className="liquid-glass-card p-6 border border-border/30 hover:border-accent/40 transition-all duration-320 overflow-hidden">
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-br from-info/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-320"
+                                    />
 
                                     <div className="relative z-10">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-info/20 to-accent/20 flex items-center justify-center">
-                                                <MapPin className="w-4 h-4 text-info" />
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-info/20 to-accent/10 backdrop-blur-sm flex items-center justify-center">
+                                                <MapPin className="w-5 h-5 text-info" />
                                             </div>
-                                            <h3 className="font-semibold text-foreground">Visit Our Atelier</h3>
+                                            <h3 className="font-bold text-foreground text-lg">Visit Our Atelier</h3>
                                         </div>
 
-                                        <div className="space-y-2 text-sm text-muted-foreground">
-                                            <p className="font-medium text-foreground">Luxury Flagship Store</p>
-                                            <p>Jl. Sudirman No. 123</p>
-                                            <p>Jakarta, Indonesia 12345</p>
+                                        <div className="space-y-3 text-sm">
+                                            <div className="liquid-glass border border-border/20 p-4 rounded-xl">
+                                                <p className="font-semibold text-foreground mb-2">Luxury Flagship Store</p>
+                                                <p className="text-muted-foreground/90">Jl. Sudirman No. 123</p>
+                                                <p className="text-muted-foreground/90">Jakarta, Indonesia 12345</p>
+                                            </div>
 
-                                            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/30">
+                                            <div className="flex items-center gap-3 pt-2">
                                                 <Clock className="w-4 h-4 text-accent" />
-                                                <span className="text-xs font-medium text-accent">By Appointment Only</span>
+                                                <span className="text-accent font-medium">By Appointment Only</span>
+                                            </div>
+
+                                            <div className="flex items-center gap-3">
+                                                <Globe className="w-4 h-4 text-success" />
+                                                <span className="text-success font-medium">Private Showroom Available</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </motion.div>
 
-                            {/* Social Links */}
+                            {/* Social Media Card */}
                             <motion.div
-                                variants={itemVariants}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.8 }}
                                 className="relative group"
                             >
-                                <div className="glass-card p-6 border border-border/30 hover:border-accent/30 transition-all duration-320 overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-card/60 to-card/20 backdrop-blur-xl" />
+                                <div className="liquid-glass-card p-6 border border-border/30 hover:border-accent/40 transition-all duration-320 overflow-hidden">
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-320"
+                                    />
 
                                     <div className="relative z-10">
-                                        <h3 className="font-semibold text-foreground mb-4">Follow Our Journey</h3>
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary/20 to-warning/10 backdrop-blur-sm flex items-center justify-center">
+                                                <Star className="w-5 h-5 text-secondary" />
+                                            </div>
+                                            <h3 className="font-bold text-foreground text-lg">Follow Our Journey</h3>
+                                        </div>
 
-                                        <div className="flex gap-3">
+                                        <div className="grid grid-cols-2 gap-3">
                                             {[
-                                                { icon: Instagram, label: '@atelier.luxury', gradient: 'from-pink-500 to-purple-600' },
-                                                { icon: Twitter, label: '@AtelierLux', gradient: 'from-blue-400 to-blue-600' }
+                                                {
+                                                    icon: Instagram,
+                                                    label: '@atelier.luxury',
+                                                    gradient: 'from-pink-500 to-purple-600',
+                                                    followers: '50K+'
+                                                },
+                                                {
+                                                    icon: Twitter,
+                                                    label: '@AtelierLux',
+                                                    gradient: 'from-blue-400 to-blue-600',
+                                                    followers: '25K+'
+                                                }
                                             ].map((social, i) => (
                                                 <motion.a
                                                     key={i}
                                                     href="#"
-                                                    whileHover={{ scale: 1.1 }}
+                                                    whileHover={{ scale: 1.05, y: -2 }}
                                                     whileTap={{ scale: 0.95 }}
-                                                    className={`flex-1 p-4 rounded-xl bg-gradient-to-r ${social.gradient} hover:shadow-lg hover:shadow-accent/20 transition-all duration-320 text-center group/social`}
+                                                    className={`p-4 rounded-2xl bg-gradient-to-r ${social.gradient} hover:shadow-xl hover:shadow-accent/20 transition-all duration-320 text-center group/social relative overflow-hidden`}
                                                 >
-                                                    <social.icon className="w-5 h-5 text-white mx-auto mb-2 group-hover/social:scale-110 transition-transform duration-320" />
-                                                    <p className="text-xs text-white/90 font-medium">{social.label}</p>
+                                                    <motion.div
+                                                        className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 group-hover/social:opacity-100 transition-opacity duration-320"
+                                                        animate={{ x: ["-100%", "200%"] }}
+                                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                                                    />
+
+                                                    <div className="relative z-10">
+                                                        <social.icon className="w-6 h-6 text-white mx-auto mb-2 group-hover/social:scale-110 transition-transform duration-320" />
+                                                        <p className="text-xs text-white/90 font-bold mb-1">{social.label}</p>
+                                                        <p className="text-xs text-white/70">{social.followers}</p>
+                                                    </div>
                                                 </motion.a>
                                             ))}
                                         </div>
@@ -821,30 +868,58 @@ const ContactPage = () => {
                         </motion.div>
                     </div>
 
-                    {/* Floating Contact Buttons - Mobile Only */}
+                    {/* Mobile Floating Actions */}
                     {isMobile && (
                         <motion.div
                             initial={{ y: 100, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 1 }}
+                            transition={{ delay: 1.2 }}
                             className="fixed bottom-6 right-6 z-50 flex flex-col gap-3"
                         >
                             {[
-                                { icon: Phone, action: "tel:+6281234567890", gradient: "from-accent to-info" },
-                                { icon: Mail, action: "mailto:concierge@atelier.luxury", gradient: "from-secondary to-warning" },
-                                { icon: MessageCircle, action: "#", gradient: "from-success to-accent" }
-                            ].map(({ icon: Icon, action, gradient }, i) => (
+                                {
+                                    icon: Phone,
+                                    action: "tel:+6281234567890",
+                                    gradient: "from-accent to-info",
+                                    delay: 0
+                                },
+                                {
+                                    icon: Mail,
+                                    action: "mailto:concierge@atelier.luxury",
+                                    gradient: "from-secondary to-warning",
+                                    delay: 0.1
+                                },
+                                {
+                                    icon: MessageCircle,
+                                    action: "#",
+                                    gradient: "from-success to-accent",
+                                    delay: 0.2
+                                }
+                            ].map(({ icon: Icon, action, gradient, delay }, i) => (
                                 <motion.a
                                     key={i}
                                     href={action}
-                                    variants={floatVariants}
-                                    animate="animate"
-                                    style={{ animationDelay: `${i * 0.2}s` }}
-                                    whileHover={{ scale: 1.1 }}
+                                    animate={{
+                                        y: [0, -8, 0],
+                                        scale: [1, 1.05, 1]
+                                    }}
+                                    transition={{
+                                        duration: 3 + delay,
+                                        repeat: Infinity,
+                                        ease: "easeInOut",
+                                        delay: delay * 2
+                                    }}
+                                    whileHover={{ scale: 1.15, rotate: 5 }}
                                     whileTap={{ scale: 0.9 }}
-                                    className={`w-14 h-14 rounded-full bg-gradient-to-r ${gradient} shadow-2xl backdrop-blur-xl flex items-center justify-center group`}
+                                    className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${gradient} shadow-2xl backdrop-blur-xl flex items-center justify-center group/fab relative overflow-hidden`}
                                 >
-                                    <Icon className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-320" />
+                                    <motion.div
+                                        className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover/fab:opacity-100 transition-opacity duration-320"
+                                        animate={{ rotate: [0, 360] }}
+                                        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+                                    />
+
+                                    <Icon className="w-7 h-7 text-white group-hover/fab:scale-110 transition-transform duration-320 relative z-10" />
                                 </motion.a>
                             ))}
                         </motion.div>
@@ -852,18 +927,27 @@ const ContactPage = () => {
 
                     {/* Premium Footer */}
                     <motion.div
-                        variants={itemVariants}
-                        className="text-center mt-20 pt-12 border-t border-border/30"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1 }}
+                        className="text-center mt-24 pt-16 border-t border-border/30"
                     >
-                        <div className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-card/60 to-card/40 backdrop-blur-xl border border-border/50 rounded-full mb-6">
-                            <Sparkles className="w-4 h-4 text-accent" />
-                            <span className="text-sm font-medium text-muted-foreground">
+                        <motion.div
+                            whileHover={{ scale: 1.05 }}
+                            className="inline-flex items-center gap-3 px-8 py-4 liquid-glass-strong border border-border/40 hover:border-accent/50 transition-all duration-320 mb-8 group"
+                        >
+                            <Crown className="w-5 h-5 text-accent group-hover:rotate-12 transition-transform duration-320" />
+                            <span className="text-sm font-bold text-muted-foreground group-hover:text-accent transition-colors duration-320">
                                 Premium support experience since 2024
                             </span>
-                        </div>
+                            <Sparkles className="w-4 h-4 text-accent group-hover:scale-110 transition-transform duration-320" />
+                        </motion.div>
 
-                        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                        <p className="text-muted-foreground/80 max-w-2xl mx-auto leading-relaxed">
                             Your satisfaction is our commitment. Experience luxury customer service that exceeds expectations.
+                            <span className="block mt-2 text-accent font-medium">
+                                "This is legit, premium brand vibes" - Every satisfied customer
+                            </span>
                         </p>
                     </motion.div>
                 </motion.div>

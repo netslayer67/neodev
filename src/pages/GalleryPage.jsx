@@ -1,10 +1,9 @@
-// GalleryPage.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-// --- sanitizer ---
+// --- sanitizer to prevent XSS/phishing ---
 const sanitizeInput = (input) => {
     if (!input) return "";
     const dangerous = /<script|javascript:|on\w+=/gi;
@@ -15,7 +14,7 @@ const sanitizeInput = (input) => {
     return String(input).replace(/[<>]/g, "");
 };
 
-// --- sample items ---
+// --- sample media items ---
 const mediaItems = [
     {
         id: 1,
@@ -57,6 +56,7 @@ const GalleryPage = () => {
     const [favorites, setFavorites] = useState(new Set());
     const [isMobile, setIsMobile] = useState(false);
 
+    // --- responsive check ---
     useEffect(() => {
         const check = () => setIsMobile(window.innerWidth < 768);
         check();
@@ -64,6 +64,7 @@ const GalleryPage = () => {
         return () => window.removeEventListener("resize", check);
     }, []);
 
+    // --- keyboard nav ---
     useEffect(() => {
         const onKey = (e) => {
             if (e.key === "Escape") closeDetail();
@@ -104,27 +105,23 @@ const GalleryPage = () => {
     };
 
     const goNext = () => {
-        setSelectedIndex((i) =>
-            i === null ? 0 : (i + 1) % mediaItems.length
-        );
+        setSelectedIndex((i) => (i === null ? 0 : (i + 1) % mediaItems.length));
     };
 
     const goPrev = () => {
-        setSelectedIndex((i) =>
-            i === null ? 0 : (i - 1 + mediaItems.length) % mediaItems.length
-        );
+        setSelectedIndex((i) => (i === null ? 0 : (i - 1 + mediaItems.length) % mediaItems.length));
     };
 
     const selected = selectedIndex !== null ? mediaItems[selectedIndex] : null;
 
     return (
-        <motion.div className="relative bg-warning-foreground/15 min-h-screen w-full text-foreground overflow-hidden">
+        <motion.div className="relative min-h-screen w-full text-foreground overflow-hidden">
             {/* Header */}
-            <motion.header className="sticky top-0 z-10 backdrop-blur-xl bg-background/30 border-b border-border/10">
+            <motion.header className="sticky top-0 z-10 backdrop-blur-glass bg-background/40 border-b border-border/10">
                 <div className="container mx-auto px-4 py-3 flex items-center justify-between">
                     <button
                         onClick={() => (window.location.href = "/")}
-                        className="px-3 py-2 rounded-lg bg-card/50 border border-border/10"
+                        className="px-3 py-2 rounded-lg liquid-glass border border-border/10 transition duration-320 hover:scale-[1.03]"
                     >
                         Back
                     </button>
@@ -139,7 +136,7 @@ const GalleryPage = () => {
                 {viewMode === "grid" && (
                     <div
                         className={cn(
-                            "grid gap-3 md:gap-6",
+                            "grid gap-4 md:gap-6",
                             isMobile ? "grid-cols-2" : "grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
                         )}
                     >
@@ -147,16 +144,18 @@ const GalleryPage = () => {
                             <button
                                 key={item.id}
                                 onClick={() => openDetail(item)}
-                                className="group relative aspect-[3/4] overflow-hidden rounded-2xl border border-border/10 bg-card/30 backdrop-blur-md hover:scale-[1.02] transition"
+                                className="group relative aspect-[3/4] overflow-hidden rounded-2xl liquid-glass border border-border/10 shadow-glass hover:scale-[1.02] transition-transform duration-320"
                             >
                                 <img
                                     src={item.src}
                                     alt={sanitizeInput(item.alt)}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-320"
                                 />
-                                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/60 to-transparent text-white text-sm">
+                                <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/50 to-transparent text-white text-sm">
                                     {sanitizeInput(item.alt)}
                                 </div>
+                                {/* decorative blob */}
+                                <span className="absolute top-2 right-2 w-4 h-4 rounded-full bg-accent/60 animate-pulse"></span>
                             </button>
                         ))}
                     </div>
@@ -171,7 +170,6 @@ const GalleryPage = () => {
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
                         >
-                            {/* background blur */}
                             <div
                                 className="absolute inset-0 blur-3xl scale-110 opacity-40"
                                 style={{
@@ -185,26 +183,26 @@ const GalleryPage = () => {
                             {!isMobile && (
                                 <div className="relative w-full max-w-[1200px] flex items-center justify-center gap-10">
                                     <motion.div
-                                        className="relative bg-card/40 backdrop-blur-xl rounded-3xl overflow-hidden border border-border/10 shadow-2xl flex-shrink-0"
+                                        className="relative liquid-glass-card overflow-hidden rounded-3xl shadow-2xl flex-shrink-0"
                                         style={{ aspectRatio: "9/16", width: "min(35vw,420px)" }}
+                                        drag
+                                        dragElastic={0.3}
+                                        dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+                                        onDragEnd={(e, info) => {
+                                            if (info.offset.x > 100) goPrev();
+                                            else if (info.offset.x < -100) goNext();
+                                            else if (info.offset.y > 120) closeDetail();
+                                        }}
                                     >
-                                        <motion.img
+                                        <img
                                             src={selected.src}
                                             alt={sanitizeInput(selected.alt)}
                                             className="w-full h-full object-cover"
-                                            drag
-                                            dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-                                            dragElastic={0.3}
-                                            onDragEnd={(e, info) => {
-                                                if (info.offset.x > 100) goPrev();
-                                                else if (info.offset.x < -100) goNext();
-                                                else if (info.offset.y > 120) closeDetail();
-                                            }}
                                         />
                                     </motion.div>
 
-                                    {/* sidebar */}
-                                    <aside className="w-80 shrink-0 flex flex-col justify-between p-4 rounded-xl bg-background/60 backdrop-blur-lg border border-border/10">
+                                    {/* Sidebar */}
+                                    <aside className="w-80 shrink-0 flex flex-col justify-between p-4 rounded-xl liquid-glass-card border-border/10">
                                         <div>
                                             <p className="text-xs text-secondary font-medium">
                                                 {selected.collection}
@@ -219,13 +217,13 @@ const GalleryPage = () => {
                                         <div className="flex gap-3 mt-6">
                                             <button
                                                 onClick={(e) => handleShare(selected, e)}
-                                                className="p-2 rounded-lg bg-card/60 border border-border/10"
+                                                className="p-2 rounded-lg liquid-glass border border-border/10 hover:scale-[1.05] transition-transform duration-320"
                                             >
                                                 <Share2 className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={(e) => toggleFav(selected.id, e)}
-                                                className="p-2 rounded-lg bg-card/60 border border-border/10"
+                                                className="p-2 rounded-lg liquid-glass border border-border/10 hover:scale-[1.05] transition-transform duration-320"
                                             >
                                                 <Heart
                                                     className={cn(
@@ -243,9 +241,9 @@ const GalleryPage = () => {
 
                             {/* Mobile */}
                             {isMobile && (
-                                <motion.div className="relative w-full max-w-[min(90vw,600px)] flex flex-col items-center">
+                                <motion.div className="relative w-full max-w-[90vw] flex flex-col items-center">
                                     <motion.div
-                                        className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden border border-border/10 bg-card/40 backdrop-blur-xl shadow-2xl"
+                                        className="relative aspect-[9/16] w-full rounded-2xl overflow-hidden liquid-glass-card shadow-2xl"
                                         drag="y"
                                         dragConstraints={{ top: 0, bottom: 0 }}
                                         dragElastic={0.6}
@@ -279,13 +277,13 @@ const GalleryPage = () => {
                                         <div className="flex justify-center gap-4 mt-3">
                                             <button
                                                 onClick={(e) => handleShare(selected, e)}
-                                                className="p-2 rounded-lg bg-card/60 border border-border/10"
+                                                className="p-2 rounded-lg liquid-glass border border-border/10 hover:scale-[1.05] transition-transform duration-320"
                                             >
                                                 <Share2 className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={(e) => toggleFav(selected.id, e)}
-                                                className="p-2 rounded-lg bg-card/60 border border-border/10"
+                                                className="p-2 rounded-lg liquid-glass border border-border/10 hover:scale-[1.05] transition-transform duration-320"
                                             >
                                                 <Heart
                                                     className={cn(
