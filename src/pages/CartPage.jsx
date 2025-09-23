@@ -43,7 +43,7 @@ const CartPage = () => {
 
   const { subtotal, shipping, total } = useMemo(() => {
     const sub = cartItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
-    const ship = cartItems.length > 0 ? 15000 : 0;
+    const ship = cartItems.length > 0 ? 4000 : 0;
     return { subtotal: sub, shipping: ship, total: sub + ship };
   }, [cartItems]);
 

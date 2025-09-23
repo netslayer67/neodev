@@ -98,9 +98,9 @@ const CheckoutPage = () => {
 
     const priceCalculations = useMemo(() => {
         const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)
-        const shippingFee = cartItems.length > 0 ? 15000 : 0
-        const adminFee = 2500
-        const onlineDiscount = 3000
+        const shippingFee = cartItems.length > 0 ? 4000 : 0
+        const adminFee = 10000
+        const onlineDiscount = 0
         const total = subtotal + shippingFee + (paymentMethod === "offline" ? adminFee : -onlineDiscount)
 
         return { subtotal, shippingFee, adminFee, onlineDiscount, total }
@@ -328,15 +328,15 @@ const CheckoutPage = () => {
                                 <PriceRow label="Subtotal" value={`Rp ${priceCalculations.subtotal.toLocaleString("id-ID")}`} />
                                 <PriceRow label="Shipping" value={`Rp ${priceCalculations.shippingFee.toLocaleString("id-ID")}`} />
                                 {paymentMethod === "offline" && (
-                                    <PriceRow label="Admin Fee" value={`Rp ${priceCalculations.adminFee.toLocaleString("id-ID")}`} />
+                                    <PriceRow label="Admin Fee" value={`Rp ${priceCalculations.adminFee.toLocaleString("id-ID")}`} className="text-success" />
                                 )}
-                                {paymentMethod === "online" && (
-                                    <PriceRow
-                                        label="Discount"
-                                        value={`-Rp ${priceCalculations.onlineDiscount.toLocaleString("id-ID")}`}
-                                        className="text-success"
-                                    />
-                                )}
+                                {/* {paymentMethod === "online" && (
+                                    // <PriceRow
+                                    //     label="Discount"
+                                    //     value={`-Rp ${priceCalculations.onlineDiscount.toLocaleString("id-ID")}`}
+                                    //     className="text-success"
+                                    // />
+                                )} */}
                             </div>
 
                             <div className="border-t border-border my-5" />
