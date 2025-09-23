@@ -34,7 +34,7 @@ export default function ProductAdmin({
                 description: product.description || "",
                 price: product.price || "",
                 category: product.category || "",
-                images: [], // fresh upload only
+                images: [],
                 sizes: product.sizes || [],
             });
         } else {
