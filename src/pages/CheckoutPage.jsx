@@ -328,8 +328,8 @@ const CheckoutPage = () => {
                                             {({ checked }) => (
                                                 <div
                                                     className={`rounded-xl border px-5 py-4 transition duration-300 cursor-pointer ${checked
-                                                            ? "border-accent ring-2 ring-accent/50 bg-card"
-                                                            : "border-border hover:border-foreground/40"
+                                                        ? "border-accent ring-2 ring-accent/50 bg-card"
+                                                        : "border-border hover:border-foreground/40"
                                                         }`}
                                                 >
                                                     <div className="flex justify-between items-center">
