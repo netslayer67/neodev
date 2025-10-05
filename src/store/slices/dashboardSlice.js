@@ -1,13 +1,13 @@
 // src/store/slices/dashboardSlice.js
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios from '../../api/axios'; // Use configured axios instance
 
 export const fetchDashboardStats = createAsyncThunk(
     'dashboard/fetchStats',
     async (_, { rejectWithValue }) => {
         try {
-            const res = await axios.get('/api/v1/admin/dashboard-stats');
+            const res = await axios.get('/admin/dashboard-stats');
             return res.data.data;
         } catch (error) {
             return rejectWithValue(error.response?.data?.message || error.message);

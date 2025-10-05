@@ -9,9 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-const ShippingCalculator = memo(({ 
-  shippingAddress, 
-  onShippingCostChange, 
+const ShippingCalculator = memo(({
+  shippingAddress,
+  onShippingCostChange,
   cartWeight = 1000,
   onAddressChange
 }) => {
@@ -25,10 +25,10 @@ const ShippingCalculator = memo(({
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
-      transition: { 
+      transition: {
         duration: 0.3,
         staggerChildren: 0.1
       }
@@ -59,35 +59,42 @@ const ShippingCalculator = memo(({
         destinationCity: shippingAddress.city,
         weight: cartWeight
       });
-      
-      const { costs, isFreeShipping: freeShipping, message } = response.data;
-      
-      setShippingOptions(costs);
-      setIsFreeShipping(freeShipping);
-      
-      // Auto-select first option
-      if (costs.length > 0) {
-        const firstOption = costs[0];
-        setSelectedShipping(firstOption);
-        onShippingCostChange(firstOption.cost, firstOption.service);
-      }
+
+      const shippingData = response.data.data;
+      const { destination, isJabodetabek, shippingCost, courier, service, etd } = shippingData;
+
+      // Create shipping option from backend response
+      const shippingOption = {
+        service: service || 'REG',
+        description: `${courier || 'Standard'} ${service || 'Regular'}`,
+        cost: shippingCost,
+        etd: etd || '2-3 hari kerja',
+        isFree: shippingCost === 0
+      };
+
+      setShippingOptions([shippingOption]);
+      setIsFreeShipping(isJabodetabek);
+
+      // Auto-select the option
+      setSelectedShipping(shippingOption);
+      onShippingCostChange(shippingOption.cost, shippingOption.service);
 
       // Show free shipping message
-      if (freeShipping && message) {
+      if (isJabodetabek && shippingCost === 0) {
         toast({
           title: "Gratis Ongkir! 🎉",
-          description: message,
+          description: "Gratis ongkir untuk wilayah Jabodetabek",
           duration: 3000
         });
       }
     } catch (error) {
       console.error('Shipping calculation failed:', error);
       setError('Gagal menghitung ongkir. Silakan coba lagi.');
-      
+
       // Fallback: check if likely Jabodetabek
       const isLikelyFree = shippingUtils.isLikelyJabodetabek(shippingAddress.city);
       const fallbackCost = isLikelyFree ? 0 : 15000;
-      
+
       setShippingOptions([{
         service: 'REG',
         description: isLikelyFree ? 'Gratis Ongkir' : 'Regular Service',
@@ -95,12 +102,12 @@ const ShippingCalculator = memo(({
         etd: '2-3 hari kerja',
         isFree: isLikelyFree
       }]);
-      
+
       setSelectedShipping({
         service: 'REG',
         cost: fallbackCost
       });
-      
+
       onShippingCostChange(fallbackCost, 'REG');
     } finally {
       setIsLoading(false);
@@ -132,7 +139,7 @@ const ShippingCalculator = memo(({
   };
 
   return (
-    <motion.div 
+    <motion.div
       className="space-y-4"
       variants={containerVariants}
       initial="hidden"
@@ -158,7 +165,7 @@ const ShippingCalculator = memo(({
             </div>
           )}
         </div>
-        
+
         {/* Quick suggestion for popular cities */}
         {!shippingAddress.city && (
           <div className="flex flex-wrap gap-2 mt-2">
@@ -237,7 +244,7 @@ const ShippingCalculator = memo(({
               <Truck size={18} className="text-accent" />
               <h4 className="font-medium text-foreground">Pilih Kurir</h4>
             </div>
-            
+
             <RadioGroup
               value={selectedShipping}
               onChange={handleShippingSelect}
@@ -245,18 +252,17 @@ const ShippingCalculator = memo(({
             >
               {shippingOptions.map((option, index) => {
                 const deliveryEstimate = shippingUtils.getDeliveryEstimate(option.etd);
-                
+
                 return (
                   <RadioGroup.Option key={index} value={option}>
                     {({ checked }) => (
                       <motion.div
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
-                        className={`rounded-xl border p-4 cursor-pointer transition-all duration-200 ${
-                          checked 
-                            ? "border-accent bg-accent/5 shadow-lg shadow-accent/10" 
+                        className={`rounded-xl border p-4 cursor-pointer transition-all duration-200 ${checked
+                            ? "border-accent bg-accent/5 shadow-lg shadow-accent/10"
                             : "border-border hover:border-accent/50 hover:bg-accent/5"
-                        }`}
+                          }`}
                       >
                         <div className="flex justify-between items-start">
                           <div className="flex-1">
@@ -277,12 +283,12 @@ const ShippingCalculator = memo(({
                               <span>Estimasi: {option.etd}</span>
                               <span className="hidden sm:inline">•</span>
                               <span>
-                                Tiba: {deliveryEstimate.min.toLocaleDateString('id-ID', { 
-                                  day: 'numeric', 
-                                  month: 'short' 
-                                })} - {deliveryEstimate.max.toLocaleDateString('id-ID', { 
-                                  day: 'numeric', 
-                                  month: 'short' 
+                                Tiba: {deliveryEstimate.min.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'short'
+                                })} - {deliveryEstimate.max.toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'short'
                                 })}
                               </span>
                             </div>
@@ -327,7 +333,7 @@ const ShippingCalculator = memo(({
 
       {/* Weight Info */}
       {cartWeight > 0 && (
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className="text-xs text-muted-foreground bg-muted/30 rounded-lg p-3"
         >

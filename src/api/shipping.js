@@ -8,13 +8,18 @@ export const shippingAPI = {
   /**
    * Calculate shipping cost based on destination and weight
    * @param {Object} params - Shipping parameters
-   * @param {string} params.destinationCity - Destination city name
-   * @param {number} params.weight - Total weight in grams
-   * @param {string} params.originCity - Origin city (optional)
+   * @param {string} params.city - Destination city name
+   * @param {string} params.postalCode - Postal code (optional)
+   * @param {number} params.weight - Total weight in grams (default: 1000)
    * @returns {Promise} Shipping cost data
    */
   getShippingCost: (params) => {
-    return axios.get('/shipping/cost', { params });
+    const { destinationCity, weight = 1000, ...rest } = params;
+    return axios.post('/shipping/calculate', {
+      city: destinationCity,
+      weight,
+      ...rest
+    });
   },
 
   /**
@@ -81,17 +86,17 @@ export const shippingUtils = {
   getDeliveryEstimate: (etd) => {
     const today = new Date();
     const etdNumbers = etd.match(/\d+/g);
-    
+
     if (!etdNumbers || etdNumbers.length === 0) {
       return {
         min: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000),
         max: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000)
       };
     }
-    
+
     const minDays = parseInt(etdNumbers[0]);
     const maxDays = etdNumbers.length > 1 ? parseInt(etdNumbers[1]) : minDays;
-    
+
     return {
       min: new Date(today.getTime() + minDays * 24 * 60 * 60 * 1000),
       max: new Date(today.getTime() + maxDays * 24 * 60 * 60 * 1000)
@@ -105,14 +110,14 @@ export const shippingUtils = {
    */
   isLikelyJabodetabek: (cityName) => {
     if (!cityName) return false;
-    
+
     const jabodetabekKeywords = [
       'jakarta', 'bogor', 'depok', 'tangerang', 'bekasi',
       'dki jakarta', 'tangsel', 'tangerang selatan'
     ];
-    
+
     const normalizedCity = cityName.toLowerCase();
-    return jabodetabekKeywords.some(keyword => 
+    return jabodetabekKeywords.some(keyword =>
       normalizedCity.includes(keyword) || keyword.includes(normalizedCity)
     );
   },
