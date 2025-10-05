@@ -275,9 +275,10 @@ const CheckoutPage = () => {
                 const orderId = orderResponse.order.orderId
 
                 if (paymentMethod === "va") {
-                    console.log('Initiating VA payment:', { isLoaded, hasSnap: !!window.snap, hasToken: !!result.midtransSnapToken })
-                    if (isLoaded && window.snap && result.midtransSnapToken) {
-                        window.snap.pay(result.midtransSnapToken, {
+                    const snapToken = result.data?.midtransSnapToken || result.midtransSnapToken
+                    console.log('Initiating VA payment:', { isLoaded, hasSnap: !!window.snap, hasToken: !!snapToken, result })
+                    if (isLoaded && window.snap && snapToken) {
+                        window.snap.pay(snapToken, {
                             onSuccess: (result) => {
                                 console.log('Midtrans onSuccess triggered:', result)
                                 toast({

@@ -154,7 +154,8 @@ const orderSlice = createSlice({
 
         // Handle different response structures
         const responseData = action.payload.data || action.payload
-        const { order, payment, midtransSnapToken, redirectUrl } = responseData
+        const actualData = responseData.data || responseData
+        const { order, payment, midtransSnapToken, redirectUrl } = actualData
 
         // Update orders list
         if (order) {
