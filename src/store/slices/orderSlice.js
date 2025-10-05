@@ -27,6 +27,32 @@ export const createOrder = createAsyncThunk(
   }
 )
 
+// Async thunk for creating preorder with enhanced error handling
+export const createPreorder = createAsyncThunk(
+  'orders/createPreorder',
+  async (orderData, { rejectWithValue }) => {
+    try {
+      const preorderData = { ...orderData, type: 'preorder', paymentMethod: 'va' }
+      const response = await axios.post('/orders', preorderData)
+      return response.data
+    } catch (error) {
+      const errorMessage = error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        'Failed to create preorder'
+
+      // Log error for debugging
+      console.error('Preorder creation error:', {
+        message: errorMessage,
+        status: error.response?.status,
+        data: error.response?.data
+      })
+
+      return rejectWithValue(errorMessage)
+    }
+  }
+)
+
 // Async thunk for fetching user orders with pagination
 export const fetchMyOrders = createAsyncThunk(
   'orders/fetchMyOrders',
@@ -175,6 +201,46 @@ const orderSlice = createSlice({
         state.error = null
       })
       .addCase(createOrder.rejected, (state, action) => {
+        state.status = 'failed'
+        state.error = action.payload
+        state.selectedOrder = null
+        state.midtransSnapToken = null
+        state.redirectUrl = null
+      })
+
+      // Create Preorder
+      .addCase(createPreorder.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+        state.midtransSnapToken = null
+        state.redirectUrl = null
+      })
+      .addCase(createPreorder.fulfilled, (state, action) => {
+        state.status = 'succeeded'
+
+        // Handle different response structures
+        const responseData = action.payload.data || action.payload
+        const actualData = responseData.data || responseData
+        const { order, payment, midtransSnapToken, redirectUrl } = actualData
+
+        // Update orders list
+        if (order) {
+          state.myOrders.unshift(order)
+          state.selectedOrder = order
+        }
+
+        // Handle payment data (preorders always use VA)
+        if (payment) {
+          state.midtransSnapToken = payment.snapToken
+          state.redirectUrl = payment.redirectUrl
+        } else {
+          state.midtransSnapToken = midtransSnapToken
+          state.redirectUrl = redirectUrl
+        }
+
+        state.error = null
+      })
+      .addCase(createPreorder.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.payload
         state.selectedOrder = null

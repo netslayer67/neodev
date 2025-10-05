@@ -23,6 +23,9 @@ const AboutPage = lazy(() => import("@/pages/AboutPage"));
 const ContactPage = lazy(() => import("@/pages/ContactPage"));
 const GalleryPage = lazy(() => import("@/pages/GalleryPage"));
 const PreorderPage = lazy(() => import("@/pages/PreorderPage"));
+const PreorderShopPage = lazy(() => import("@/pages/PreorderShopPage"));
+const PreorderDetailPage = lazy(() => import("@/pages/PreorderDetailPage"));
+const PreorderCheckoutPage = lazy(() => import("@/pages/PreorderCheckoutPage"));
 const UpcomingPage = lazy(() => import("@/pages/UpcomingPage"));
 
 // --- Admin Pages ---
@@ -71,6 +74,8 @@ function App() {
         <Route path="/cart" element={<MainLayout><CartPage /></MainLayout>} />
         <Route path="/about" element={<MainLayout><AboutPage /></MainLayout>} />
         <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+        <Route path="/preorder" element={<MainLayout><PreorderShopPage /></MainLayout>} />
+        <Route path="/preorder/:slug" element={<MainLayout><PreorderDetailPage /></MainLayout>} />
         <Route path="/pre" element={<MainLayout><PreorderPage /></MainLayout>} />
         <Route path="/coming" element={<MainLayout><UpcomingPage /></MainLayout>} />
 
@@ -93,6 +98,14 @@ function App() {
           element={
             <ProtectedRoute>
               <MainLayout><CheckoutPage /></MainLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/preorder-checkout"
+          element={
+            <ProtectedRoute>
+              <MainLayout><PreorderCheckoutPage /></MainLayout>
             </ProtectedRoute>
           }
         />

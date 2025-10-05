@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo, memo } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { Heart, Eye } from "lucide-react";
+import { Heart, Eye, Clock, Award } from "lucide-react";
 
 // Constants
 const CAROUSEL_INTERVAL = 5000;
@@ -15,6 +15,14 @@ const shimmerClass = "animate-pulse bg-gradient-to-r from-muted/20 via-muted/40 
 const FreshDropBadge = memo(() => (
   <span className="absolute top-2 left-2 z-20 rounded-full border border-border/40 bg-card/60 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur-md shadow-sm">
     Fresh Drop
+  </span>
+));
+
+// Preorder Badge
+const PreorderBadge = memo(() => (
+  <span className="absolute top-2 left-2 z-20 rounded-full border border-warning/40 bg-gradient-to-r from-warning/20 to-accent/20 px-2 py-0.5 text-[10px] font-medium text-warning backdrop-blur-md shadow-sm">
+    <Clock size={8} className="inline mr-1" />
+    PREORDER
   </span>
 ));
 
@@ -83,18 +91,24 @@ const ProductImage = memo(({ images, currentImage, productName }) => {
 });
 
 // Product Info
-const ProductInfo = memo(({ product }) => (
+const ProductInfo = memo(({ product, isPreorder = false }) => (
   <div className="relative z-20 space-y-1 p-4">
-    <h3 className="font-heading text-base sm:text-lg line-clamp-2 group-hover:text-accent transition-colors duration-320">{product.name}</h3>
+    <h3 className={`font-heading text-base sm:text-lg line-clamp-2 transition-colors duration-320 ${isPreorder ? 'group-hover:text-warning' : 'group-hover:text-accent'}`}>{product.name}</h3>
     <p className="text-xs font-sans text-muted-foreground">{product.category}</p>
     <div className="mt-2 flex items-center justify-between">
-      <span className="text-sm font-semibold text-accent">Rp {product.price?.toLocaleString("id-ID") || '0'}</span>
+      <span className={`text-sm font-semibold ${isPreorder ? 'text-warning' : 'text-accent'}`}>Rp {product.price?.toLocaleString("id-ID") || '0'}</span>
+      {isPreorder && (
+        <div className="flex items-center gap-1 text-xs text-warning font-medium">
+          <Award size={10} />
+          <span>VA Only</span>
+        </div>
+      )}
     </div>
   </div>
 ));
 
 // Main ProductCard
-const ProductCard = memo(({ product, loading = false, index = null }) => {
+const ProductCard = memo(({ product, loading = false, index = null, isPreorder = false }) => {
   const cardRef = useRef(null);
   const rafRef = useRef(null);
   const intervalRef = useRef(null);
@@ -105,7 +119,8 @@ const ProductCard = memo(({ product, loading = false, index = null }) => {
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const multipleImages = useMemo(() => product?.images?.length > 1, [product?.images?.length]);
-  const showBadge = useMemo(() => !loading && index === 0, [loading, index]);
+  const showBadge = useMemo(() => !loading && index === 0 && !isPreorder, [loading, index, isPreorder]);
+  const showPreorderBadge = useMemo(() => !loading && isPreorder, [loading, isPreorder]);
 
   useEffect(() => {
     if (!multipleImages || loading || prefersReducedMotion) return;
@@ -149,12 +164,13 @@ const ProductCard = memo(({ product, loading = false, index = null }) => {
 
   return (
     <motion.div ref={cardRef} variants={variants} initial="hidden" whileInView="visible" viewport={{ once: true, margin: "100px" }} onMouseMove={handleMouseMove} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="group relative w-full transition-all duration-320 will-change-transform" style={{ transformStyle: 'preserve-3d', backfaceVisibility: 'hidden' }}>
-      <Link to={`/product/${product.slug}`} className="block overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-xl shadow-lg transition-all duration-320 hover:shadow-xl hover:shadow-accent/5 hover:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/50" aria-label={`View details for ${product.name}`}>
-        {!prefersReducedMotion && <motion.div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-accent/10 blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-320" animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />}
+      <Link to={isPreorder ? `/preorder/${product.slug}` : `/product/${product.slug}`} className={`block overflow-hidden rounded-2xl border border-border/50 backdrop-blur-xl shadow-lg transition-all duration-320 hover:shadow-xl focus:outline-none focus:ring-2 ${isPreorder ? 'bg-gradient-to-br from-card/60 to-warning/5 hover:shadow-warning/5 hover:border-warning/40 focus:ring-warning/50' : 'bg-card/60 hover:shadow-accent/5 hover:border-accent/40 focus:ring-accent/50'}`} aria-label={`View details for ${product.name}`}>
+        {!prefersReducedMotion && <motion.div className={`absolute -top-8 -right-8 w-24 h-24 rounded-full blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-320 ${isPreorder ? 'bg-warning/10' : 'bg-accent/10'}`} animate={{ scale: [1, 1.1, 1] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }} />}
         <ProductImage images={product.images} currentImage={currentImage} productName={product.name} />
         {showBadge && <FreshDropBadge />}
+        {showPreorderBadge && <PreorderBadge />}
         <ActionButtons />
-        <ProductInfo product={product} />
+        <ProductInfo product={product} isPreorder={isPreorder} />
       </Link>
     </motion.div>
   );

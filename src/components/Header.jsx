@@ -140,6 +140,7 @@ const NavLinks = memo(function NavLinks() {
   const links = useMemo(() => [
     { name: 'Home', href: '/', icon: Crown, exclusive: true },
     { name: 'Collection', href: '/shop', icon: Sparkles },
+    { name: 'Preorder', href: '/preorder', icon: Sparkles, preorder: true },
     { name: 'About', href: '/about', icon: Shield },
     { name: 'Concierge', href: '/contact', icon: Star }
   ], [])
@@ -147,10 +148,11 @@ const NavLinks = memo(function NavLinks() {
   return (
     <nav className="hidden lg:flex items-center gap-5">
       {links.map(l => (
-        <NavLink key={l.name} to={l.href} className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-[320ms] text-sm font-medium ${isActive ? 'text-accent bg-accent/8 shadow-sm' : 'text-foreground/80 hover:text-accent hover:bg-accent/5'}`}>
+        <NavLink key={l.name} to={l.href} className={({ isActive }) => `flex items-center gap-2 px-3 py-2 rounded-xl transition-all duration-[320ms] text-sm font-medium ${isActive ? (l.preorder ? 'text-warning bg-warning/8 shadow-sm' : 'text-accent bg-accent/8 shadow-sm') : (l.preorder ? 'text-foreground/80 hover:text-warning hover:bg-warning/5' : 'text-foreground/80 hover:text-accent hover:bg-accent/5')}`}>
           <l.icon className="w-4 h-4" />
           <span>{l.name}</span>
           {l.exclusive && <span className="ml-2 w-1.5 h-1.5 bg-accent rounded-full animate-pulse" />}
+          {l.preorder && <span className="ml-2 w-1.5 h-1.5 bg-warning rounded-full animate-pulse" />}
         </NavLink>
       ))}
     </nav>
@@ -228,6 +230,7 @@ function MobilePanel({ onClose }) {
           {[
             { name: 'Home', href: '/', icon: Crown, exclusive: true },
             { name: 'Collection', href: '/shop', icon: Sparkles },
+            { name: 'Preorder', href: '/preorder', icon: Sparkles, preorder: true },
             { name: 'About', href: '/about', icon: Shield },
             { name: 'Concierge', href: '/contact', icon: Star }
           ].map(l => (
@@ -237,8 +240,8 @@ function MobilePanel({ onClose }) {
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-300
-                 ${isActive ? 'bg-accent/8 text-accent border border-accent/30' :
-                  'text-foreground/90 hover:bg-accent/5'}`
+                 ${isActive ? (l.preorder ? 'bg-warning/8 text-warning border border-warning/30' : 'bg-accent/8 text-accent border border-accent/30') :
+                  (l.preorder ? 'text-foreground/90 hover:bg-warning/5' : 'text-foreground/90 hover:bg-accent/5')}`
               }
             >
               <div className="w-8 h-8 rounded-lg bg-card/60 backdrop-blur-lg flex items-center justify-center">
@@ -247,6 +250,7 @@ function MobilePanel({ onClose }) {
               <div className="flex-1">
                 <div className="text-sm font-medium">{l.name}</div>
                 {l.exclusive && <div className="text-[10px] text-accent">Exclusive</div>}
+                {l.preorder && <div className="text-[10px] text-warning">Preorder</div>}
               </div>
             </NavLink>
           ))}

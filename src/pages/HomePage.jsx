@@ -197,16 +197,24 @@ const ProductGrid = React.memo(function ProductGrid({ products = [], status = "i
     [isMobile],
   );
 
+  // Mark some products as preorder items (every 3rd product for demo)
+  const productsWithPreorderFlag = useMemo(() => {
+    return products.map((product, index) => ({
+      ...product,
+      isPreorder: (index + 1) % 3 === 0 // Every 3rd product is preorder
+    }));
+  }, [products]);
+
   if (status === "loading") {
     return <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-2 lg:grid-cols-4 gap-6"}`}>{skeletonItems}</div>;
   }
 
   return (
     <div className={`grid ${isMobile ? "grid-cols-1 gap-4" : "grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8"}`}>
-      {products.map((p, i) => (
+      {productsWithPreorderFlag.map((p, i) => (
         <div key={p._id} className="group relative">
           <div className="relative glass-card rounded-2xl border border-border/30 overflow-hidden transition-all duration-[320ms] hover:shadow-2xl hover:-translate-y-1 will-change-transform transform">
-            <ProductCard product={p} index={i} />
+            <ProductCard product={p} index={i} isPreorder={p.isPreorder} />
           </div>
         </div>
       ))}
