@@ -1,5 +1,5 @@
 // src/api/shipping.js
-import axiosInstance from './axiosInstance';
+import axios from './axios'; // Use existing axios instance
 
 /**
  * Shipping API client for frontend
@@ -14,7 +14,7 @@ export const shippingAPI = {
    * @returns {Promise} Shipping cost data
    */
   getShippingCost: (params) => {
-    return axiosInstance.get('/shipping/cost', { params });
+    return axios.get('/shipping/cost', { params });
   },
 
   /**
@@ -22,7 +22,7 @@ export const shippingAPI = {
    * @returns {Promise} List of provinces
    */
   getProvinces: () => {
-    return axiosInstance.get('/shipping/provinces');
+    return axios.get('/shipping/provinces');
   },
 
   /**
@@ -31,7 +31,7 @@ export const shippingAPI = {
    * @returns {Promise} List of cities in the province
    */
   getCities: (provinceId) => {
-    return axiosInstance.get(`/shipping/cities/${provinceId}`);
+    return axios.get(`/shipping/cities/${provinceId}`);
   },
 
   /**
@@ -40,7 +40,7 @@ export const shippingAPI = {
    * @returns {Promise} Validation result
    */
   validateAddress: (address) => {
-    return axiosInstance.post('/shipping/validate-address', { address });
+    return axios.post('/shipping/validate-address', { address });
   },
 
   /**
@@ -49,7 +49,7 @@ export const shippingAPI = {
    * @returns {Promise} Free shipping eligibility
    */
   checkFreeShipping: (city) => {
-    return axiosInstance.get('/shipping/check-free-shipping', {
+    return axios.get('/shipping/check-free-shipping', {
       params: { city }
     });
   }
