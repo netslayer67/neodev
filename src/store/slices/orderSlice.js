@@ -1,13 +1,13 @@
 // src/store/slices/orderSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import axiosInstance from '../../api/axiosInstance'
+import axios from '../../api/axios' // Use existing axios instance
 
 // Async thunk for creating order with enhanced error handling
 export const createOrder = createAsyncThunk(
   'orders/createOrder',
   async (orderData, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.post('/orders', orderData)
+      const response = await axios.post('/orders', orderData)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
@@ -41,7 +41,7 @@ export const fetchMyOrders = createAsyncThunk(
         params.append('status', status)
       }
       
-      const response = await axiosInstance.get(`/orders/my?${params}`)
+      const response = await axios.get(`/orders/my?${params}`)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
@@ -57,7 +57,7 @@ export const fetchOrderById = createAsyncThunk(
   'orders/fetchOrderById',
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(`/orders/${orderId}`)
+      const response = await axios.get(`/orders/${orderId}`)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
@@ -73,7 +73,7 @@ export const cancelOrder = createAsyncThunk(
   'orders/cancelOrder',
   async (orderId, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.patch(`/orders/${orderId}/cancel`)
+      const response = await axios.patch(`/orders/${orderId}/cancel`)
       return response.data
     } catch (error) {
       const errorMessage = error.response?.data?.message || 
