@@ -30,6 +30,7 @@ const AdminLayout = lazy(() => import("@/pages/admin/AdminLayout"));
 const DashboardPage = lazy(() => import("@/pages/admin/DashboardPage"));
 const AdminProductsPage = lazy(() => import("@/pages/admin/ProductsPage"));
 const AdminOrdersPage = lazy(() => import("@/pages/admin/OrdersPage"));
+const AdminUsersPage = lazy(() => import("@/pages/admin/UsersPage"));
 
 // --- Layout Wrapper ---
 const MainLayout = ({ children }) => (
@@ -108,6 +109,7 @@ function App() {
           <Route index element={<DashboardPage />} />
           <Route path="products" element={<AdminProductsPage />} />
           <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="users" element={<AdminUsersPage />} />
         </Route>
 
         {/* Optional: 404 */}

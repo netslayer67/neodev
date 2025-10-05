@@ -27,6 +27,56 @@ export const fetchAllUsers = createAsyncThunk(
     }
 );
 
+// --- PENAMBAHAN FUNGSI USER MANAGEMENT ---
+
+export const fetchUserById = createAsyncThunk(
+    'admin/fetchUserById',
+    async (userId, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`/admin/users/${userId}`);
+            return response.data.data;
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+);
+
+export const createUser = createAsyncThunk(
+    'admin/createUser',
+    async (userData, { rejectWithValue }) => {
+        try {
+            const response = await axios.post('/admin/users', userData);
+            return response.data.data;
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+);
+
+export const updateUser = createAsyncThunk(
+    'admin/updateUser',
+    async ({ userId, userData }, { rejectWithValue }) => {
+        try {
+            const response = await axios.put(`/admin/users/${userId}`, userData);
+            return response.data.data;
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+);
+
+export const deleteUser = createAsyncThunk(
+    'admin/deleteUser',
+    async (userId, { rejectWithValue }) => {
+        try {
+            await axios.delete(`/admin/users/${userId}`);
+            return userId;
+        } catch (err) {
+            return rejectWithValue(err.response.data);
+        }
+    }
+);
+
 // --- PENAMBAHAN FUNGSI BARU DI SINI ---
 
 /**
@@ -137,6 +187,57 @@ const adminSlice = createSlice({
                 state.users = action.payload;
             })
             .addCase(fetchAllUsers.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message;
+            })
+            // Fetch User By ID
+            .addCase(fetchUserById.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(fetchUserById.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                // You can store individual user data if needed
+            })
+            .addCase(fetchUserById.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message;
+            })
+            // Create User
+            .addCase(createUser.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(createUser.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.users.push(action.payload);
+            })
+            .addCase(createUser.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message;
+            })
+            // Update User
+            .addCase(updateUser.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(updateUser.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                const index = state.users.findIndex(user => user._id === action.payload._id);
+                if (index !== -1) {
+                    state.users[index] = action.payload;
+                }
+            })
+            .addCase(updateUser.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload?.message;
+            })
+            // Delete User
+            .addCase(deleteUser.pending, (state) => {
+                state.status = 'loading';
+            })
+            .addCase(deleteUser.fulfilled, (state, action) => {
+                state.status = 'succeeded';
+                state.users = state.users.filter(user => user._id !== action.payload);
+            })
+            .addCase(deleteUser.rejected, (state, action) => {
                 state.status = 'failed';
                 state.error = action.payload?.message;
             })

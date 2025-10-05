@@ -17,8 +17,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 // import { Badge } from "@/components/ui/badge";
 
-import { PlusCircle, Grid, List, Loader2, Badge } from "lucide-react";
+import { PlusCircle, Grid, List, Loader2, Badge, Package } from "lucide-react";
 import ProductAdmin from "./ProductAdmin";
+import StockManagementModal from "../../components/admin/StockManagementModal";
 
 export default function AdminProductsPage() {
   const dispatch = useDispatch();
@@ -28,6 +29,8 @@ export default function AdminProductsPage() {
   const [search, setSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [stockModalOpen, setStockModalOpen] = useState(false);
+  const [selectedProductForStock, setSelectedProductForStock] = useState(null);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -41,6 +44,18 @@ export default function AdminProductsPage() {
     if (window.confirm("Yakin hapus produk ini?")) {
       dispatch(deleteProduct(id));
     }
+  };
+
+  const handleManageStock = (product) => {
+    setSelectedProductForStock(product);
+    setStockModalOpen(true);
+  };
+
+  const handleStockModalClose = () => {
+    setStockModalOpen(false);
+    setSelectedProductForStock(null);
+    // Refresh products to get updated stock data
+    dispatch(fetchProducts());
   };
 
   return (
@@ -132,9 +147,23 @@ export default function AdminProductsPage() {
                 <p className="text-sm text-muted-foreground line-clamp-2">
                   {product.description}
                 </p>
-                <div className="flex items-center justify-between">
-                  <Badge variant="success">Rp {product.price}</Badge>
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Badge variant="success">Rp {product.price.toLocaleString("id-ID")}</Badge>
+                    <Badge variant={product.stock > 0 ? "info" : "error"}>
+                      Stock: {product.stock}
+                    </Badge>
+                  </div>
                   <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleManageStock(product)}
+                      className="flex-1"
+                    >
+                      <Package className="w-3 h-3 mr-1" />
+                      Stock
+                    </Button>
                     <Button
                       size="sm"
                       variant="outline"
@@ -185,6 +214,13 @@ export default function AdminProductsPage() {
         />
 
       )}
+
+      {/* Stock Management Modal */}
+      <StockManagementModal
+        isOpen={stockModalOpen}
+        onClose={handleStockModalClose}
+        product={selectedProductForStock}
+      />
     </div>
   );
 }

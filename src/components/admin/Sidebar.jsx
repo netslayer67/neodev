@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
-  LayoutDashboard, Package, ShoppingCart, LogOut, ShieldCheck, Menu, X,
+  LayoutDashboard, Package, ShoppingCart, Users, LogOut, ShieldCheck, Menu, X,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useIsMobile } from '../../hooks/useIsMobile';
@@ -11,6 +11,7 @@ const navLinks = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Products', href: '/admin/products', icon: Package },
   { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
+  { name: 'Users', href: '/admin/users', icon: Users },
 ];
 
 

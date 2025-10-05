@@ -150,8 +150,13 @@ const ProfilePage = () => {
     const { toast } = useToast();
     const shouldReduceMotion = useReducedMotion();
 
+    // Debug logging
+    console.log('ProfilePage location state:', location.state);
+    console.log('ProfilePage activeView from state:', location.state?.activeView);
+
     // State management
     const [activeView, setActiveView] = useState(location.state?.activeView || "orders");
+    console.log('ProfilePage initial activeView:', activeView);
     const [selectedOrder, setSelectedOrder] = useState(null);
     const [searchQuery, setSearchQuery] = useState("");
     const [showCancelSuccess, setShowCancelSuccess] = useState(false);
@@ -169,6 +174,13 @@ const ProfilePage = () => {
             dispatch(fetchMyOrders());
         }
     }, [user, dispatch, orderStatus]);
+
+    // Update activeView when location state changes
+    useEffect(() => {
+        if (location.state?.activeView) {
+            setActiveView(location.state.activeView);
+        }
+    }, [location.state]);
 
     useEffect(() => {
         document.body.style.overflow = selectedOrder ? "hidden" : "";
@@ -190,6 +202,8 @@ const ProfilePage = () => {
     const handleCancelOrder = useCallback(async () => {
         if (!selectedOrder) return;
 
+        console.log('Cancelling order:', selectedOrder.orderId, 'for user:', user?._id);
+
         try {
             await dispatch(cancelOrder(selectedOrder.orderId)).unwrap();
             toast({
@@ -200,13 +214,14 @@ const ProfilePage = () => {
             setShowCancelSuccess(true);
             setTimeout(() => setShowCancelSuccess(false), 2000);
         } catch (err) {
+            console.error('Cancel order error:', err);
             toast({
                 variant: "destructive",
-                title: "Gagal",
-                description: err.message || "Terjadi kesalahan."
+                title: "Gagal Membatalkan Pesanan",
+                description: err.message || "Terjadi kesalahan saat membatalkan pesanan."
             });
         }
-    }, [dispatch, selectedOrder, toast]);
+    }, [dispatch, selectedOrder, toast, user]);
 
     const handleSearchChange = useCallback((e) => {
         setSearchQuery(e.target.value);
@@ -220,11 +235,16 @@ const ProfilePage = () => {
         setActiveView(view);
     }, []);
 
-    // Memoized filtered orders dengan optimasi
+    // Memoized filtered orders dengan optimasi - sorted by newest first
     const filteredOrders = useMemo(() => {
         if (!Array.isArray(myOrders)) return [];
 
-        const activeOrders = myOrders.filter(order => order.status !== "Cancelled");
+        // Sort by createdAt descending (newest first), then filter out cancelled orders
+        const sortedOrders = [...myOrders].sort((a, b) =>
+            new Date(b.createdAt) - new Date(a.createdAt)
+        );
+
+        const activeOrders = sortedOrders.filter(order => order.status !== "Cancelled");
 
         if (!debouncedSearch) return activeOrders;
 
@@ -398,68 +418,171 @@ const ProfilePage = () => {
                 </button>
             </nav>
 
-            {/* Order Detail Modal */}
+            {/* Enhanced Order Detail Modal */}
             <AnimatePresence mode="wait">
                 {selectedOrder && (
                     <motion.div
-                        className="fixed inset-0 z-50 bg-overlay backdrop-blur-md flex justify-center items-end md:items-center p-4"
+                        className="fixed inset-0 z-50 bg-overlay backdrop-blur-glass flex justify-center items-center p-4"
                         {...modalVariants}
                         onClick={handleModalClose}
                     >
                         <motion.div
                             onClick={(e) => e.stopPropagation()}
-                            className="w-full md:max-w-lg glass-card p-6 rounded-t-2xl md:rounded-3xl will-change-transform"
+                            className="w-full max-w-2xl glass-card p-6 rounded-3xl will-change-transform max-h-[90vh] overflow-y-auto scrollbar-hide"
                         >
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold truncate flex-1">
-                                    Pesanan #{selectedOrder.orderId}
-                                </h3>
+                            {/* Header */}
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="min-w-0 flex-1">
+                                    <h3 className="text-xl font-heading font-bold truncate">
+                                        Pesanan #{selectedOrder.orderId}
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground mt-1">
+                                        {new Date(selectedOrder.createdAt).toLocaleString('id-ID', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
+                                    </p>
+                                </div>
                                 <button
                                     onClick={handleModalClose}
-                                    className="text-muted-foreground hover:text-foreground transition-colors p-1 flex-shrink-0"
+                                    className="text-muted-foreground hover:text-foreground transition-colors p-2 flex-shrink-0"
                                     aria-label="Tutup"
                                 >
-                                    <X size={20} />
+                                    <X size={24} />
                                 </button>
                             </div>
 
-                            <div className="space-y-3 text-sm text-foreground max-h-60 overflow-y-auto scrollbar-hide">
-                                {selectedOrder.items?.map((item, index) => (
-                                    <div key={`${item.product}-${index}`} className="flex justify-between gap-4">
-                                        <div className="min-w-0 flex-1">
-                                            <span className="truncate block">
-                                                {item.name}
-                                            </span>
-                                            {item.size && (
-                                                <span className="text-muted-foreground text-xs">
-                                                    ({item.size}) × {item.quantity}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="font-mono flex-shrink-0">
-                                            Rp {(item.price * item.quantity).toLocaleString('id-ID')}
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="mt-4 pt-4 border-t border-border">
-                                <div className="flex justify-between items-center mb-4">
-                                    <span className="font-semibold">Total:</span>
-                                    <span className="font-bold text-secondary">
-                                        Rp {selectedOrder.totalAmount.toLocaleString('id-ID')}
+                            {/* Status & Payment Method */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                                <div className="glass-card p-4">
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-2">Status Pesanan</h4>
+                                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${selectedOrder.status === 'Telah Sampai' ? 'bg-success/20 text-success' :
+                                            selectedOrder.status === 'Dikirim' ? 'bg-info/20 text-info' :
+                                                selectedOrder.status === 'Diproses' ? 'bg-warning/20 text-warning' :
+                                                    selectedOrder.status === 'Pending Payment' ? 'bg-error/20 text-error' :
+                                                        'bg-muted/20 text-muted-foreground'
+                                        }`}>
+                                        {selectedOrder.status}
                                     </span>
                                 </div>
+                                <div className="glass-card p-4">
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-2">Metode Pembayaran</h4>
+                                    <span className="text-sm font-medium">
+                                        {selectedOrder.paymentMethod === 'va' ? 'Virtual Account' : 'Cash On Delivery'}
+                                    </span>
+                                    {selectedOrder.transactionId && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                            TXN: {selectedOrder.transactionId}
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
 
+                            {/* Items */}
+                            <div className="glass-card p-4 mb-6">
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Detail Produk</h4>
+                                <div className="space-y-3 max-h-48 overflow-y-auto scrollbar-hide">
+                                    {selectedOrder.items?.map((item, index) => (
+                                        <div key={`${item.product}-${index}`} className="flex justify-between items-start gap-4 py-2 border-b border-border/50 last:border-b-0">
+                                            <div className="min-w-0 flex-1">
+                                                <span className="font-medium text-sm block truncate">
+                                                    {item.name}
+                                                </span>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="text-xs text-muted-foreground">
+                                                        Size {item.size}
+                                                    </span>
+                                                    <span className="text-xs text-muted-foreground">×</span>
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {item.quantity} pcs
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <div className="font-mono text-sm">
+                                                    Rp {(item.price * item.quantity).toLocaleString('id-ID')}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    @ Rp {item.price.toLocaleString('id-ID')}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Price Breakdown */}
+                            <div className="glass-card p-4 mb-6">
+                                <h4 className="font-semibold text-sm text-muted-foreground mb-3">Rincian Pembayaran</h4>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Subtotal Produk</span>
+                                        <span className="font-mono">Rp {selectedOrder.itemsPrice?.toLocaleString('id-ID') || selectedOrder.totalAmount.toLocaleString('id-ID')}</span>
+                                    </div>
+                                    {selectedOrder.shippingPrice > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span>Biaya Pengiriman</span>
+                                            <span className="font-mono">Rp {selectedOrder.shippingPrice.toLocaleString('id-ID')}</span>
+                                        </div>
+                                    )}
+                                    {selectedOrder.adminFee > 0 && (
+                                        <div className="flex justify-between text-sm">
+                                            <span>Biaya Admin COD</span>
+                                            <span className="font-mono">Rp {selectedOrder.adminFee.toLocaleString('id-ID')}</span>
+                                        </div>
+                                    )}
+                                    {selectedOrder.discount > 0 && (
+                                        <div className="flex justify-between text-sm text-success">
+                                            <span>Diskon</span>
+                                            <span className="font-mono">-Rp {selectedOrder.discount.toLocaleString('id-ID')}</span>
+                                        </div>
+                                    )}
+                                    <div className="border-t border-border pt-2 mt-2">
+                                        <div className="flex justify-between font-semibold text-base">
+                                            <span>Total Pembayaran</span>
+                                            <span className="font-mono text-accent">Rp {selectedOrder.totalAmount.toLocaleString('id-ID')}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Shipping Address */}
+                            {selectedOrder.shippingAddress && (
+                                <div className="glass-card p-4 mb-6">
+                                    <h4 className="font-semibold text-sm text-muted-foreground mb-3">Alamat Pengiriman</h4>
+                                    <div className="text-sm space-y-1">
+                                        <p className="font-medium">{selectedOrder.user?.name}</p>
+                                        <p>{selectedOrder.shippingAddress.street}</p>
+                                        <p className="text-muted-foreground">
+                                            {selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.postalCode}
+                                        </p>
+                                        <p className="text-muted-foreground">{selectedOrder.shippingAddress.country}</p>
+                                        <p className="text-muted-foreground">📞 {selectedOrder.shippingAddress.phone}</p>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3">
                                 {['Diproses', 'Pending Payment'].includes(selectedOrder.status) && (
                                     <Button
                                         variant="destructive"
-                                        className="w-full"
+                                        className="flex-1"
                                         onClick={handleCancelOrder}
                                     >
                                         Batalkan Pesanan
                                     </Button>
                                 )}
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={handleModalClose}
+                                >
+                                    Tutup
+                                </Button>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -489,8 +612,8 @@ const ProfilePage = () => {
                     <button
                         onClick={() => handleViewChange('account')}
                         className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 transition-colors duration-200 ${activeView === 'account'
-                                ? 'bg-accent/20 text-foreground'
-                                : 'text-muted-foreground hover:bg-card/50'
+                            ? 'bg-accent/20 text-foreground'
+                            : 'text-muted-foreground hover:bg-card/50'
                             }`}
                     >
                         <User size={16} /> Info
@@ -498,8 +621,8 @@ const ProfilePage = () => {
                     <button
                         onClick={() => handleViewChange('orders')}
                         className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 transition-colors duration-200 ${activeView === 'orders'
-                                ? 'bg-accent/20 text-foreground'
-                                : 'text-muted-foreground hover:bg-card/50'
+                            ? 'bg-accent/20 text-foreground'
+                            : 'text-muted-foreground hover:bg-card/50'
                             }`}
                     >
                         <ShoppingBag size={16} /> Pesanan
@@ -507,8 +630,8 @@ const ProfilePage = () => {
                     <button
                         onClick={() => handleViewChange('reviews')}
                         className={`w-full text-left py-2 px-3 rounded-lg flex items-center gap-3 transition-colors duration-200 ${activeView === 'reviews'
-                                ? 'bg-accent/20 text-foreground'
-                                : 'text-muted-foreground hover:bg-card/50'
+                            ? 'bg-accent/20 text-foreground'
+                            : 'text-muted-foreground hover:bg-card/50'
                             }`}
                     >
                         <Star size={16} /> Review

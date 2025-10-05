@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback, memo } from "react"
+import { useState, useEffect, useMemo, useCallback, memo, useRef } from "react"
 import { motion } from "framer-motion"
 import { Helmet } from "react-helmet"
 import { Button } from "@/components/ui/button"
@@ -121,6 +121,7 @@ const CheckoutPage = () => {
         isValid: false,
         errors: []
     })
+    const isProcessingOrderRef = useRef(false)
 
     // Calculate cart weight (300g per item default)
     const cartWeight = useMemo(() => {
@@ -260,20 +261,24 @@ const CheckoutPage = () => {
                 notes: '' // Add notes field if needed
             }
 
+            isProcessingOrderRef.current = true
             try {
                 const result = await dispatch(createOrder(orderData)).unwrap()
 
                 // Ensure we have the order data
-                if (!result || !result.order || !result.order.orderId) {
+                const orderResponse = result.data || result
+                if (!orderResponse || !orderResponse.order || !orderResponse.order.orderId) {
+                    console.error('Invalid order response:', result)
                     throw new Error("Order creation failed - missing order data")
                 }
 
-                const orderId = result.order.orderId
+                const orderId = orderResponse.order.orderId
 
                 if (paymentMethod === "va") {
                     if (isLoaded && window.snap && result.payment?.snapToken) {
                         window.snap.pay(result.payment.snapToken, {
                             onSuccess: () => {
+                                console.log('Midtrans onSuccess triggered, navigating to profile')
                                 toast({
                                     title: "Pembayaran Berhasil! 🎉",
                                     description: `Order #${orderId} telah dibayar`
@@ -281,6 +286,7 @@ const CheckoutPage = () => {
                                 dispatch(clearCart())
                                 dispatch(clearOrderState())
                                 navigate("/profile", { state: { activeView: "orders" } })
+                                isProcessingOrderRef.current = false
                             },
                             onPending: () => {
                                 toast({
@@ -288,6 +294,7 @@ const CheckoutPage = () => {
                                     description: `Order #${orderId} menunggu pembayaran`
                                 })
                                 navigate("/profile", { state: { activeView: "orders" } })
+                                isProcessingOrderRef.current = false
                             },
                             onError: (err) => {
                                 toast({
@@ -295,6 +302,7 @@ const CheckoutPage = () => {
                                     title: "Pembayaran Gagal",
                                     description: err.message || "Terjadi kesalahan dalam pembayaran",
                                 })
+                                isProcessingOrderRef.current = false
                             },
                             onClose: () => {
                                 toast({
@@ -311,6 +319,7 @@ const CheckoutPage = () => {
                         })
                     }
                 } else {
+                    console.log('COD payment, navigating to profile')
                     toast({
                         title: "Order Berhasil Dibuat! 🎉",
                         description: `Order #${orderId} akan segera diproses`
@@ -318,6 +327,7 @@ const CheckoutPage = () => {
                     dispatch(clearCart())
                     dispatch(clearOrderState())
                     navigate("/profile", { state: { activeView: "orders" } })
+                    isProcessingOrderRef.current = false
                 }
             } catch (err) {
                 console.error('Order creation failed:', err)
@@ -326,6 +336,7 @@ const CheckoutPage = () => {
                     title: "Gagal membuat pesanan",
                     description: err.message || "Terjadi kesalahan saat membuat pesanan. Silakan coba lagi."
                 })
+                isProcessingOrderRef.current = false
             }
         },
         [
@@ -335,12 +346,14 @@ const CheckoutPage = () => {
         ]
     )
 
-    /* Redirect if no cart */
+    /* Redirect if no cart on initial load (not during order processing) */
     useEffect(() => {
-        if (cartItems.length === 0) {
+        // Only redirect to cart on component mount if cart is initially empty
+        // This prevents redirect during order creation when cart is cleared
+        if (cartItems.length === 0 && !isProcessingOrderRef.current) {
             navigate("/cart")
         }
-    }, [cartItems.length, navigate])
+    }, []) // Empty dependency array - only run on mount
 
     // Validate address on changes
     useEffect(() => {
