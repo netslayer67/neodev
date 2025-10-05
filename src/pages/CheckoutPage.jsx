@@ -59,9 +59,8 @@ const CartItem = memo(({ item }) => {
                     <img
                         src={item.images?.[0]?.url || "/placeholder.svg"}
                         alt={item.name}
-                        className={`w-full h-full object-cover transition-opacity duration-300 ${
-                            imageLoaded ? "opacity-100" : "opacity-0"
-                        }`}
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? "opacity-100" : "opacity-0"
+                            }`}
                         onLoad={() => setImageLoaded(true)}
                         loading="lazy"
                     />
@@ -86,9 +85,8 @@ const CartItem = memo(({ item }) => {
 })
 
 const PriceRow = memo(({ label, value, className = "", highlight = false }) => (
-    <div className={`flex justify-between items-center ${className} ${
-        highlight ? "text-lg font-bold" : "text-sm"
-    }`}>
+    <div className={`flex justify-between items-center ${className} ${highlight ? "text-lg font-bold" : "text-sm"
+        }`}>
         <span className={highlight ? "text-foreground" : "text-muted-foreground"}>{label}</span>
         <span className={`font-mono ${highlight ? "text-accent font-bold" : "text-foreground"}`}>
             {value}
@@ -108,7 +106,7 @@ const CheckoutPage = () => {
     const orderStatus = useSelector(useCallback((s) => s.orders.status, []))
 
     const [activeSection, setActiveSection] = useState("shipping")
-    const [paymentMethod, setPaymentMethod] = useState("online")
+    const [paymentMethod, setPaymentMethod] = useState("va")
     const [shippingCost, setShippingCost] = useState(0)
     const [selectedShippingService, setSelectedShippingService] = useState('REG')
     const [shippingAddress, setShippingAddress] = useState({
@@ -135,13 +133,15 @@ const CheckoutPage = () => {
     /* Enhanced Price calculation */
     const priceCalculations = useMemo(() => {
         const subtotal = cartItems.reduce((sum, i) => sum + i.price * i.quantity, 0)
-        const adminFee = paymentMethod === "cod" ? 5000 : 0
-        const total = subtotal + shippingCost + adminFee
+        const adminFee = paymentMethod === "cod" ? 2500 : 0
+        const discount = paymentMethod === "va" ? 3000 : 0
+        const total = subtotal + shippingCost + adminFee - discount
 
-        return { 
-            subtotal, 
-            shippingFee: shippingCost, 
-            adminFee, 
+        return {
+            subtotal,
+            shippingFee: shippingCost,
+            adminFee,
+            discount,
             total,
             savings: shippingCost === 0 ? 15000 : 0 // Show savings for free shipping
         }
@@ -150,7 +150,7 @@ const CheckoutPage = () => {
     const paymentOptions = useMemo(
         () => [
             {
-                id: "online",
+                id: "va",
                 name: "Pembayaran Online",
                 desc: "Virtual Account, E-Wallet, Credit Card",
                 icon: CreditCard,
@@ -170,28 +170,28 @@ const CheckoutPage = () => {
     /* Enhanced address validation */
     const validateAddress = useCallback(() => {
         const errors = []
-        
+
         if (!shippingAddress.street || shippingAddress.street.trim().length < 10) {
             errors.push('Alamat lengkap minimal 10 karakter')
         }
-        
+
         if (!shippingAddress.city || shippingAddress.city.trim().length < 3) {
             errors.push('Nama kota/kabupaten harus diisi')
         }
-        
+
         if (!shippingAddress.postalCode || !shippingUtils.isValidPostalCode(shippingAddress.postalCode)) {
             errors.push('Kode pos harus 5 digit angka')
         }
-        
+
         if (!shippingAddress.phone || !shippingUtils.isValidPhoneNumber(shippingAddress.phone)) {
             errors.push('Nomor telepon tidak valid')
         }
-        
+
         setAddressValidation({
             isValid: errors.length === 0,
             errors
         })
-        
+
         return errors.length === 0
     }, [shippingAddress])
 
@@ -208,13 +208,13 @@ const CheckoutPage = () => {
     const handleContinueToPayment = useCallback(() => {
         if (!validateAddress()) {
             toast({
-                variant: "destructive", 
-                title: "Alamat tidak lengkap", 
+                variant: "destructive",
+                title: "Alamat tidak lengkap",
                 description: "Mohon lengkapi dan periksa kembali alamat pengiriman Anda"
             })
             return
         }
-        
+
         if (shippingCost === 0 && !shippingUtils.isLikelyJabodetabek(shippingAddress.city)) {
             toast({
                 variant: "destructive",
@@ -223,7 +223,7 @@ const CheckoutPage = () => {
             })
             return
         }
-        
+
         setActiveSection("payment")
     }, [shippingAddress, shippingCost, validateAddress, toast])
 
@@ -250,9 +250,9 @@ const CheckoutPage = () => {
                     quantity: i.quantity,
                     size: i.size,
                 })),
-                shippingAddress: { 
-                    ...shippingAddress, 
-                    fullName: user.name 
+                shippingAddress: {
+                    ...shippingAddress,
+                    fullName: user.name
                 },
                 paymentMethod,
                 shippingCost: shippingCost,
@@ -263,22 +263,29 @@ const CheckoutPage = () => {
             try {
                 const result = await dispatch(createOrder(orderData)).unwrap()
 
-                if (paymentMethod === "online") {
+                // Ensure we have the order data
+                if (!result || !result.order || !result.order.orderId) {
+                    throw new Error("Order creation failed - missing order data")
+                }
+
+                const orderId = result.order.orderId
+
+                if (paymentMethod === "va") {
                     if (isLoaded && window.snap && result.payment?.snapToken) {
                         window.snap.pay(result.payment.snapToken, {
                             onSuccess: () => {
-                                toast({ 
-                                    title: "Pembayaran Berhasil! 🎉", 
-                                    description: `Order #${result.order.orderId} telah dibayar`
+                                toast({
+                                    title: "Pembayaran Berhasil! 🎉",
+                                    description: `Order #${orderId} telah dibayar`
                                 })
                                 dispatch(clearCart())
                                 dispatch(clearOrderState())
                                 navigate("/profile", { state: { activeView: "orders" } })
                             },
                             onPending: () => {
-                                toast({ 
-                                    title: "Pembayaran Pending ⏳", 
-                                    description: `Order #${result.order.orderId} menunggu pembayaran`
+                                toast({
+                                    title: "Pembayaran Pending ⏳",
+                                    description: `Order #${orderId} menunggu pembayaran`
                                 })
                                 navigate("/profile", { state: { activeView: "orders" } })
                             },
@@ -304,9 +311,9 @@ const CheckoutPage = () => {
                         })
                     }
                 } else {
-                    toast({ 
-                        title: "Order Berhasil Dibuat! 🎉", 
-                        description: `Order #${result.order.orderId} akan segera diproses`
+                    toast({
+                        title: "Order Berhasil Dibuat! 🎉",
+                        description: `Order #${orderId} akan segera diproses`
                     })
                     dispatch(clearCart())
                     dispatch(clearOrderState())
@@ -314,16 +321,16 @@ const CheckoutPage = () => {
                 }
             } catch (err) {
                 console.error('Order creation failed:', err)
-                toast({ 
-                    variant: "destructive", 
-                    title: "Gagal membuat pesanan", 
+                toast({
+                    variant: "destructive",
+                    title: "Gagal membuat pesanan",
                     description: err.message || "Terjadi kesalahan saat membuat pesanan. Silakan coba lagi."
                 })
             }
         },
         [
-            cartItems, shippingAddress, user.name, paymentMethod, 
-            shippingCost, selectedShippingService, isLoaded, 
+            cartItems, shippingAddress, user.name, paymentMethod,
+            shippingCost, selectedShippingService, isLoaded,
             dispatch, toast, navigate, validateAddress
         ]
     )
@@ -367,26 +374,22 @@ const CheckoutPage = () => {
                     <p className="mt-2 text-muted-foreground">
                         Selesaikan pembelian Anda dengan aman
                     </p>
-                    
+
                     {/* Progress Indicator */}
                     <div className="flex items-center justify-center mt-6 space-x-4">
-                        <div className={`flex items-center space-x-2 ${
-                            activeSection === "shipping" ? "text-accent" : "text-muted-foreground"
-                        }`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                activeSection === "shipping" ? "border-accent bg-accent text-white" : "border-muted-foreground"
+                        <div className={`flex items-center space-x-2 ${activeSection === "shipping" ? "text-accent" : "text-muted-foreground"
                             }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${activeSection === "shipping" ? "border-accent bg-accent text-white" : "border-muted-foreground"
+                                }`}>
                                 1
                             </div>
                             <span className="text-sm font-medium">Alamat</span>
                         </div>
                         <div className="w-8 h-0.5 bg-border" />
-                        <div className={`flex items-center space-x-2 ${
-                            activeSection === "payment" ? "text-accent" : "text-muted-foreground"
-                        }`}>
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                activeSection === "payment" ? "border-accent bg-accent text-white" : "border-muted-foreground"
+                        <div className={`flex items-center space-x-2 ${activeSection === "payment" ? "text-accent" : "text-muted-foreground"
                             }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${activeSection === "payment" ? "border-accent bg-accent text-white" : "border-muted-foreground"
+                                }`}>
                                 2
                             </div>
                             <span className="text-sm font-medium">Pembayaran</span>
@@ -420,25 +423,25 @@ const CheckoutPage = () => {
                                 <div className="space-y-4">
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <FormField id="fullName" label="Nama Lengkap">
-                                            <Input 
-                                                id="fullName" 
-                                                defaultValue={user?.name} 
-                                                readOnly 
-                                                className="bg-muted/50" 
+                                            <Input
+                                                id="fullName"
+                                                defaultValue={user?.name}
+                                                readOnly
+                                                className="bg-muted/50"
                                             />
                                         </FormField>
                                         <FormField id="email" label="Email">
-                                            <Input 
-                                                id="email" 
-                                                defaultValue={user?.email} 
-                                                readOnly 
-                                                className="bg-muted/50" 
+                                            <Input
+                                                id="email"
+                                                defaultValue={user?.email}
+                                                readOnly
+                                                className="bg-muted/50"
                                             />
                                         </FormField>
                                     </div>
 
-                                    <FormField 
-                                        id="phone" 
+                                    <FormField
+                                        id="phone"
                                         label="No. Telepon"
                                         tooltip="Format: 08xxxxxxxxxx atau +62xxxxxxxxxx"
                                     >
@@ -458,16 +461,15 @@ const CheckoutPage = () => {
                                             value={shippingAddress.street}
                                             onChange={(e) => handleAddressChange("street", e.target.value)}
                                             placeholder="Jalan, No. Rumah, RT/RW, Kelurahan, Kecamatan"
-                                            className={`w-full p-3 border rounded-xl bg-card/60 min-h-[80px] resize-none transition duration-300 focus:border-accent focus:ring-2 focus:ring-accent/40 ${
-                                                addressValidation.errors.some(e => e.includes('Alamat')) ? 'border-red-500' : 'border-border'
-                                            }`}
+                                            className={`w-full p-3 border rounded-xl bg-card/60 min-h-[80px] resize-none transition duration-300 focus:border-accent focus:ring-2 focus:ring-accent/40 ${addressValidation.errors.some(e => e.includes('Alamat')) ? 'border-red-500' : 'border-border'
+                                                }`}
                                             required
                                         />
                                     </FormField>
 
                                     <div className="grid sm:grid-cols-2 gap-4">
-                                        <FormField 
-                                            id="postalCode" 
+                                        <FormField
+                                            id="postalCode"
                                             label="Kode Pos"
                                             tooltip="5 digit kode pos Indonesia"
                                         >
@@ -563,11 +565,10 @@ const CheckoutPage = () => {
                                         <RadioGroup.Option key={opt.id} value={opt.id}>
                                             {({ checked }) => (
                                                 <div
-                                                    className={`rounded-xl border px-6 py-4 transition duration-300 cursor-pointer relative ${
-                                                        checked
-                                                            ? "border-accent ring-2 ring-accent/50 bg-accent/5"
-                                                            : "border-border hover:border-accent/40 hover:bg-accent/5"
-                                                    }`}
+                                                    className={`rounded-xl border px-6 py-4 transition duration-300 cursor-pointer relative ${checked
+                                                        ? "border-accent ring-2 ring-accent/50 bg-accent/5"
+                                                        : "border-border hover:border-accent/40 hover:bg-accent/5"
+                                                        }`}
                                                 >
                                                     {opt.recommended && (
                                                         <span className="absolute -top-2 left-4 px-2 py-1 text-xs font-medium bg-accent text-white rounded-full">
@@ -659,13 +660,13 @@ const CheckoutPage = () => {
                                         ? "Buat Pesanan"
                                         : "Bayar Sekarang"}
                             </Button>
-                            
-                            {paymentMethod === "online" && (
+
+                            {paymentMethod === "va" && (
                                 <p className="text-xs text-muted-foreground text-center mt-3">
                                     Anda akan diarahkan ke halaman pembayaran yang aman
                                 </p>
                             )}
-                            
+
                             {/* Trust Badges */}
                             <div className="flex items-center justify-center space-x-4 mt-4 pt-4 border-t border-border">
                                 <div className="flex items-center space-x-1 text-xs text-muted-foreground">

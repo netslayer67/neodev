@@ -41,10 +41,9 @@ const CartPage = () => {
   const { cartItems } = useSelector((s) => s.cart);
   const shouldReduceMotion = useReducedMotion();
 
-  const { subtotal, shipping, total } = useMemo(() => {
+  const { subtotal, total } = useMemo(() => {
     const sub = cartItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
-    const ship = cartItems.length > 0 ? 4000 : 0;
-    return { subtotal: sub, shipping: ship, total: sub + ship };
+    return { subtotal: sub, total: sub };
   }, [cartItems]);
 
   const handleRemove = (item) => dispatch(removeFromCart(item));
@@ -200,13 +199,16 @@ const CartPage = () => {
                   </div>
                   <div className="flex items-center justify-between text-muted-foreground">
                     <span>Shipping</span>
-                    <span className="font-mono">{formatIDR(shipping)}</span>
+                    <span className="font-mono text-xs">Calculated at checkout</span>
                   </div>
                   <div className="h-px bg-border my-1" />
                   <div className="flex items-center justify-between text-lg font-bold">
                     <span>Total</span>
-                    <span className="font-mono text-accent">{formatIDR(total)}</span>
+                    <span className="font-mono text-accent">{formatIDR(subtotal)}</span>
                   </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Final total includes shipping & taxes calculated at checkout
+                  </p>
                 </div>
 
                 <Button asChild size="lg" className="w-full rounded-full font-bold btn-primary transition duration-320">
