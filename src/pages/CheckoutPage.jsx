@@ -275,10 +275,11 @@ const CheckoutPage = () => {
                 const orderId = orderResponse.order.orderId
 
                 if (paymentMethod === "va") {
-                    if (isLoaded && window.snap && result.payment?.snapToken) {
-                        window.snap.pay(result.payment.snapToken, {
-                            onSuccess: () => {
-                                console.log('Midtrans onSuccess triggered, navigating to profile')
+                    console.log('Initiating VA payment:', { isLoaded, hasSnap: !!window.snap, hasToken: !!result.midtransSnapToken })
+                    if (isLoaded && window.snap && result.midtransSnapToken) {
+                        window.snap.pay(result.midtransSnapToken, {
+                            onSuccess: (result) => {
+                                console.log('Midtrans onSuccess triggered:', result)
                                 toast({
                                     title: "Pembayaran Berhasil! 🎉",
                                     description: `Order #${orderId} telah dibayar`
@@ -288,7 +289,8 @@ const CheckoutPage = () => {
                                 navigate("/profile", { state: { activeView: "orders" } })
                                 isProcessingOrderRef.current = false
                             },
-                            onPending: () => {
+                            onPending: (result) => {
+                                console.log('Midtrans onPending triggered:', result)
                                 toast({
                                     title: "Pembayaran Pending ⏳",
                                     description: `Order #${orderId} menunggu pembayaran`
@@ -297,6 +299,7 @@ const CheckoutPage = () => {
                                 isProcessingOrderRef.current = false
                             },
                             onError: (err) => {
+                                console.error('Midtrans onError triggered:', err)
                                 toast({
                                     variant: "destructive",
                                     title: "Pembayaran Gagal",
@@ -305,6 +308,7 @@ const CheckoutPage = () => {
                                 isProcessingOrderRef.current = false
                             },
                             onClose: () => {
+                                console.log('Midtrans onClose triggered - payment cancelled by user')
                                 toast({
                                     title: "Pembayaran Dibatalkan",
                                     description: "Anda menutup halaman pembayaran.",
@@ -312,6 +316,7 @@ const CheckoutPage = () => {
                             },
                         })
                     } else {
+                        console.error('Payment system not ready:', { isLoaded, hasSnap: !!window.snap, hasToken: !!result.midtransSnapToken })
                         toast({
                             variant: "destructive",
                             title: "Error",
